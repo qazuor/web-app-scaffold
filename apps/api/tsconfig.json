@@ -1,12 +1,12 @@
 // apps/api/tsconfig.json
 {
-	"extends": "@repo/config/tsconfig.json",
-	"compilerOptions": {
-		"baseUrl": ".",
-		"outDir": "./dist",
-		"rootDir": "./src",
-		"lib": ["es2022"]
-	},
-	"include": ["src"],
-	"exclude": ["node_modules", "dist"]
+    "extends": "@repo/config/tsconfig.json",
+    "compilerOptions": {
+        "baseUrl": ".",
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "lib": ["es2022"]
+    },
+    "include": ["src"],
+    "exclude": ["node_modules", "dist"]
 }

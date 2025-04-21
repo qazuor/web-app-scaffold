@@ -1,11 +1,12 @@
-import { type JSX } from "react";
+import type { JSX } from "react";
+import React = require("react");
 
 export function Code({
-  children,
-  className,
+    children,
+    className,
 }: {
-  children: React.ReactNode;
-  className?: string;
+    children: React.ReactNode;
+    className?: string;
 }): JSX.Element {
-  return <code className={className}>{children}</code>;
+    return <code className={className}>{children}</code>;
 }

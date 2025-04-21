@@ -17,9 +17,9 @@ import { afterAll, afterEach, beforeAll } from "vitest";
 
 // Mocking fetch simple si no usas msw
 global.fetch = () =>
-	Promise.resolve({
-		json: () => Promise.resolve({ message: "Mock API Message" }),
-		ok: true,
-		status: 200,
-		// Add other properties needed by the fetch API if necessary
-	} as Response); // Type assertion for simplicity in mock
+    Promise.resolve({
+        json: () => Promise.resolve({ message: "Mock API Message" }),
+        ok: true,
+        status: 200,
+        // Add other properties needed by the fetch API if necessary
+    } as Response); // Type assertion for simplicity in mock

@@ -1,22 +1,22 @@
 {
-	"extends": "@repo/config/tsconfig.json",
-	"compilerOptions": {
-		"baseUrl": ".",
-		"outDir": "./dist",
-		// "rootDir": "./src", // <-- Elimina esta línea
-		// Asegura que JSX esté configurado (debería venir del base, pero puedes dejarlo si quieres sobrescribir/asegurar)
-		"jsx": "react-jsx",
-		"lib": ["DOM", "DOM.Iterable", "ESNext"],
-		"allowJs": true,
-		"skipLibCheck": true,
-		"isolatedModules": true,
-		"noEmit": true, // Vite maneja la emisión
-		"moduleResolution": "Bundler", // O Node, dependiendo de tus necesidades con Vite 5+
-		"resolveJsonModule": true,
-		"allowImportingTsExtensions": true,
-		"noFallthroughCasesInSwitch": true
-	},
-	// Mantén include para que TS type-checkee tanto src como vite.config.ts
-	"include": ["src", "vite.config.ts"],
-	"exclude": ["node_modules", "dist"]
+    "extends": "@repo/config/tsconfig.json",
+    "compilerOptions": {
+        "baseUrl": ".",
+        "outDir": "./dist",
+        // "rootDir": "./src", // <-- Elimina esta línea
+        // Asegura que JSX esté configurado (debería venir del base, pero puedes dejarlo si quieres sobrescribir/asegurar)
+        "jsx": "react-jsx",
+        "lib": ["DOM", "DOM.Iterable", "ESNext"],
+        "allowJs": true,
+        "skipLibCheck": true,
+        "isolatedModules": true,
+        "noEmit": true, // Vite maneja la emisión
+        "moduleResolution": "Bundler", // O Node, dependiendo de tus necesidades con Vite 5+
+        "resolveJsonModule": true,
+        "allowImportingTsExtensions": true,
+        "noFallthroughCasesInSwitch": true
+    },
+    // Mantén include para que TS type-checkee tanto src como vite.config.ts
+    "include": ["src", "vite.config.ts"],
+    "exclude": ["node_modules", "dist"]
 }
