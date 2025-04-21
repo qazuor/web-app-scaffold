@@ -10,12 +10,18 @@ function App() {
 
 	useEffect(() => {
 		// Asegúrate de que la API esté corriendo en http://localhost:3001
+		// En un despliegue real, esta URL debería ser una variable de entorno
 		fetch("http://localhost:3001/")
-			.then((res) => res.json())
+			.then((res) => {
+				if (!res.ok) {
+					throw new Error(`HTTP error! status: ${res.status}`);
+				}
+				return res.json();
+			})
 			.then((data) => setApiMessage(data.message))
 			.catch((err) => {
 				console.error("Error fetching API:", err);
-				setApiMessage("Error al conectar con la API.");
+				setApiMessage(`Error al conectar con la API: ${err.message}`);
 			});
 	}, []);
 
@@ -31,7 +37,7 @@ function App() {
 			</div>
 			<h1>Vite + React</h1>
 			<div className="card">
-				<button type="button" onClick={() => setCount((count) => count + 1)}>
+				<button onClick={() => setCount((count) => count + 1)}>
 					count is {count}
 				</button>
 				<p>
@@ -41,8 +47,9 @@ function App() {
 			<p className="read-the-docs">
 				Click on the Vite and React logos to learn more
 			</p>
-			<h2>Mensaje de la API:</h2>
-			<p>{apiMessage}</p> {/* Muestra el mensaje de la API */}
+			<h2>Mensaje de la App API:</h2>
+			<h2 className="border">{apiMessage}</h2>{" "}
+			{/* Muestra el mensaje de la API */}
 		</>
 	);
 }

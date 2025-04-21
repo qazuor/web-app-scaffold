@@ -1,6 +1,6 @@
 import { serve } from "@hono/node-server";
-// apps/api/src/index.ts
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 
 const app = new Hono();
 
@@ -9,6 +9,20 @@ app.use("*", async (c, next) => {
 	console.log(`${c.req.method} ${c.req.url}`);
 	await next();
 });
+
+// Middleware de CORS
+app.use(
+	"//*",
+	cors({
+		// <-- Usa el middleware de CORS para todas las rutas
+		origin: ["http://localhost:5173"], // Permite solo este origen en desarrollo
+		allowHeaders: ["Content-Type", "Authorization"], // Añade los encabezados que tu frontend pueda enviar
+		allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Añade los métodos que tu frontend pueda usar
+		exposeHeaders: ["Content-Length"], // Encabezados a exponer al frontend
+		maxAge: 600, // Cachea la respuesta preflight por 10 minutos
+		credentials: true, // Permite enviar cookies/auth headers si tu frontend los usa
+	}),
+);
 
 // Ruta básica de bienvenida
 app.get("/", (c) => {
@@ -27,12 +41,10 @@ app.post("/echo", async (c) => {
 	return c.json(body);
 });
 
-// Exportar la instancia de Hono (útil para testing)
 export default app;
 
-// Para ejecutar directamente en desarrollo
 if (process.env.NODE_ENV === "development") {
-	const port = 3001; // O la que prefieras
+	const port = 3001;
 	console.log(`Server is running on http://localhost:${port}`);
 	serve({
 		fetch: app.fetch,

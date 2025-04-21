@@ -1,21 +1,22 @@
-// apps/web/tsconfig.json
 {
 	"extends": "@repo/config/tsconfig.json",
 	"compilerOptions": {
 		"baseUrl": ".",
 		"outDir": "./dist",
-		"rootDir": "./src",
-		"jsx": "react-jsx", // Asegura que JSX esté configurado para React
+		// "rootDir": "./src", // <-- Elimina esta línea
+		// Asegura que JSX esté configurado (debería venir del base, pero puedes dejarlo si quieres sobrescribir/asegurar)
+		"jsx": "react-jsx",
 		"lib": ["DOM", "DOM.Iterable", "ESNext"],
-		"allowJs": true, // Puede ser útil si usas libs JS
-		"skipLibCheck": true, // Ya lo tenemos en el base, pero no está de más
-		"isolatedModules": true, // Ya en el base
+		"allowJs": true,
+		"skipLibCheck": true,
+		"isolatedModules": true,
 		"noEmit": true, // Vite maneja la emisión
 		"moduleResolution": "Bundler", // O Node, dependiendo de tus necesidades con Vite 5+
 		"resolveJsonModule": true,
 		"allowImportingTsExtensions": true,
 		"noFallthroughCasesInSwitch": true
 	},
+	// Mantén include para que TS type-checkee tanto src como vite.config.ts
 	"include": ["src", "vite.config.ts"],
 	"exclude": ["node_modules", "dist"]
 }
