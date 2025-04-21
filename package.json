@@ -5,9 +5,9 @@
 		"build": "turbo run build",
 		"dev": "turbo run dev",
 		"lint": "turbo run lint",
-		"lint:fix": "biome check --apply .",
+		"lint:fix": "biome check --write .",
 		"format": "biome format --write .",
-		"check": "biome check --apply",
+		"check": "biome check --write",
 		"test": "turbo run test",
 		"test:file": "vitest run",
 		"check-types": "turbo run check-types"
