@@ -7,12 +7,12 @@ module.exports = {
         extend: {
             // Ejemplo: Añadir un color base que todas las apps puedan usar
             colors: {
-                "brand-primary": "#0070f3",
-                "brand-secondary": "#1a202c",
+                'brand-primary': '#0070f3',
+                'brand-secondary': '#1a202c',
             },
             // Ejemplo: Añadir una fuente personalizada
             fontFamily: {
-                sans: ["Inter", "sans-serif"], // Asegúrate de importar la fuente en tu CSS
+                sans: ['Inter', 'sans-serif'], // Asegúrate de importar la fuente en tu CSS
             },
         },
     },

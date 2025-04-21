@@ -1,17 +1,17 @@
 // apps/web/src/App.tsx
-import { useEffect, useState } from "react";
-import viteLogo from "/vite.svg";
-import reactLogo from "./assets/react.svg";
-import "./App.css";
+import { useEffect, useState } from 'react';
+import viteLogo from '/vite.svg';
+import reactLogo from './assets/react.svg';
+import './App.css';
 
 function App() {
     const [count, setCount] = useState(0);
-    const [apiMessage, setApiMessage] = useState("Cargando...");
+    const [apiMessage, setApiMessage] = useState('Cargando...');
 
     useEffect(() => {
         // Asegúrate de que la API esté corriendo en http://localhost:3001
         // En un despliegue real, esta URL debería ser una variable de entorno
-        fetch("http://localhost:3001/")
+        fetch('http://localhost:3001/')
             .then((res) => {
                 if (!res.ok) {
                     throw new Error(`HTTP error! status: ${res.status}`);
@@ -20,7 +20,7 @@ function App() {
             })
             .then((data) => setApiMessage(data.message))
             .catch((err) => {
-                console.error("Error fetching API:", err);
+                console.error('Error fetching API:', err);
                 setApiMessage(`Error al conectar con la API: ${err.message}`);
             });
     }, []);

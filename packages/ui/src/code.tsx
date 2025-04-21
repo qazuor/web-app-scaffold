@@ -1,5 +1,5 @@
-import type { JSX } from "react";
-import React = require("react");
+import type { JSX } from 'react';
+import React = require('react');
 
 export function Code({
     children,

@@ -1,7 +1,7 @@
 // apps/web/src/setupTests.ts
-import "@testing-library/jest-dom";
-import { setupServer } from "msw/node"; // O mock service worker si planeas mockear requests más complejos
-import { afterAll, afterEach, beforeAll } from "vitest";
+import '@testing-library/jest-dom';
+import { setupServer } from 'msw/node'; // O mock service worker si planeas mockear requests más complejos
+import { afterAll, afterEach, beforeAll } from 'vitest';
 
 // Example: Mocking fetch API calls
 // const server = setupServer(
@@ -18,7 +18,7 @@ import { afterAll, afterEach, beforeAll } from "vitest";
 // Mocking fetch simple si no usas msw
 global.fetch = () =>
     Promise.resolve({
-        json: () => Promise.resolve({ message: "Mock API Message" }),
+        json: () => Promise.resolve({ message: 'Mock API Message' }),
         ok: true,
         status: 200,
         // Add other properties needed by the fetch API if necessary
