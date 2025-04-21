@@ -1,0 +1,13 @@
+// tsconfig.json (root)
+{
+	"extends": "./packages/config/tsconfig.json",
+	"compilerOptions": {
+		"allowJs": true,
+		"checkJs": true,
+		"jsx": "react-jsx",
+		"lib": ["dom", "dom.iterable", "esnext"],
+		"noEmit": true
+	},
+	"include": ["apps", "packages", "cypress", "declarations.d.ts"],
+	"exclude": ["node_modules"]
+}

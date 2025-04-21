@@ -20,7 +20,7 @@
 		"react-dom": "^19.1.0"
 	},
 	"devDependencies": {
-		"@repo/typescript-config": "workspace:*",
+		"@repo/config": "workspace:*",
 		"@types/node": "^22.14.0",
 		"@types/react": "19.1.0",
 		"@types/react-dom": "19.1.1",
