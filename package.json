@@ -1,5 +1,5 @@
 {
-  "name": "my-turborepo",
+  "name": "web-app-scaffold",
   "private": true,
   "scripts": {
     "build": "turbo run build",
