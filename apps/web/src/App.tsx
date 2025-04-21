@@ -48,7 +48,7 @@ function App() {
 				Click on the Vite and React logos to learn more
 			</p>
 			<h2>Mensaje de la App API:</h2>
-			<h2 className="border">{apiMessage}</h2>{" "}
+			<h2 className="border border-1">{apiMessage}</h2>{" "}
 			{/* Muestra el mensaje de la API */}
 		</>
 	);
