@@ -1,0 +1,13 @@
+{
+	"name": "@repo/config",
+	"version": "1.0.0",
+	"description": "",
+	"private": true,
+	"scripts": {},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"typescript": "5.8.2"
+	}
+}
