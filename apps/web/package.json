@@ -1,30 +1,33 @@
 {
 	"name": "web",
-	"version": "0.1.0",
-	"type": "module",
 	"private": true,
+	"version": "0.0.0",
+	"type": "module",
 	"scripts": {
-		"dev": "next dev --turbopack --port 3000",
-		"build": "next build",
-		"start": "next start",
-		"lint": "biome check .",
-		"lint:fix": "biome check --apply .",
-		"format": "biome format --write .",
-		"check": "biome check --apply",
-		"check-types": "tsc --noEmit"
+		"dev": "vite",
+		"build": "tsc && vite build",
+		"lint": "biome check --apply .",
+		"preview": "vite preview",
+		"test": "vitest run --environment jsdom"
 	},
 	"dependencies": {
-		"@repo/ui": "workspace:*",
-		"next": "^15.3.0",
 		"react": "^19.1.0",
 		"react-dom": "^19.1.0"
 	},
 	"devDependencies": {
+		"@eslint/js": "^9.22.0",
 		"@repo/config": "workspace:*",
-		"@types/node": "^22.14.0",
-		"@types/react": "19.1.0",
-		"@types/react-dom": "19.1.1",
-		"eslint": "^9.24.0",
-		"typescript": "5.8.2"
+		"@repo/ui": "workspace:*",
+		"@types/react": "^19.1.0",
+		"@types/react-dom": "^19.1.1",
+		"@vitejs/plugin-react": "^4.4.1",
+		"eslint": "^9.22.0",
+		"eslint-plugin-react-hooks": "^5.2.0",
+		"eslint-plugin-react-refresh": "^0.4.19",
+		"globals": "^16.0.0",
+		"typescript": "~5.7.3",
+		"typescript-eslint": "^8.26.1",
+		"vite": "^6.3.1",
+		"vitest": "^3.1.2"
 	}
 }

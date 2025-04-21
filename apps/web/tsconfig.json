@@ -1,20 +1,21 @@
+// apps/web/tsconfig.json
 {
-  "extends": "@repo/config/nextjs.json",
-  "compilerOptions": {
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
-  },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "next-env.d.ts",
-    "next.config.js",
-    ".next/types/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+	"extends": "@repo/config/tsconfig.json",
+	"compilerOptions": {
+		"baseUrl": ".",
+		"outDir": "./dist",
+		"rootDir": "./src",
+		"jsx": "react-jsx", // Asegura que JSX esté configurado para React
+		"lib": ["DOM", "DOM.Iterable", "ESNext"],
+		"allowJs": true, // Puede ser útil si usas libs JS
+		"skipLibCheck": true, // Ya lo tenemos en el base, pero no está de más
+		"isolatedModules": true, // Ya en el base
+		"noEmit": true, // Vite maneja la emisión
+		"moduleResolution": "Bundler", // O Node, dependiendo de tus necesidades con Vite 5+
+		"resolveJsonModule": true,
+		"allowImportingTsExtensions": true,
+		"noFallthroughCasesInSwitch": true
+	},
+	"include": ["src", "vite.config.ts"],
+	"exclude": ["node_modules", "dist"]
 }
