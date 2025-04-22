@@ -43,3 +43,6 @@ NOTES.md
 routeTree.gen.ts
 .vinxi
 .output
+
+# app generator
+packages/.ports.json
