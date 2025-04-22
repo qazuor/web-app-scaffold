@@ -12,7 +12,7 @@
         "test:file": "vitest run",
         "clean": "turbo run clean",
         "check-types": "turbo run check-types",
-        "create-app": "node packages/generator/dist/index.js"
+        "create:app": "node packages/generator/dist/index.js"
     },
     "devDependencies": {
         "@biomejs/biome": "^1.9.4",
@@ -24,7 +24,7 @@
         "turbo": "^2.5.0",
         "typescript": "5.8.2"
     },
-    "packageManager": "pnpm@9.0.0",
+    "packageManager": "pnpm@10.9.0",
     "engines": {
         "node": ">=18"
     }

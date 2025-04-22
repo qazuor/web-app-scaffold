@@ -38,3 +38,8 @@ yarn-error.log*
 *.pem
 
 NOTES.md
+
+# Tanstack
+routeTree.gen.ts
+.vinxi
+.output

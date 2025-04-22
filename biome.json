@@ -8,7 +8,16 @@
     },
     "files": {
         "ignoreUnknown": false,
-        "ignore": ["**/node_modules/**", "**/.turbo/**", "**/dist/**", "**/build/**"]
+        "ignore": [
+            "**/node_modules/**",
+            "**/.turbo/**",
+            "**/dist/**",
+            "**/build/**",
+            "**/coverage/**",
+            "**/.output/**",
+            "**/.vinxi/**",
+            "**/routeTree.gen.ts"
+        ]
     },
     "formatter": {
         "enabled": true,
