@@ -8,7 +8,7 @@ import type { Command } from 'commander';
 export function setupCLI(program: Command, version: string): void {
     program
         .version(version)
-        .description('🚀 Qazuor App Generator for Turborepo')
+        .description('Qazuor App Generator for Turborepo')
         .option('-n, --name <name>', 'Application name')
         .option('-f, --framework <framework>', 'Framework to use')
         .option('-d, --description <description>', 'Application description')

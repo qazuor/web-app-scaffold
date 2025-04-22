@@ -44,9 +44,6 @@ interface GeneratorOptions {
  * @param options CLI options
  */
 export async function runGenerator(options: GeneratorOptions): Promise<void> {
-    // Show title
-    logger.title('Qazuor App Generator for Turborepo', { icon: '🚀' });
-
     // Prompt the user for required information
     const framework = await promptForFramework(options);
     const appName = await promptForName({ name: options.name }, framework);
