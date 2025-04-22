@@ -19,5 +19,6 @@
         "module": "ESNext",
         "outDir": "dist",
         "jsx": "react-jsx"
-    }
+    },
+    "exclude": ["node_modules"]
 }

@@ -7,13 +7,21 @@
     "keywords": [],
     "author": "",
     "license": "ISC",
+    "main": "index.js",
+    "files": ["tsconfig.json", "tailwind.config.js", "vitest.config.js", "biome.json"],
+    "dependencies": {
+        "@biomejs/biome": "^1.9.4"
+    },
     "devDependencies": {
         "@testing-library/jest-dom": "^6.6.3",
         "@testing-library/react": "^16.3.0",
+        "@testing-library/user-event": "^14.6.1",
+        "@vitejs/plugin-react": "^4.4.1",
         "@vitest/coverage-v8": "^3.1.2",
         "jsdom": "^26.1.0",
         "tailwindcss": "^4.1.4",
         "typescript": "5.8.2",
-        "vitest": "^3.1.2"
+        "vitest": "^3.1.2",
+        "msw": "^2.7.5"
     }
 }

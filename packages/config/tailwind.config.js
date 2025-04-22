@@ -1,28 +1,25 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-    // El `content` debe ser definido en cada proyecto individual
-    content: [],
-
+    content: ['./src/**/*.{js,ts,jsx,tsx,astro}', './index.html'],
     theme: {
         extend: {
-            // Ejemplo: Añadir un color base que todas las apps puedan usar
             colors: {
-                'brand-primary': '#0070f3',
-                'brand-secondary': '#1a202c',
-            },
-            // Ejemplo: Añadir una fuente personalizada
-            fontFamily: {
-                sans: ['Inter', 'sans-serif'], // Asegúrate de importar la fuente en tu CSS
+                primary: {
+                    DEFAULT: '#3b82f6',
+                    50: '#eff6ff',
+                    100: '#dbeafe',
+                    200: '#bfdbfe',
+                    300: '#93c5fd',
+                    400: '#60a5fa',
+                    500: '#3b82f6',
+                    600: '#2563eb',
+                    700: '#1d4ed8',
+                    800: '#1e40af',
+                    900: '#1e3a8a',
+                    950: '#172554',
+                },
             },
         },
     },
-
-    plugins: [
-        // Ejemplo: Añadir plugins comunes que quieras en todas partes
-        // require('@tailwindcss/forms'),
-        // require('@tailwindcss/typography'),
-    ],
-
-    // Si necesitas prefijos comunes para evitar conflictos
-    // prefix: 'my-',
+    plugins: [],
 };
