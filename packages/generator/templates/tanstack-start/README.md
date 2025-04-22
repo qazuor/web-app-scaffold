@@ -23,13 +23,13 @@ Visit [http://localhost:3000](http://localhost:3000) to see your application.
 
 ## Project Structure
 
-- `src/root.tsx`: The root layout component
-- `src/routes/`: File-based routing directory
-- `src/routes/api.*.ts`: API routes
-- `src/server-functions/`: Server functions that can be called from the client
-- `src/entry-client.tsx`: Client entry point
-- `src/entry-server.tsx`: Server entry point
-- `src/global.css`: Global styles
+- `app/root.tsx`: The root layout component
+- `app/routes/`: File-based routing directory
+- `app/routes/api.*.ts`: API routes
+- `app/server-functions/`: Server functions that can be called from the client
+- `app/entry-client.tsx`: Client entry point
+- `app/entry-server.tsx`: Server entry point
+- `app/global.css`: Global styles
 
 ## Available Scripts
 

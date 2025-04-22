@@ -4,34 +4,38 @@
     "version": "0.1.0",
     "description": "{{description}}",
     "type": "module",
+    "sideEffects": false,
     "scripts": {
-        "dev": "npx @tanstack/start@latest dev",
-        "build": "npx @tanstack/start@latest build",
-        "start": "node ./.tanstack/build/server/index.js",
-        "lint": "biome lint --config-path=./config/biome.json ./src",
-        "format": "biome format --config-path=./config/biome.json --write ./src",
-        "check": "biome check --config-path=./config/biome.json --apply ./src",
-        "generate-routes": "npx @tanstack/router-cli@latest generate"
+        "dev": "vinxi dev",
+        "build": "vinxi build",
+        "start": "vinxi start",
+        "lint": "biome lint --config-path=./config/biome.json ./app",
+        "format": "biome format --config-path=./config/biome.json --write ./app",
+        "check": "biome check --config-path=./config/biome.json --apply ./app"
     },
     "dependencies": {
-        "@tanstack/react-query": "^5.13.4",
-        "@tanstack/react-router": "^1.15.10",
-        "@tanstack/start": "^1.116.2",
-        "react": "^18.2.0",
-        "react-dom": "^18.2.0",
-        "zod": "^3.22.4"
+        "@tanstack/react-router": "^1.116.0",
+        "@tanstack/react-router-devtools": "^1.116.0",
+        "@tanstack/react-start": "^1.116.2",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "vinxi": "0.5.1"
     },
     "devDependencies": {
         "@repo/config": "workspace:*",
-        "@types/node": "^22.14.0",
-        "typescript": "^5.8.2",
-        "@tanstack/router-cli": "^1.116.0",
-        "@tanstack/router-devtools": "^1.15.10",
-        "@tanstack/router-vite-plugin": "^1.15.10",
-        "@types/react": "^18.2.45",
-        "@types/react-dom": "^18.2.18",
+        "@tanstack/router-vite-plugin": "^1.116.1",
+        "@testing-library/react": "^14.1.2",
+        "@types/node": "^22.5.4",
+        "@types/react": "^19.0.8",
+        "@types/react-dom": "^19.0.3",
+        "@vitejs/plugin-react": "^4.4.1",
         "autoprefixer": "^10.4.16",
+        "jsdom": "^23.0.1",
         "postcss": "^8.4.32",
-        "tailwindcss": "^3.4.0"
+        "tailwindcss": "^3.4.0",
+        "typescript": "^5.7.2",
+        "vite": "^6.3.1",
+        "vite-tsconfig-paths": "^5.1.4",
+        "vitest": "^3.1.2"
     }
 }
