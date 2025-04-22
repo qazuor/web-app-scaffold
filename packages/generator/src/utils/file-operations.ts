@@ -86,6 +86,7 @@ export async function updatePackageJson(
  * @param framework Selected framework
  * @param description Application description
  * @param basePath Base path to calculate relative paths
+ * @param port Port number
  */
 export async function processDirectory(
     dirPath: string,
@@ -93,6 +94,7 @@ export async function processDirectory(
     framework: string,
     description: string,
     basePath: string,
+    port?: number,
 ): Promise<void> {
     const entries = await fs.readdir(dirPath, { withFileTypes: true });
     const relativePath = path.relative(basePath, dirPath);
@@ -105,9 +107,9 @@ export async function processDirectory(
         const relativeFilePath = path.join(displayPath, entry.name);
 
         if (entry.isDirectory()) {
-            await processDirectory(fullPath, appName, framework, description, basePath);
+            await processDirectory(fullPath, appName, framework, description, basePath, port);
         } else if (entry.isFile()) {
-            await processFile(fullPath, relativeFilePath, appName, framework, description);
+            await processFile(fullPath, relativeFilePath, appName, framework, description, port);
         }
     }
 }
@@ -119,6 +121,7 @@ export async function processDirectory(
  * @param appName Application name
  * @param framework Selected framework
  * @param description Application description
+ * @param port Port number
  */
 export async function processFile(
     filePath: string,
@@ -126,6 +129,7 @@ export async function processFile(
     appName: string,
     framework: string,
     description: string,
+    port?: number,
 ): Promise<void> {
     try {
         logger.file('Processing file:', relativeFilePath);
@@ -138,6 +142,15 @@ export async function processFile(
             .replace(/{{appName}}/g, appName)
             .replace(/{{framework}}/g, framework)
             .replace(/{{description}}/g, description);
+
+        // Replace port if provided
+        if (port) {
+            content = content.replace(/port:\s*3000/g, `port: ${port}`);
+            content = content.replace(/PORT\s*\|\|\s*3000/g, `PORT || ${port}`);
+            content = content.replace(/"port":\s*3000/g, `"port": ${port}`);
+            content = content.replace(/port=3000/g, `port=${port}`);
+            content = content.replace(/PORT=3000/g, `PORT=${port}`);
+        }
 
         if (content !== (await fs.readFile(filePath, 'utf8'))) {
             logger.success(`Replacing placeholders in: ${chalk.cyan(relativeFilePath)}`, {
@@ -205,5 +218,179 @@ export async function updateBiomeConfig(appDir: string): Promise<void> {
                 subtitle: 'You may need to manually update the extends path in biome.json',
             });
         }
+    }
+}
+
+/**
+ * Updates configuration files to use the specified port
+ * @param appDir Path to the app directory
+ * @param framework Framework name
+ * @param port Port number
+ */
+export async function updatePortInConfigs(
+    appDir: string,
+    framework: string,
+    port: number,
+): Promise<void> {
+    logger.info(`Setting port to ${port} in configuration files`, { icon: '🔌' });
+
+    try {
+        // Update different config files based on the framework
+        switch (framework) {
+            case 'hono':
+                await updateHonoPort(appDir, port);
+                break;
+            case 'react-vite':
+                await updateVitePort(appDir, port);
+                break;
+            case 'astro-vite':
+                await updateAstroPort(appDir, port);
+                break;
+            case 'tanstack-start':
+                await updateTanstackPort(appDir, port);
+                break;
+        }
+
+        logger.success(`Port configuration updated to ${port}`);
+    } catch (error) {
+        logger.warn('Failed to update port in configuration files', {
+            subtitle: 'You may need to manually update the port in the configuration files',
+        });
+    }
+}
+
+/**
+ * Updates the port in Hono configuration
+ * @param appDir App directory
+ * @param port Port number
+ */
+async function updateHonoPort(appDir: string, port: number): Promise<void> {
+    const viteConfigPath = path.join(appDir, 'vite.config.ts');
+    const indexPath = path.join(appDir, 'src', 'index.ts');
+
+    if (await fs.pathExists(viteConfigPath)) {
+        let content = await fs.readFile(viteConfigPath, 'utf8');
+        content = content.replace(/port:\s*3000/g, `port: ${port}`);
+        await fs.writeFile(viteConfigPath, content);
+    }
+
+    if (await fs.pathExists(indexPath)) {
+        let content = await fs.readFile(indexPath, 'utf8');
+        content = content.replace(/PORT\s*\|\|\s*3000/g, `PORT || ${port}`);
+        await fs.writeFile(indexPath, content);
+    }
+}
+
+/**
+ * Updates the port in Vite configuration
+ * @param appDir App directory
+ * @param port Port number
+ */
+async function updateVitePort(appDir: string, port: number): Promise<void> {
+    const viteConfigPath = path.join(appDir, 'vite.config.ts');
+
+    if (await fs.pathExists(viteConfigPath)) {
+        let content = await fs.readFile(viteConfigPath, 'utf8');
+        content = content.replace(/port:\s*3000/g, `port: ${port}`);
+        await fs.writeFile(viteConfigPath, content);
+    }
+}
+
+/**
+ * Updates the port in Astro configuration
+ * @param appDir App directory
+ * @param port Port number
+ */
+async function updateAstroPort(appDir: string, port: number): Promise<void> {
+    const astroConfigPath = path.join(appDir, 'astro.config.mjs');
+
+    if (await fs.pathExists(astroConfigPath)) {
+        let content = await fs.readFile(astroConfigPath, 'utf8');
+        content = content.replace(/port:\s*3000/g, `port: ${port}`);
+        await fs.writeFile(astroConfigPath, content);
+    }
+}
+
+/**
+ * Updates the port in TanStack Start configuration
+ * @param appDir App directory
+ * @param port Port number
+ */
+async function updateTanstackPort(appDir: string, port: number): Promise<void> {
+    const viteConfigPath = path.join(appDir, 'vite.config.ts');
+    const tanstackConfigPath = path.join(appDir, 'tanstack.config.ts');
+
+    if (await fs.pathExists(viteConfigPath)) {
+        let content = await fs.readFile(viteConfigPath, 'utf8');
+        content = content.replace(/port:\s*3000/g, `port: ${port}`);
+        await fs.writeFile(viteConfigPath, content);
+    }
+
+    if (await fs.pathExists(tanstackConfigPath)) {
+        let content = await fs.readFile(tanstackConfigPath, 'utf8');
+
+        // Add port configuration if it doesn't exist
+        if (!content.includes('port:')) {
+            content = content.replace(
+                /export default defineConfig\(\{/,
+                `export default defineConfig({\n  server: {\n    port: ${port}\n  },`,
+            );
+        } else {
+            content = content.replace(/port:\s*\d+/g, `port: ${port}`);
+        }
+
+        await fs.writeFile(tanstackConfigPath, content);
+    }
+}
+
+/**
+ * Creates a .env file with the port configuration based on the template's .env.example
+ * @param appDir App directory
+ * @param framework Framework name
+ * @param port Port number
+ */
+export async function createEnvFile(
+    appDir: string,
+    framework: string,
+    port: number,
+): Promise<void> {
+    const envPath = path.join(appDir, '.env');
+    const envExamplePath = path.join(appDir, '.env.example');
+
+    logger.info('Creating .env file with port configuration', { icon: '📝' });
+
+    try {
+        // Check if .env.example exists
+        if (await fs.pathExists(envExamplePath)) {
+            // Read the example file
+            let envContent = await fs.readFile(envExamplePath, 'utf8');
+
+            // Replace the port in the content
+            envContent = envContent.replace(/PORT=\d+/g, `PORT=${port}`);
+
+            // Write the .env file
+            await fs.writeFile(envPath, envContent);
+
+            logger.success('Environment file created based on template');
+        } else {
+            // Create a default .env file if no example exists
+            const defaultEnvContent = `# Application configuration
+PORT=${port}
+
+# Add your environment variables below
+# Example: API_KEY=your_api_key
+`;
+            await fs.writeFile(envPath, defaultEnvContent);
+
+            // Also create a .env.example file
+            await fs.writeFile(envExamplePath, defaultEnvContent);
+
+            logger.success('Default environment files created');
+        }
+    } catch (error) {
+        logger.warn('Failed to create environment files', {
+            subtitle: 'You may need to manually create the .env file',
+        });
+        console.error(error);
     }
 }

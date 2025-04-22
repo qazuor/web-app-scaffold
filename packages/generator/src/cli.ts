@@ -12,5 +12,6 @@ export function setupCLI(program: Command, version: string): void {
         .option('-n, --name <name>', 'Application name')
         .option('-f, --framework <framework>', 'Framework to use')
         .option('-d, --description <description>', 'Application description')
+        .option('-p, --port <port>', 'Port number for the application', Number.parseInt)
         .option('-i, --install', 'Automatically install dependencies');
 }

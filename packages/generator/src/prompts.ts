@@ -4,6 +4,7 @@ import {
     getDefaultDescriptionForFramework,
     getDefaultNameForFramework,
 } from './utils/defaults.js';
+import { getNextAvailablePort, isPortInUse } from './utils/port-manager.js';
 
 /**
  * Prompts the user to select the framework to use
@@ -83,6 +84,48 @@ export async function promptForDescription(
     ]);
 
     return description;
+}
+
+/**
+ * Prompts the user to input the port number
+ * @param options CLI options
+ * @returns Port number
+ */
+export async function promptForPort(options: { port?: number }): Promise<number> {
+    if (options.port) {
+        return options.port;
+    }
+
+    // Get the next available port as the default
+    const nextPort = await getNextAvailablePort();
+
+    const { port } = await inquirer.prompt([
+        {
+            type: 'input',
+            name: 'port',
+            message: 'Port number for the application:',
+            default: nextPort.toString(),
+            validate: async (input) => {
+                const port = Number.parseInt(input, 10);
+
+                if (Number.isNaN(port)) {
+                    return 'Port must be a number';
+                }
+
+                if (port < 1024 || port > 65535) {
+                    return 'Port must be between 1024 and 65535';
+                }
+
+                if (await isPortInUse(port)) {
+                    return `Port ${port} is already in use by another app in this monorepo`;
+                }
+
+                return true;
+            },
+        },
+    ]);
+
+    return Number.parseInt(port, 10);
 }
 
 /**
