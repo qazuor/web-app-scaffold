@@ -1,30 +1,33 @@
 {
-    "name": "{{appName}}",
+    "name": "@repo/generator",
     "version": "0.1.0",
-    "description": "{{description}}",
-    "private": true,
+    "description": "App generator for Turborepo monorepos",
     "type": "module",
-    "scripts": {
-        "dev": "cross-env NODE_ENV=development tsx watch src/index.ts",
-        "build": "tsc",
-        "start": "node dist/index.js",
-        "lint": "biome lint --config-path=./config/biome.json ./src",
-        "format": "biome format --config-path=./config/biome.json --write ./src",
-        "check": "biome check --config-path=./config/biome.json --apply ./src",
-        "test": "vitest run --coverage"
+    "bin": {
+        "create-app": "./dist/index.js"
     },
+    "scripts": {
+        "build": "tsup src/index.ts --format esm --dts --sourcemap && npm run copy-templates",
+        "dev": "tsup src/index.ts --format esm --dts --watch",
+        "lint": "biome check .",
+        "lint:fix": "biome check --write .",
+        "format": "biome format --write .",
+        "check": "biome check --write",
+        "clean": "rm -rf dist",
+        "copy-templates": "cp -r templates dist/"
+    },
+    "keywords": ["turborepo", "generator", "cli"],
     "dependencies": {
-        "@hono/node-server": "^1.14.1",
-        "hono": "^4.7.7"
+        "chalk": "^5.3.0",
+        "commander": "^11.1.0",
+        "fs-extra": "^11.2.0",
+        "inquirer": "^9.2.12"
     },
     "devDependencies": {
-        "@repo/config": "workspace:*",
-        "@types/node": "^22.14.0",
-        "typescript": "^5.8.2",
-        "vite": "^6.3.1",
-        "vitest": "^3.1.2",
-        "vite-plugin-node": "^3.1.0",
-        "cross-env": "^7.0.3",
-        "tsx": "^4.19.3"
+        "@types/fs-extra": "^11.0.4",
+        "@types/inquirer": "^9.0.7",
+        "@types/node": "^20.10.5",
+        "tsup": "^8.0.1",
+        "typescript": "^5.3.3"
     }
 }
