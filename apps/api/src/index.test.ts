@@ -7,7 +7,7 @@ describe('Hono API', () => {
         const res = await app.request('http://localhost/'); // Usa app.request para testing
 
         expect(res.status).toBe(200);
-        const json = await res.json();
+        const json = (await res.json()) as { message: string };
         expect(json.message).toBe('Hello from Hono API!');
     });
 
@@ -15,7 +15,7 @@ describe('Hono API', () => {
         const res = await app.request('http://localhost/hello/Alice');
 
         expect(res.status).toBe(200);
-        const json = await res.json();
+        const json = (await res.json()) as { message: string };
         expect(json.message).toBe('Hello, Alice!');
     });
 
