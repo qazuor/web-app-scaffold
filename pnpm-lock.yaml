@@ -171,7 +171,7 @@ importers:
   packages/generator:
     dependencies:
       chalk:
-        specifier: ^5.4.1
+        specifier: ^5.3.0
         version: 5.4.1
       commander:
         specifier: ^11.1.0
@@ -197,10 +197,10 @@ importers:
         version: 20.17.30
       tsup:
         specifier: ^8.0.1
-        version: 8.4.0(jiti@2.4.2)(postcss@8.5.3)(tsx@4.19.3)(typescript@5.7.3)(yaml@2.7.1)
+        version: 8.4.0(jiti@2.4.2)(postcss@8.5.3)(tsx@4.19.3)(typescript@5.8.2)(yaml@2.7.1)
       typescript:
         specifier: ^5.3.3
-        version: 5.7.3
+        version: 5.8.2
 
   packages/ui:
     dependencies:
@@ -7817,7 +7817,7 @@ snapshots:
 
   tslib@2.8.1: {}
 
-  tsup@8.4.0(jiti@2.4.2)(postcss@8.5.3)(tsx@4.19.3)(typescript@5.7.3)(yaml@2.7.1):
+  tsup@8.4.0(jiti@2.4.2)(postcss@8.5.3)(tsx@4.19.3)(typescript@5.8.2)(yaml@2.7.1):
     dependencies:
       bundle-require: 5.1.0(esbuild@0.25.2)
       cac: 6.7.14
@@ -7837,7 +7837,7 @@ snapshots:
       tree-kill: 1.2.2
     optionalDependencies:
       postcss: 8.5.3
-      typescript: 5.7.3
+      typescript: 5.8.2
     transitivePeerDependencies:
       - jiti
       - supports-color
