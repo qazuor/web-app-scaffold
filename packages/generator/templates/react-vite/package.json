@@ -8,9 +8,9 @@
         "dev": "vite",
         "build": "tsc && vite build",
         "preview": "vite preview",
-        "lint": "biome lint ./src",
-        "format": "biome format --write ./src",
-        "check": "biome check --apply ./src",
+        "lint": "biome lint --config-path=./config/biome.json ./src",
+        "format": "biome format --config-path=./config/biome.json --write ./src",
+        "check": "biome check --config-path=./config/biome.json --apply ./src",
         "test": "vitest run"
     },
     "dependencies": {

@@ -139,15 +139,6 @@ export async function processFile(
             .replace(/{{framework}}/g, framework)
             .replace(/{{description}}/g, description);
 
-        // Special handling for biome.json files to fix extends paths
-        if (path.basename(filePath) === 'biome.json') {
-            // Replace relative path with workspace path
-            content = content.replace(
-                /"extends":\s*\[\s*"..\/..\/config\/biome.json"\s*\]/,
-                '"extends": ["@repo/config/biome.json"]',
-            );
-        }
-
         if (content !== (await fs.readFile(filePath, 'utf8'))) {
             logger.success(`Replacing placeholders in: ${chalk.cyan(relativeFilePath)}`, {
                 icon: '✏️',
@@ -164,6 +155,27 @@ export async function processFile(
 }
 
 /**
+ * Creates a copy of the shared configuration in the app directory
+ * @param appDir Path to the app directory
+ * @param configDir Path to the shared configuration directory
+ */
+export async function copySharedConfig(appDir: string, configDir: string): Promise<void> {
+    const appConfigDir = path.join(appDir, 'config');
+
+    // Create the config directory in the app
+    await createDirectory(appConfigDir);
+
+    // Copy the biome.json file from the shared config
+    const sourceBiomeConfig = path.join(configDir, 'biome.json');
+    const destBiomeConfig = path.join(appConfigDir, 'biome.json');
+
+    if (fs.existsSync(sourceBiomeConfig)) {
+        logger.info('Copying shared Biome configuration', { icon: '⚙️' });
+        await fs.copy(sourceBiomeConfig, destBiomeConfig);
+    }
+}
+
+/**
  * Updates the Biome configuration to use the correct path for extends
  * @param appDir Path to the app directory
  */
@@ -171,16 +183,16 @@ export async function updateBiomeConfig(appDir: string): Promise<void> {
     const biomeConfigPath = path.join(appDir, 'biome.json');
 
     if (fs.existsSync(biomeConfigPath)) {
-        logger.info('Updating Biome configuration to use workspace paths', { icon: '⚙️' });
+        logger.info('Updating Biome configuration to use local path', { icon: '⚙️' });
 
         try {
             const biomeConfig = await fs.readJson(biomeConfigPath);
 
-            // Update extends to use workspace path
+            // Update extends to use local path
             if (biomeConfig.extends && Array.isArray(biomeConfig.extends)) {
                 biomeConfig.extends = biomeConfig.extends.map((ext: string) => {
-                    if (ext.includes('../../config/biome.json')) {
-                        return '@repo/config/biome.json';
+                    if (ext.includes('../../packages/config/biome.json')) {
+                        return './config/biome.json';
                     }
                     return ext;
                 });
