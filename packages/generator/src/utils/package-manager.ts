@@ -1,0 +1,345 @@
+import { execSync } from 'node:child_process';
+import path from 'node:path';
+import fs from 'fs-extra';
+import type { PackageConfig } from '../packages/types.js';
+import { logger } from './logger.js';
+
+/**
+ * Installs selected packages
+ * @param appDir Application directory
+ * @param selectedPackages Selected packages
+ * @returns true if installation was successful, false otherwise
+ */
+export async function installSelectedPackages(
+    appDir: string,
+    selectedPackages: PackageConfig[],
+): Promise<boolean> {
+    try {
+        // Group packages by type (regular and dev)
+        const regularDeps: string[] = [];
+        const devDeps: string[] = [];
+
+        // Add main packages and their dependencies
+        for (const pkg of selectedPackages) {
+            const depString = `${pkg.name}@${pkg.version}`;
+
+            if (pkg.isDev) {
+                devDeps.push(depString);
+            } else {
+                regularDeps.push(depString);
+            }
+
+            // Add additional dependencies
+            if (pkg.dependencies) {
+                regularDeps.push(...pkg.dependencies);
+            }
+
+            if (pkg.devDependencies) {
+                devDeps.push(...pkg.devDependencies);
+            }
+        }
+
+        // Install regular dependencies if any
+        if (regularDeps.length > 0) {
+            logger.info(`Installing dependencies: ${regularDeps.join(', ')}`, {
+                icon: '📦',
+            });
+            execSync(`pnpm add ${regularDeps.join(' ')}`, {
+                cwd: appDir,
+                stdio: 'inherit',
+            });
+        }
+
+        // Install dev dependencies if any
+        if (devDeps.length > 0) {
+            logger.info(`Installing dev dependencies: ${devDeps.join(', ')}`, {
+                icon: '🔧',
+            });
+            execSync(`pnpm add -D ${devDeps.join(' ')}`, {
+                cwd: appDir,
+                stdio: 'inherit',
+            });
+        }
+
+        logger.success('All packages installed successfully.');
+        return true;
+    } catch (error) {
+        logger.error('Failed to install packages:', {
+            subtitle: 'You can install them manually later.',
+        });
+        console.error(error);
+        return false;
+    }
+}
+
+/**
+ * Creates configuration files for selected packages
+ * @param appDir Application directory
+ * @param selectedPackages Selected packages
+ * @param appName Application name
+ * @param port Port number
+ */
+export async function createPackageConfigs(
+    appDir: string,
+    selectedPackages: PackageConfig[],
+    appName: string,
+    port: number,
+): Promise<void> {
+    for (const pkg of selectedPackages) {
+        if (!pkg.configFiles || pkg.configFiles.length === 0) {
+            continue;
+        }
+
+        logger.info(`Setting up configuration for ${pkg.displayName}`, {
+            icon: '⚙️',
+        });
+
+        for (const configFile of pkg.configFiles) {
+            const filePath = path.join(appDir, configFile.path);
+
+            // Ensure directory exists
+            await fs.ensureDir(path.dirname(filePath));
+
+            // Get content
+            let content =
+                typeof configFile.content === 'function'
+                    ? configFile.content(appName, port)
+                    : configFile.content;
+
+            // Replace placeholders
+            content = content
+                .replace(/{{appName}}/g, appName)
+                .replace(/{{port}}/g, port.toString());
+
+            // Write or append to file
+            if (configFile.append && (await fs.pathExists(filePath))) {
+                const existingContent = await fs.readFile(filePath, 'utf8');
+
+                // Special handling for astro.config.mjs
+                if (filePath.endsWith('astro.config.mjs')) {
+                    await updateAstroConfig(filePath, pkg.name);
+                } else {
+                    // Generic append
+                    await fs.writeFile(filePath, `${existingContent}\n${content}`);
+                }
+            } else {
+                await fs.writeFile(filePath, content);
+            }
+
+            // Special handling for TanStack Start
+            if (filePath.endsWith('tanstack.config.ts') && pkg.name.includes('drizzle')) {
+                await updateTanStackConfig(filePath, pkg.name);
+            }
+
+            logger.file('Created', configFile.path);
+        }
+    }
+}
+
+/**
+ * Updates Astro configuration file with new integrations
+ * @param configPath Path to astro.config.mjs
+ * @param packageName Package name to add
+ */
+async function updateAstroConfig(configPath: string, packageName: string): Promise<void> {
+    try {
+        let content = await fs.readFile(configPath, 'utf8');
+
+        // Map package names to import names and integration names
+        const integrationMap: Record<string, { import: string; integration: string }> = {
+            '@astrojs/router': { import: 'router', integration: 'router()' },
+            'astro:transitions': { import: '{ transitions }', integration: 'transitions()' },
+            '@astrojs/react': { import: 'react', integration: 'react()' },
+            '@astrojs/tailwind': { import: 'tailwind', integration: 'tailwind()' },
+            '@astrojs/i18n': { import: 'i18n', integration: 'i18n()' },
+        };
+
+        const integration = integrationMap[packageName];
+
+        if (!integration) {
+            return;
+        }
+
+        // Check if import already exists
+        if (!content.includes(`import ${integration.import} from '${packageName}'`)) {
+            // Add import
+            const importStatement = `import ${integration.import} from '${packageName}';\n`;
+            content = content.replace(/import {/m, `${importStatement}import {`);
+        }
+
+        // Check if integration already exists in the integrations array
+        if (!content.includes(integration.integration)) {
+            // Add integration to the integrations array
+            content = content.replace(/integrations:\s*\[(.*?)\]/s, (match, integrations) => {
+                const newIntegrations = integrations.trim()
+                    ? `${integrations.trim()}, ${integration.integration}`
+                    : integration.integration;
+                return `integrations: [${newIntegrations}]`;
+            });
+        }
+
+        await fs.writeFile(configPath, content);
+        logger.success(`Added ${packageName} integration to Astro config`);
+    } catch (error) {
+        logger.warn(`Failed to update Astro config for ${packageName}`, {
+            subtitle: 'You may need to manually update astro.config.mjs',
+        });
+    }
+}
+
+/**
+ * Updates TanStack Start configuration file with new integrations
+ * @param configPath Path to tanstack.config.ts
+ * @param packageName Package name to add
+ */
+async function updateTanStackConfig(configPath: string, packageName: string): Promise<void> {
+    try {
+        let content = await fs.readFile(configPath, 'utf8');
+
+        // For Drizzle, add database configuration
+        if (packageName.includes('drizzle')) {
+            if (!content.includes('database:')) {
+                content = content.replace(
+                    /export default defineConfig\(\{/,
+                    `export default defineConfig({\n  database: {\n    provider: "sqlite",\n    url: process.env.DATABASE_URL || "sqlite.db"\n  },`,
+                );
+                await fs.writeFile(configPath, content);
+                logger.success('Added database configuration to TanStack config');
+            }
+        }
+    } catch (error) {
+        logger.warn(`Failed to update TanStack config for ${packageName}`, {
+            subtitle: 'You may need to manually update tanstack.config.ts',
+        });
+    }
+}
+
+/**
+ * Updates environment variables for selected packages
+ * @param appDir Application directory
+ * @param selectedPackages Selected packages
+ */
+export async function updateEnvVars(
+    appDir: string,
+    selectedPackages: PackageConfig[],
+): Promise<void> {
+    const envPath = path.join(appDir, '.env');
+    const envExamplePath = path.join(appDir, '.env.example');
+
+    // Collect all environment variables
+    const envVars: Record<string, string> = {};
+
+    for (const pkg of selectedPackages) {
+        if (pkg.envVars) {
+            Object.assign(envVars, pkg.envVars);
+        }
+    }
+
+    // If no environment variables to add, return
+    if (Object.keys(envVars).length === 0) {
+        return;
+    }
+
+    logger.info('Adding environment variables for selected packages', {
+        icon: '🔑',
+    });
+
+    // Update .env file
+    if (await fs.pathExists(envPath)) {
+        let content = await fs.readFile(envPath, 'utf8');
+
+        // Add each environment variable if it doesn't exist
+        for (const [key, value] of Object.entries(envVars)) {
+            if (!content.includes(`${key}=`)) {
+                content += `\n# Added for ${key.split('_')[0].toLowerCase()} integration\n${key}=${value}\n`;
+            }
+        }
+
+        await fs.writeFile(envPath, content);
+    }
+
+    // Update .env.example file
+    if (await fs.pathExists(envExamplePath)) {
+        let content = await fs.readFile(envExamplePath, 'utf8');
+
+        // Add each environment variable if it doesn't exist
+        for (const [key, value] of Object.entries(envVars)) {
+            if (!content.includes(`${key}=`)) {
+                content += `\n# Added for ${key.split('_')[0].toLowerCase()} integration\n${key}=${value}\n`;
+            }
+        }
+
+        await fs.writeFile(envExamplePath, content);
+    }
+}
+
+/**
+ * Updates README.md with information about selected packages
+ * @param appDir Application directory
+ * @param selectedPackages Selected packages
+ * @param appName Application name
+ */
+export async function updateReadme(
+    appDir: string,
+    selectedPackages: PackageConfig[],
+    appName: string,
+): Promise<void> {
+    const readmePath = path.join(appDir, 'README.md');
+
+    if (!(await fs.pathExists(readmePath))) {
+        logger.warn('README.md not found, skipping update');
+        return;
+    }
+
+    logger.info('Updating README.md with package documentation', {
+        icon: '📝',
+    });
+
+    let content = await fs.readFile(readmePath, 'utf8');
+
+    // Check if we already have an "Installed Packages" section
+    if (content.includes('## Installed Packages')) {
+        // If it exists, we'll replace it
+        const regex = /## Installed Packages[\s\S]*?(?=##|$)/;
+        const packagesSection = generatePackagesSection(selectedPackages, appName);
+        content = content.replace(regex, packagesSection);
+    } else {
+        // Otherwise, add it at the end
+        content += generatePackagesSection(selectedPackages, appName);
+    }
+
+    await fs.writeFile(readmePath, content);
+}
+
+/**
+ * Generates the "Installed Packages" section for the README
+ * @param selectedPackages Selected packages
+ * @param appName Application name
+ * @returns Formatted section content
+ */
+function generatePackagesSection(selectedPackages: PackageConfig[], appName: string): string {
+    if (selectedPackages.length === 0) {
+        return '';
+    }
+
+    let section = '\n\n## Installed Packages\n\n';
+    section += 'This project includes the following packages:\n\n';
+
+    for (const pkg of selectedPackages) {
+        section += `- **${pkg.displayName}**: ${pkg.description}\n`;
+    }
+
+    // Add detailed documentation for each package
+    for (const pkg of selectedPackages) {
+        if (pkg.readmeSection) {
+            const packageSection =
+                typeof pkg.readmeSection === 'function'
+                    ? pkg.readmeSection(appName)
+                    : pkg.readmeSection.replace(/{{appName}}/g, appName);
+
+            section += `\n${packageSection}\n`;
+        }
+    }
+
+    return section;
+}

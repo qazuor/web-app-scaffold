@@ -1,4 +1,5 @@
 import inquirer from 'inquirer';
+import { type PackageConfig, getPackagesForFramework } from './packages/index.js';
 import {
     availableFrameworks,
     getDefaultDescriptionForFramework,
@@ -126,6 +127,42 @@ export async function promptForPort(options: { port?: number }): Promise<number>
     ]);
 
     return Number.parseInt(port, 10);
+}
+
+/**
+ * Prompts the user to select packages to install
+ * @param framework Selected framework
+ * @returns Array of selected packages
+ */
+export async function promptForPackages(framework: string): Promise<PackageConfig[]> {
+    try {
+        const availablePackages = await getPackagesForFramework(framework);
+
+        if (availablePackages.length === 0) {
+            return [];
+        }
+
+        const { selectedPackageNames } = await inquirer.prompt([
+            {
+                type: 'checkbox',
+                name: 'selectedPackageNames',
+                message: 'Select packages to install:',
+                choices: availablePackages.map((pkg) => ({
+                    name: `${pkg.displayName} - ${pkg.description}`,
+                    value: pkg.name,
+                    checked: false,
+                })),
+            },
+        ]);
+
+        // Return the full package configs for selected packages
+        return availablePackages.filter((pkg) => selectedPackageNames.includes(pkg.name));
+    } catch (error) {
+        console.error('Error loading packages:', error);
+        throw new Error(
+            `Failed to load packages for framework ${framework}. The generator will continue without additional packages.`,
+        );
+    }
 }
 
 /**
