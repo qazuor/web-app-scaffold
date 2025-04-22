@@ -3,11 +3,14 @@
     "ui": "tui",
     "tasks": {
         "build": {
-            "dependsOn": ["^build", "lint", "test"],
+            "dependsOn": ["^build", "lint"],
             "outputs": ["dist/**", "build/**"]
         },
         "lint": {
             "dependsOn": ["^lint"]
+        },
+        "format": {
+            "dependsOn": ["^format"]
         },
         "check-types": {
             "dependsOn": ["^check-types"]
@@ -18,8 +21,12 @@
         },
         "test": {
             "dependsOn": ["^build"],
+            "inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts", "test/**/*.tsx"],
             "outputs": ["coverage/**"]
+        },
+        "clean": {
+            "cache": false
         }
     },
-    "globalDependencies": ["**/.env", ".env.local"]
+    "globalDependencies": ["**/.env.*local"]
 }
