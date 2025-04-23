@@ -5,6 +5,9 @@ export const zodPackage: PackageConfig = {
     displayName: 'Zod',
     description: 'TypeScript-first schema validation with static type inference',
     version: '^3.22.4',
+    canBeShared: true,
+    sharedPackageTemplate: 'zod',
+    defaultSharedName: 'schema',
     readmeSection: `
 ## Zod
 
