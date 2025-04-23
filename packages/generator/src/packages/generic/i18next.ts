@@ -5,6 +5,9 @@ export const i18nextPackage: PackageConfig = {
     displayName: 'i18next',
     description: 'Internationalization framework',
     version: '^23.7.16',
+    canBeShared: true,
+    sharedPackageTemplate: 'i18next',
+    defaultSharedName: 'i18n',
     dependencies: ['react-i18next@^14.0.0'],
     configFiles: [
         {
