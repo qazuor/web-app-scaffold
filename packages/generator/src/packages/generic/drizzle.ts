@@ -5,6 +5,9 @@ export const drizzlePackage: PackageConfig = {
     displayName: 'Drizzle ORM',
     description: 'TypeScript ORM with a focus on type safety',
     version: '^0.29.3',
+    canBeShared: true,
+    sharedPackageTemplate: 'drizzle',
+    defaultSharedName: 'db',
     devDependencies: ['drizzle-kit@^0.20.10'],
     configFiles: [
         {
