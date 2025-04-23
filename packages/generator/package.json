@@ -22,7 +22,8 @@
         "execa": "^8.0.1",
         "figlet": "^1.8.1",
         "fs-extra": "^11.2.0",
-        "inquirer": "^9.2.12"
+        "inquirer": "^9.2.12",
+        "type-fest": "^4.10.1"
     },
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",

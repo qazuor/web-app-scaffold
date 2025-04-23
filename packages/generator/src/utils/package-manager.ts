@@ -1,6 +1,7 @@
 import { execSync } from 'node:child_process';
 import path from 'node:path';
 import fs from 'fs-extra';
+import type { PackageJson } from 'type-fest';
 import type { PackageConfig } from '../packages/types.js';
 import { logger } from './logger.js';
 
@@ -15,50 +16,57 @@ export async function installSelectedPackages(
     selectedPackages: PackageConfig[],
 ): Promise<boolean> {
     try {
-        // Group packages by type (regular and dev)
-        const regularDeps: string[] = [];
-        const devDeps: string[] = [];
+        const packageJsonPath = path.join(appDir, 'package.json');
+        const packageJson = (await fs.readJson(packageJsonPath)) as PackageJson;
 
-        // Add main packages and their dependencies
+        // Initialize dependencies objects if they don't exist
+        packageJson.dependencies = packageJson.dependencies || {};
+        packageJson.devDependencies = packageJson.devDependencies || {};
+
+        // Add selected packages to package.json
         for (const pkg of selectedPackages) {
-            const depString = `${pkg.name}@${pkg.version}`;
-
-            if (pkg.isDev) {
-                devDeps.push(depString);
-            } else {
-                regularDeps.push(depString);
-            }
+            const target = pkg.isDev ? packageJson.devDependencies : packageJson.dependencies;
+            target[pkg.name] = pkg.version;
 
             // Add additional dependencies
             if (pkg.dependencies) {
-                regularDeps.push(...pkg.dependencies);
+                for (const dep of pkg.dependencies) {
+                    const [name, version] = dep.split('@');
+                    packageJson.dependencies[name] = version;
+                }
             }
 
+            // Add additional dev dependencies
             if (pkg.devDependencies) {
-                devDeps.push(...pkg.devDependencies);
+                for (const dep of pkg.devDependencies) {
+                    const [name, version] = dep.split('@');
+                    packageJson.devDependencies[name] = version;
+                }
             }
         }
 
-        // Install regular dependencies if any
+        // Write updated package.json
+        await fs.writeJson(packageJsonPath, packageJson, { spaces: 4 });
+
+        // Log the packages being installed
+        const regularDeps = Object.entries(packageJson.dependencies || {}).map(
+            ([name, version]) => `${name}@${version}`,
+        );
+        const devDeps = Object.entries(packageJson.devDependencies || {}).map(
+            ([name, version]) => `${name}@${version}`,
+        );
+
         if (regularDeps.length > 0) {
-            logger.info(`Installing dependencies: ${regularDeps.join(', ')}`, {
-                icon: '📦',
-            });
-            execSync(`pnpm add ${regularDeps.join(' ')}`, {
-                cwd: appDir,
-                stdio: 'inherit',
-            });
+            logger.info(`Installing dependencies: ${regularDeps.join(', ')}`, { icon: '📦' });
         }
 
-        // Install dev dependencies if any
         if (devDeps.length > 0) {
-            logger.info(`Installing dev dependencies: ${devDeps.join(', ')}`, {
-                icon: '🔧',
-            });
-            execSync(`pnpm add -D ${devDeps.join(' ')}`, {
-                cwd: appDir,
-                stdio: 'inherit',
-            });
+            logger.info(`Installing dev dependencies: ${devDeps.join(', ')}`, { icon: '🔧' });
+        }
+
+        // Run a single install command
+        if (regularDeps.length > 0 || devDeps.length > 0) {
+            execSync('pnpm install', { cwd: appDir, stdio: 'inherit' });
         }
 
         logger.success('All packages installed successfully.');
