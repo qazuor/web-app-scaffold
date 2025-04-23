@@ -31,4 +31,20 @@ export interface PackageConfig {
     readmeSection?: string | ((appName: string) => string);
     /** Environment variables to add */
     envVars?: Record<string, string>;
+    /** Post-install commands to run */
+    postInstall?: string[];
+}
+
+/** UI library configuration */
+export interface UILibraryConfig extends PackageConfig {
+    /** Setup commands to run after installation */
+    setup?: string[];
+    /** Files to copy from templates */
+    templateFiles?: string[];
+}
+
+/** Icon library configuration */
+export interface IconLibraryConfig extends PackageConfig {
+    /** Example import statement */
+    importExample?: string;
 }

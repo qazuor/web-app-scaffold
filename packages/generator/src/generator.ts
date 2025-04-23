@@ -6,10 +6,12 @@ import type { PackageConfig } from './packages/types.js';
 import {
     promptForDescription,
     promptForFramework,
+    promptForIconLibrary,
     promptForInstall,
     promptForName,
     promptForPackages,
     promptForPort,
+    promptForUILibrary,
 } from './prompts.js';
 import { installDependencies } from './utils/dependency-installer.js';
 import {
@@ -64,7 +66,18 @@ export async function runGenerator(options: GeneratorOptions): Promise<void> {
         const port = await promptForPort({ port: options.port });
 
         // Load packages - if this fails, it will throw an error
+        const uiLibrary = await promptForUILibrary(framework);
+        const iconLibrary = await promptForIconLibrary(framework);
         const selectedPackages = await promptForPackages(framework);
+
+        // Add UI and icon libraries to selected packages if chosen
+        if (uiLibrary) {
+            selectedPackages.push(uiLibrary);
+        }
+        if (iconLibrary) {
+            selectedPackages.push(iconLibrary);
+        }
+
         const shouldInstall = await promptForInstall(options);
 
         // Create the app
@@ -74,12 +87,15 @@ export async function runGenerator(options: GeneratorOptions): Promise<void> {
         // Install dependencies if requested
         if (shouldInstall) {
             const appDir = path.join(process.cwd(), 'apps', appName);
+
+            // if has selected packages to install add it before run pnpm install
+            if (selectedPackages.length > 0) {
+                await installSelectedPackages(appDir, selectedPackages);
+            }
+
             const installed = await installDependencies(appDir);
 
-            // Install selected packages if dependencies were installed successfully
             if (installed && selectedPackages.length > 0) {
-                await installSelectedPackages(appDir, selectedPackages);
-
                 // Create configuration files for selected packages
                 await createPackageConfigs(appDir, selectedPackages, appName, port);
 

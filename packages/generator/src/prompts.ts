@@ -1,5 +1,8 @@
 import inquirer from 'inquirer';
+import { iconLibraries } from './packages/icon-libraries/index.js';
 import { type PackageConfig, getPackagesForFramework } from './packages/index.js';
+import type { IconLibraryConfig } from './packages/types.js';
+import { uiLibraries } from './packages/ui-libraries/index.js';
 import {
     availableFrameworks,
     getDefaultDescriptionForFramework,
@@ -185,6 +188,62 @@ export async function promptForInstall(options: { install?: boolean }): Promise<
     ]);
 
     return install;
+}
+
+/**
+ * Prompts the user to select a UI library if using React
+ * @param framework Selected framework
+ * @returns Selected UI library configuration or null
+ */
+export async function promptForUILibrary(framework: string): Promise<PackageConfig | null> {
+    if (!['react-vite', 'tanstack-start'].includes(framework)) {
+        return null;
+    }
+
+    const { uiLibrary } = await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'uiLibrary',
+            message: 'Which UI library would you like to use?',
+            choices: [
+                ...uiLibraries.map((lib) => ({
+                    name: `${lib.displayName} - ${lib.description}`,
+                    value: lib,
+                })),
+                { name: 'None', value: null },
+            ],
+        },
+    ]);
+
+    return uiLibrary;
+}
+
+/**
+ * Prompts the user to select an icon library if using React
+ * @param framework Selected framework
+ * @returns Selected icon library configuration or null
+ */
+export async function promptForIconLibrary(framework: string): Promise<PackageConfig | null> {
+    if (!['react-vite', 'tanstack-start'].includes(framework)) {
+        return null;
+    }
+
+    const { iconLibrary } = await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'iconLibrary',
+            message: 'Which icon library would you like to use?',
+            choices: [
+                ...iconLibraries.map((lib: IconLibraryConfig) => ({
+                    name: `${lib.displayName} - ${lib.description}`,
+                    value: lib,
+                })),
+                { name: 'None', value: null },
+            ],
+        },
+    ]);
+
+    return iconLibrary;
 }
 
 /**

@@ -31,7 +31,7 @@ export async function installSelectedPackages(
             // Add additional dependencies
             if (pkg.dependencies) {
                 for (const dep of pkg.dependencies) {
-                    const [name, version] = dep.split('@');
+                    const [name, version] = dep.split(/(?!^)@(.+)/).filter(Boolean);
                     packageJson.dependencies[name] = version;
                 }
             }
@@ -39,7 +39,7 @@ export async function installSelectedPackages(
             // Add additional dev dependencies
             if (pkg.devDependencies) {
                 for (const dep of pkg.devDependencies) {
-                    const [name, version] = dep.split('@');
+                    const [name, version] = dep.split(/(?!^)@(.+)/).filter(Boolean);
                     packageJson.devDependencies[name] = version;
                 }
             }
@@ -57,23 +57,18 @@ export async function installSelectedPackages(
         );
 
         if (regularDeps.length > 0) {
-            logger.info(`Installing dependencies: ${regularDeps.join(', ')}`, { icon: '📦' });
+            logger.info(`Adding dependencies: ${regularDeps.join(', ')}`, { icon: '📦' });
         }
 
         if (devDeps.length > 0) {
-            logger.info(`Installing dev dependencies: ${devDeps.join(', ')}`, { icon: '🔧' });
+            logger.info(`Adding dev dependencies: ${devDeps.join(', ')}`, { icon: '🔧' });
         }
 
-        // Run a single install command
-        if (regularDeps.length > 0 || devDeps.length > 0) {
-            execSync('pnpm install', { cwd: appDir, stdio: 'inherit' });
-        }
-
-        logger.success('All packages installed successfully.');
+        logger.success('All packages added successfully to package.json.');
         return true;
     } catch (error) {
-        logger.error('Failed to install packages:', {
-            subtitle: 'You can install them manually later.',
+        logger.error('Failed to add packages:', {
+            subtitle: 'You can add them manually later.',
         });
         console.error(error);
         return false;
