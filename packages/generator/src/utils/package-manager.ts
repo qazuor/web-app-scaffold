@@ -3,7 +3,48 @@ import path from 'node:path';
 import fs from 'fs-extra';
 import type { PackageJson } from 'type-fest';
 import type { PackageConfig } from '../packages/types.js';
+import { promptForInstallationType } from '../prompts.js';
 import { logger } from './logger.js';
+
+/**
+ * Creates a shared package
+ * @param packageName Package name
+ * @param templateName Template to use
+ * @returns true if package was created successfully
+ */
+async function createSharedPackage(packageName: string, templateName: string): Promise<boolean> {
+    try {
+        const packagesDir = path.join(process.cwd(), 'packages');
+        const packageDir = path.join(packagesDir, packageName);
+        const templateDir = path.join(global.templatesDir, 'packages', templateName);
+
+        // Check if template exists
+        if (!fs.existsSync(templateDir)) {
+            logger.error(`Template ${templateName} not found`);
+            return false;
+        }
+
+        // Create package directory
+        await fs.ensureDir(packageDir);
+
+        // Copy template files
+        await fs.copy(templateDir, packageDir);
+
+        // Update package.json
+        const packageJsonPath = path.join(packageDir, 'package.json');
+        if (fs.existsSync(packageJsonPath)) {
+            const packageJson = await fs.readJson(packageJsonPath);
+            packageJson.name = `@repo/${packageName}`;
+            await fs.writeJson(packageJsonPath, packageJson, { spaces: 4 });
+        }
+
+        logger.success(`Created shared package @repo/${packageName}`);
+        return true;
+    } catch (error) {
+        logger.error('Failed to create shared package:', { subtitle: String(error) });
+        return false;
+    }
+}
 
 /**
  * Installs selected packages
@@ -25,6 +66,25 @@ export async function installSelectedPackages(
 
         // Add selected packages to package.json
         for (const pkg of selectedPackages) {
+            // Check if package should be installed as shared
+            const installationType = await promptForInstallationType(pkg);
+
+            if (installationType.isShared && pkg.sharedPackageTemplate) {
+                // Create shared package
+                const success = await createSharedPackage(
+                    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+                    installationType.packageName!,
+                    pkg.sharedPackageTemplate,
+                );
+
+                if (success) {
+                    // Add shared package as dependency
+                    packageJson.dependencies[`@repo/${installationType.packageName}`] =
+                        'workspace:*';
+                    continue;
+                }
+            }
+
             const target = pkg.isDev ? packageJson.devDependencies : packageJson.dependencies;
             target[pkg.name] = pkg.version;
 

@@ -31,6 +31,12 @@ export interface PackageConfig {
     readmeSection?: string | ((appName: string) => string);
     /** Environment variables to add */
     envVars?: Record<string, string>;
+    /** Whether this package can be installed as a shared package */
+    canBeShared?: boolean;
+    /** Template directory for shared package if supported */
+    sharedPackageTemplate?: string;
+    /** Default name for the shared package */
+    defaultSharedName?: string;
     /** Post-install commands to run */
     postInstall?: string[];
 }

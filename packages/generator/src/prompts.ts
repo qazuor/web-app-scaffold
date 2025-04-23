@@ -169,6 +169,53 @@ export async function promptForPackages(framework: string): Promise<PackageConfi
 }
 
 /**
+ * Prompts the user to choose installation type for a package
+ * @param pkg Package configuration
+ * @returns Installation configuration
+ */
+export async function promptForInstallationType(pkg: PackageConfig): Promise<{
+    isShared: boolean;
+    packageName?: string;
+}> {
+    if (!pkg.canBeShared) {
+        return { isShared: false };
+    }
+
+    const { installationType } = await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'installationType',
+            message: `How would you like to install ${pkg.displayName}?`,
+            choices: [
+                { name: 'Direct installation in the app', value: 'direct' },
+                { name: 'As a shared package in the monorepo', value: 'shared' },
+            ],
+        },
+    ]);
+
+    if (installationType === 'direct') {
+        return { isShared: false };
+    }
+
+    const { packageName } = await inquirer.prompt([
+        {
+            type: 'input',
+            name: 'packageName',
+            message: 'Package name:',
+            default: pkg.defaultSharedName || 'shared-package',
+            validate: (input: string) => {
+                if (/^[a-z0-9-]+$/.test(input)) {
+                    return true;
+                }
+                return 'Package name must only contain lowercase letters, numbers and hyphens';
+            },
+        },
+    ]);
+
+    return { isShared: true, packageName };
+}
+
+/**
  * Prompts the user whether to install dependencies
  * @param options CLI options
  * @returns true if dependencies should be installed, false otherwise
