@@ -35,59 +35,126 @@ export const drizzlePackage: PackageConfig = {
                 devDependencies: [],
             },
         },
+        scripts: {
+            sqlite: {
+                generate: 'drizzle-kit generate:sqlite',
+                push: 'drizzle-kit push:sqlite',
+            },
+            postgres: {
+                generate: 'drizzle-kit generate:pg',
+                push: 'drizzle-kit push:pg',
+            },
+            mysql: {
+                generate: 'drizzle-kit generate:mysql',
+                push: 'drizzle-kit push:mysql',
+            },
+            singlestore: {
+                generate: 'drizzle-kit generate:mysql',
+                push: 'drizzle-kit push:mysql',
+            },
+        },
     },
     devDependencies: ['drizzle-kit@^0.20.10'],
     configFiles: [
         {
             path: 'src/db/schema.ts',
-            content: `import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+            content: (appName, port, selectedConfig) => {
+                const imports = {
+                    sqlite: "import { integer, sqliteTable as table, text } from 'drizzle-orm/sqlite-core';",
+                    postgres:
+                        "import { integer, pgTable as table, text } from 'drizzle-orm/pg-core';",
+                    mysql: "import { int, mysqlTable as table, varchar } from 'drizzle-orm/mysql-core';",
+                    singlestore:
+                        "import { int, mysqlTable as table, varchar } from 'drizzle-orm/mysql-core';",
+                };
 
-export const users = sqliteTable('users', {
-  id: text('id').primaryKey(),
-  name: text('name').notNull(),
-  email: text('email').notNull().unique(),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().defaultNow(),
+                const config = selectedConfig || 'sqlite';
+                const isMySQL = config === 'mysql' || config === 'singlestore';
+
+                return `${imports[config]}
+
+export const users = table('users', {
+    id: ${isMySQL ? 'varchar("id", { length: 36 })' : 'text("id")'}.primaryKey(),
+    name: ${isMySQL ? 'varchar("name", { length: 255 })' : 'text("name")'}.notNull(),
+    email: ${isMySQL ? 'varchar("email", { length: 255 })' : 'text("email")'}.notNull().unique(),
+    createdAt: ${isMySQL ? 'int("created_at")' : 'integer("created_at", { mode: "timestamp" })'}.notNull().defaultNow(),
 });
 
-export const posts = sqliteTable('posts', {
-  id: text('id').primaryKey(),
-  title: text('title').notNull(),
-  content: text('content').notNull(),
-  authorId: text('author_id').notNull().references(() => users.id),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().defaultNow(),
-});
-`,
+export const posts = table('posts', {
+    id: ${isMySQL ? 'varchar("id", { length: 36 })' : 'text("id")'}.primaryKey(),
+    title: ${isMySQL ? 'varchar("title", { length: 255 })' : 'text("title")'}.notNull(),
+    content: ${isMySQL ? 'varchar("content", { length: 65535 })' : 'text("content")'}.notNull(),
+    authorId: ${isMySQL ? 'varchar("author_id", { length: 36 })' : 'text("author_id")'}.notNull().references(() => users.id),
+    createdAt: ${isMySQL ? 'int("created_at")' : 'integer("created_at", { mode: "timestamp" })'}.notNull().defaultNow(),
+});`;
+            },
         },
         {
             path: 'src/db/index.ts',
-            content: `import { drizzle } from 'drizzle-orm/better-sqlite3';
-import Database from 'better-sqlite3';
+            content: (appName, port, selectedConfig) => {
+                const imports = {
+                    sqlite: `import { drizzle } from 'drizzle-orm/better-sqlite3';\nimport Database from 'better-sqlite3';`,
+                    postgres: `import { drizzle } from 'drizzle-orm/postgres-js';\nimport postgres from 'postgres';`,
+                    mysql: `import { drizzle } from 'drizzle-orm/mysql2';\nimport mysql from 'mysql2/promise';`,
+                    singlestore: `import { drizzle } from 'drizzle-orm/mysql2';\nimport { createClient } from '@singlestore/http-client';`,
+                };
+
+                const config = selectedConfig || 'sqlite';
+                const dbInit = {
+                    sqlite: `const sqlite = new Database('sqlite.db');\nexport const db = drizzle(sqlite, { schema });`,
+                    postgres: `const client = postgres(process.env.DATABASE_URL!);\nexport const db = drizzle(client, { schema });`,
+                    mysql: `const client = await mysql.createConnection(process.env.DATABASE_URL!);\nexport const db = drizzle(client, { schema });`,
+                    singlestore: `const client = createClient(process.env.DATABASE_URL!);\nexport const db = drizzle(client, { schema });`,
+                };
+
+                return `${imports[config]}
 import * as schema from './schema';
 
-// Initialize SQLite database
-const sqlite = new Database('sqlite.db');
-export const db = drizzle(sqlite, { schema });
+// Initialize database client
+${dbInit[config]}
 
 // Export types
 export type User = typeof schema.users.$inferSelect;
 export type NewUser = typeof schema.users.$inferInsert;
 export type Post = typeof schema.posts.$inferSelect;
 export type NewPost = typeof schema.posts.$inferInsert;
-`,
+
+// Export schema
+export * from './schema';`;
+            },
         },
         {
             path: 'drizzle.config.ts',
-            content: `import type { Config } from 'drizzle-kit';
+            content: (appName, port, selectedConfig) => {
+                const config = selectedConfig || 'sqlite';
+                const driverConfig = {
+                    sqlite: {
+                        driver: 'better-sqlite3',
+                        dbCredentials: "{ url: 'sqlite.db' }",
+                    },
+                    postgres: {
+                        driver: 'pg',
+                        dbCredentials: '{ connectionString: process.env.DATABASE_URL }',
+                    },
+                    mysql: {
+                        driver: 'mysql2',
+                        dbCredentials: '{ url: process.env.DATABASE_URL }',
+                    },
+                    singlestore: {
+                        driver: 'mysql2',
+                        dbCredentials: '{ url: process.env.DATABASE_URL }',
+                    },
+                };
+
+                return `import type { Config } from 'drizzle-kit';
 
 export default {
-  schema: './src/db/schema.ts',
-  out: './drizzle',
-  driver: 'better-sqlite3',
-  dbCredentials: {
-    url: 'sqlite.db',
-  },
-} satisfies Config;
-`,
+    schema: './src/db/schema.ts',
+    out: './drizzle',
+    driver: '${driverConfig[config].driver}',
+    dbCredentials: ${driverConfig[config].dbCredentials}
+} satisfies Config;`;
+            },
         },
     ],
     envVars: {

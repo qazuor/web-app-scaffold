@@ -7,14 +7,10 @@
     "scripts": {
         "lint": "biome check .",
         "format": "biome format --write .",
-        "generate": "drizzle-kit generate:sqlite",
-        "push": "drizzle-kit push:sqlite",
         "studio": "drizzle-kit studio"
     },
     "dependencies": {
         "drizzle-orm": "^0.29.3"
     },
-    "devDependencies": {
-        "drizzle-kit": "^0.20.10"
-    }
+    "devDependencies": {}
 }

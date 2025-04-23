@@ -37,6 +37,11 @@ export interface PackageConfig {
     sharedPackageTemplate?: string;
     /** Default name for the shared package */
     defaultSharedName?: string;
+    /** Scripts to add to package.json */
+    scripts?: {
+        /** Scripts for direct installation */
+        direct?: Record<string, string>;
+    };
     /** Additional configuration options for packages */
     configOptions?: {
         type: 'list';
@@ -52,6 +57,7 @@ export interface PackageConfig {
                 devDependencies: string[];
             }
         >;
+        scripts?: Record<string, Record<string, string>>;
     };
     /** Selected configuration option */
     selectedConfig?: string;

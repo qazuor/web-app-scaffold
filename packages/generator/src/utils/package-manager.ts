@@ -60,7 +60,7 @@ async function createSharedPackage(pkg: PackageConfig, packageName: string): Pro
                     },
                 };
 
-                const config = configMap[pkg.selectedConfig];
+                const config = configMap[pkg.selectedConfig as keyof typeof configMap];
                 content = content.replace(/driver:\s*'[^']*'/, `driver: '${config.driver}'`);
                 content = content.replace(
                     /dbCredentials:\s*{[^}]*}/,
@@ -99,6 +99,36 @@ async function createSharedPackage(pkg: PackageConfig, packageName: string): Pro
         if (fs.existsSync(packageJsonPath)) {
             const packageJson = await fs.readJson(packageJsonPath);
             packageJson.name = `@repo/${packageName}`;
+            packageJson.dependencies = packageJson.dependencies || {};
+            packageJson.devDependencies = packageJson.devDependencies || {};
+            packageJson.scripts = packageJson.scripts || {};
+
+            // Add provider-specific dependencies
+            const configDeps = pkg.selectedConfig
+                ? pkg.configOptions?.dependencies[pkg.selectedConfig]
+                : undefined;
+            if (configDeps) {
+                for (const dep of configDeps.dependencies) {
+                    const [name, version] = dep.split(/(?!^)@(.+)/).filter(Boolean);
+                    packageJson.dependencies[name] = version;
+                }
+                for (const dep of configDeps.devDependencies) {
+                    const [name, version] = dep.split(/(?!^)@(.+)/).filter(Boolean);
+                    packageJson.devDependencies[name] = version;
+                }
+            }
+
+            // Update scripts based on selected provider
+            const scripts = pkg.selectedConfig
+                ? (pkg.configOptions?.scripts?.[pkg.selectedConfig] ?? {})
+                : undefined;
+            if (scripts) {
+                Object.assign(packageJson.scripts, {
+                    ...scripts,
+                    studio: 'drizzle-kit studio',
+                });
+            }
+
             await fs.writeJson(packageJsonPath, packageJson, { spaces: 4 });
         }
 
@@ -127,6 +157,7 @@ export async function installSelectedPackages(
         // Initialize dependencies objects if they don't exist
         packageJson.dependencies = packageJson.dependencies || {};
         packageJson.devDependencies = packageJson.devDependencies || {};
+        packageJson.scripts = packageJson.scripts || {};
 
         // Add selected packages to package.json
         for (const pkg of selectedPackages) {
@@ -163,6 +194,21 @@ export async function installSelectedPackages(
                 for (const dep of pkg.devDependencies) {
                     const [name, version] = dep.split(/(?!^)@(.+)/).filter(Boolean);
                     packageJson.devDependencies[name] = version;
+                }
+            }
+
+            // Add scripts for direct installation
+            if (
+                !pkg.installationType?.isShared &&
+                pkg.configOptions?.scripts &&
+                pkg.selectedConfig
+            ) {
+                const scripts = pkg.configOptions.scripts[pkg.selectedConfig];
+                if (scripts) {
+                    Object.assign(packageJson.scripts, {
+                        ...scripts,
+                        studio: 'drizzle-kit studio', // Studio command is the same for all providers
+                    });
                 }
             }
 
@@ -229,6 +275,11 @@ export async function createPackageConfigs(
 ): Promise<void> {
     for (const pkg of selectedPackages) {
         if (!pkg.configFiles || pkg.configFiles.length === 0) {
+            continue;
+        }
+
+        // Skip all config files for shared packages
+        if (pkg.installationType?.isShared) {
             continue;
         }
 
