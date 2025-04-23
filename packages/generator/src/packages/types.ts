@@ -37,6 +37,24 @@ export interface PackageConfig {
     sharedPackageTemplate?: string;
     /** Default name for the shared package */
     defaultSharedName?: string;
+    /** Additional configuration options for packages */
+    configOptions?: {
+        type: 'list';
+        message: string;
+        choices: Array<{
+            name: string;
+            value: string;
+        }>;
+        dependencies: Record<
+            string,
+            {
+                dependencies: string[];
+                devDependencies: string[];
+            }
+        >;
+    };
+    /** Selected configuration option */
+    selectedConfig?: string;
     /** Installation type configuration if package is shared */
     installationType?: {
         isShared: boolean;

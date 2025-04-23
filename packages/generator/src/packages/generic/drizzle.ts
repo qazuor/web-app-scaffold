@@ -8,6 +8,34 @@ export const drizzlePackage: PackageConfig = {
     canBeShared: true,
     sharedPackageTemplate: 'drizzle',
     defaultSharedName: 'db',
+    configOptions: {
+        type: 'list',
+        message: 'Which database provider would you like to use?',
+        choices: [
+            { name: 'SQLite - Lightweight local database', value: 'sqlite' },
+            { name: 'PostgreSQL - Full-featured SQL database', value: 'postgres' },
+            { name: 'MySQL - Popular open-source database', value: 'mysql' },
+            { name: 'SingleStore - Distributed SQL database', value: 'singlestore' },
+        ],
+        dependencies: {
+            sqlite: {
+                dependencies: ['better-sqlite3@^9.2.2'],
+                devDependencies: ['@types/better-sqlite3@^7.6.8'],
+            },
+            postgres: {
+                dependencies: ['postgres@^3.4.3'],
+                devDependencies: [],
+            },
+            mysql: {
+                dependencies: ['mysql2@^3.6.5'],
+                devDependencies: [],
+            },
+            singlestore: {
+                dependencies: ['@singlestore/http-client@^1.0.0'],
+                devDependencies: [],
+            },
+        },
+    },
     devDependencies: ['drizzle-kit@^0.20.10'],
     configFiles: [
         {

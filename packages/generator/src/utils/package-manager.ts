@@ -3,6 +3,7 @@ import path from 'node:path';
 import fs from 'fs-extra';
 import type { PackageJson } from 'type-fest';
 import type { PackageConfig } from '../packages/types.js';
+import { promptForInstallationType } from '../prompts.js';
 import { logger } from './logger.js';
 
 /**
@@ -11,15 +12,19 @@ import { logger } from './logger.js';
  * @param templateName Template to use
  * @returns true if package was created successfully
  */
-async function createSharedPackage(packageName: string, templateName: string): Promise<boolean> {
+async function createSharedPackage(pkg: PackageConfig, packageName: string): Promise<boolean> {
     try {
         const packagesDir = path.join(process.cwd(), 'packages');
         const packageDir = path.join(packagesDir, packageName);
-        const templateDir = path.join(global.templatesDir, 'packages', templateName);
+        const templateDir = path.join(
+            global.templatesDir,
+            'packages',
+            pkg.sharedPackageTemplate || 'default',
+        );
 
         // Check if template exists
         if (!fs.existsSync(templateDir)) {
-            logger.error(`Template ${templateName} not found`);
+            logger.error(`Template ${pkg.sharedPackageTemplate} not found`);
             return false;
         }
 
@@ -28,6 +33,66 @@ async function createSharedPackage(packageName: string, templateName: string): P
 
         // Copy template files
         await fs.copy(templateDir, packageDir);
+
+        // Update drizzle.config.ts based on selected database provider
+        if (pkg.name === 'drizzle-orm' && pkg.selectedConfig) {
+            const drizzleConfigPath = path.join(packageDir, 'drizzle.config.ts');
+            if (await fs.pathExists(drizzleConfigPath)) {
+                let content = await fs.readFile(drizzleConfigPath, 'utf8');
+
+                // Update driver and credentials based on selected provider
+                const configMap = {
+                    sqlite: {
+                        driver: 'better-sqlite3',
+                        credentials: "{ url: 'sqlite.db' }",
+                    },
+                    postgres: {
+                        driver: 'pg',
+                        credentials: '{ connectionString: process.env.DATABASE_URL }',
+                    },
+                    mysql: {
+                        driver: 'mysql2',
+                        credentials: '{ url: process.env.DATABASE_URL }',
+                    },
+                    singlestore: {
+                        driver: 'mysql2',
+                        credentials: '{ url: process.env.DATABASE_URL }',
+                    },
+                };
+
+                const config = configMap[pkg.selectedConfig];
+                content = content.replace(/driver:\s*'[^']*'/, `driver: '${config.driver}'`);
+                content = content.replace(
+                    /dbCredentials:\s*{[^}]*}/,
+                    `dbCredentials: ${config.credentials}`,
+                );
+
+                await fs.writeFile(drizzleConfigPath, content);
+            }
+        }
+
+        // Apply configuration options if any
+        if (pkg.configOptions?.dependencies && pkg.selectedConfig) {
+            const configDeps = pkg.configOptions.dependencies[pkg.selectedConfig];
+            if (configDeps) {
+                const packageJsonPath = path.join(packageDir, 'package.json');
+                const packageJson = await fs.readJson(packageJsonPath);
+
+                // Add configuration-specific dependencies
+                for (const dep of configDeps.dependencies) {
+                    const [name, version] = dep.split(/(?!^)@(.+)/).filter(Boolean);
+                    packageJson.dependencies[name] = version;
+                }
+
+                // Add configuration-specific dev dependencies
+                for (const dep of configDeps.devDependencies) {
+                    const [name, version] = dep.split(/(?!^)@(.+)/).filter(Boolean);
+                    packageJson.devDependencies[name] = version;
+                }
+
+                await fs.writeJson(packageJsonPath, packageJson, { spaces: 4 });
+            }
+        }
 
         // Update package.json
         const packageJsonPath = path.join(packageDir, 'package.json');
@@ -65,23 +130,23 @@ export async function installSelectedPackages(
 
         // Add selected packages to package.json
         for (const pkg of selectedPackages) {
-            // Check if package has installation type info
-            if (pkg.installationType?.isShared && pkg.sharedPackageTemplate) {
+            // Handle shared packages
+            if (pkg.installationType?.isShared && pkg.canBeShared) {
                 // Create shared package
                 const success = await createSharedPackage(
-                    // biome-ignore lint/style/noNonNullAssertion: <explanation>
-                    pkg.installationType.packageName!,
-                    pkg.sharedPackageTemplate,
+                    pkg,
+                    pkg.installationType.packageName || pkg.defaultSharedName || 'shared-package',
                 );
 
                 if (success) {
-                    // Add shared package as dependency
+                    // Add shared package as workspace dependency
                     packageJson.dependencies[`@repo/${pkg.installationType.packageName}`] =
                         'workspace:*';
                     continue;
                 }
             }
 
+            // Handle direct installation
             const target = pkg.isDev ? packageJson.devDependencies : packageJson.dependencies;
             target[pkg.name] = pkg.version;
 
@@ -98,6 +163,23 @@ export async function installSelectedPackages(
                 for (const dep of pkg.devDependencies) {
                     const [name, version] = dep.split(/(?!^)@(.+)/).filter(Boolean);
                     packageJson.devDependencies[name] = version;
+                }
+            }
+
+            // Handle configuration-specific dependencies
+            if (pkg.configOptions?.dependencies && pkg.selectedConfig) {
+                const configDeps = pkg.configOptions.dependencies[pkg.selectedConfig];
+                if (configDeps) {
+                    // Add configuration-specific dependencies
+                    for (const dep of configDeps.dependencies) {
+                        const [name, version] = dep.split(/(?!^)@(.+)/).filter(Boolean);
+                        packageJson.dependencies[name] = version;
+                    }
+                    // Add configuration-specific dev dependencies
+                    for (const dep of configDeps.devDependencies) {
+                        const [name, version] = dep.split(/(?!^)@(.+)/).filter(Boolean);
+                        packageJson.devDependencies[name] = version;
+                    }
                 }
             }
         }

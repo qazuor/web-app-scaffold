@@ -159,7 +159,22 @@ export async function promptForPackages(framework: string): Promise<PackageConfi
         ]);
 
         // Return the full package configs for selected packages
-        return availablePackages.filter((pkg) => selectedPackageNames.includes(pkg.name));
+        const selectedPackages = availablePackages.filter((pkg) =>
+            selectedPackageNames.includes(pkg.name),
+        );
+
+        // Process each selected package for additional configuration
+        for (const pkg of selectedPackages) {
+            // Handle configuration options and shared package installation
+            if (pkg.configOptions) {
+                pkg.selectedConfig = await promptForConfigOption(pkg);
+            }
+            if (pkg.canBeShared) {
+                pkg.installationType = await promptForInstallationType(pkg);
+            }
+        }
+
+        return selectedPackages;
     } catch (error) {
         console.error('Error loading packages:', error);
         throw new Error(
@@ -213,6 +228,23 @@ export async function promptForInstallationType(pkg: PackageConfig): Promise<{
     ]);
 
     return { isShared: true, packageName };
+}
+
+async function promptForConfigOption(pkg: PackageConfig): Promise<string | undefined> {
+    if (!pkg.configOptions) {
+        return undefined;
+    }
+
+    const { option } = await inquirer.prompt([
+        {
+            type: pkg.configOptions.type,
+            name: 'option',
+            message: pkg.configOptions.message,
+            choices: pkg.configOptions.choices,
+        },
+    ]);
+
+    return option;
 }
 
 /**
