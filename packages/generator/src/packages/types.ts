@@ -37,6 +37,11 @@ export interface PackageConfig {
     sharedPackageTemplate?: string;
     /** Default name for the shared package */
     defaultSharedName?: string;
+    /** Installation type configuration if package is shared */
+    installationType?: {
+        isShared: boolean;
+        packageName?: string;
+    };
     /** Post-install commands to run */
     postInstall?: string[];
 }

@@ -3,7 +3,6 @@ import path from 'node:path';
 import fs from 'fs-extra';
 import type { PackageJson } from 'type-fest';
 import type { PackageConfig } from '../packages/types.js';
-import { promptForInstallationType } from '../prompts.js';
 import { logger } from './logger.js';
 
 /**
@@ -66,20 +65,18 @@ export async function installSelectedPackages(
 
         // Add selected packages to package.json
         for (const pkg of selectedPackages) {
-            // Check if package should be installed as shared
-            const installationType = await promptForInstallationType(pkg);
-
-            if (installationType.isShared && pkg.sharedPackageTemplate) {
+            // Check if package has installation type info
+            if (pkg.installationType?.isShared && pkg.sharedPackageTemplate) {
                 // Create shared package
                 const success = await createSharedPackage(
                     // biome-ignore lint/style/noNonNullAssertion: <explanation>
-                    installationType.packageName!,
+                    pkg.installationType.packageName!,
                     pkg.sharedPackageTemplate,
                 );
 
                 if (success) {
                     // Add shared package as dependency
-                    packageJson.dependencies[`@repo/${installationType.packageName}`] =
+                    packageJson.dependencies[`@repo/${pkg.installationType.packageName}`] =
                         'workspace:*';
                     continue;
                 }

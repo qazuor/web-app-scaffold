@@ -8,6 +8,7 @@ import {
     promptForFramework,
     promptForIconLibrary,
     promptForInstall,
+    promptForInstallationType,
     promptForName,
     promptForPackages,
     promptForPort,
@@ -70,18 +71,29 @@ export async function runGenerator(options: GeneratorOptions): Promise<void> {
         const iconLibrary = await promptForIconLibrary(framework);
         const selectedPackages = await promptForPackages(framework);
 
+        // Process shared package options for selected packages
+        const packageConfigs = [];
+        for (const pkg of selectedPackages) {
+            if (pkg.canBeShared) {
+                const installationType = await promptForInstallationType(pkg);
+                packageConfigs.push({ ...pkg, installationType });
+            } else {
+                packageConfigs.push(pkg);
+            }
+        }
+
         // Add UI and icon libraries to selected packages if chosen
         if (uiLibrary) {
-            selectedPackages.push(uiLibrary);
+            packageConfigs.push(uiLibrary);
         }
         if (iconLibrary) {
-            selectedPackages.push(iconLibrary);
+            packageConfigs.push(iconLibrary);
         }
 
         const shouldInstall = await promptForInstall(options);
 
         // Create the app
-        await createApp(appName, framework, description, port, selectedPackages);
+        await createApp(appName, framework, description, port, packageConfigs);
         logger.success(`App "${appName}" successfully created with ${framework}!`);
 
         // Install dependencies if requested
@@ -89,8 +101,8 @@ export async function runGenerator(options: GeneratorOptions): Promise<void> {
             const appDir = path.join(process.cwd(), 'apps', appName);
 
             // if has selected packages to install add it before run pnpm install
-            if (selectedPackages.length > 0) {
-                await installSelectedPackages(appDir, selectedPackages);
+            if (packageConfigs.length > 0) {
+                await installSelectedPackages(appDir, packageConfigs);
             }
 
             const installed = await installDependencies(appDir);
