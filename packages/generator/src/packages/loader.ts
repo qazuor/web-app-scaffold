@@ -1,27 +1,31 @@
-import fs from 'node:fs';
+import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { logger } from '../utils/logger.js';
 import type { PackageConfig } from './types.js';
 
-// Get the current directory
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const packagesDir = path.join(__dirname);
 
-// Determine if we're running from compiled code
-const isCompiledCode = __dirname.includes('dist');
+logger.info(`Packages directory: ${packagesDir}`, { icon: '📦' });
 
-// Determine the base directory for packages
-const packagesBaseDir = isCompiledCode
-    ? path.join(__dirname) // En código compilado, estamos ya en el directorio packages
-    : path.join(__dirname); // En código fuente, estamos ya en el directorio packages
-
-// Determine the generic packages directory
-const genericPackagesDir = path.join(packagesBaseDir, 'packages/generic');
-
-// Log paths for debugging
-console.log('Current directory:', __dirname);
-console.log('Is compiled code:', isCompiledCode);
-console.log('Packages base directory:', packagesBaseDir);
-console.log('Generic packages directory:', genericPackagesDir);
+/**
+ * Validates if a module exports a valid package config
+ */
+function getPackageConfig(module: unknown): PackageConfig | null {
+    if (!module || typeof module !== 'object') {
+        return null;
+    }
+    const moduleKeys = Object.keys(module);
+    const hasName = moduleKeys.includes('name');
+    const hasDisplayName = moduleKeys.includes('displayName');
+    const hasDescription = moduleKeys.includes('description');
+    const hasVersion = moduleKeys.includes('version');
+    if (hasName && hasDisplayName && hasDescription && hasVersion) {
+        return module as PackageConfig;
+    }
+    return null;
+}
 
 /**
  * Dynamically loads framework packages from the filesystem
@@ -31,67 +35,52 @@ export async function loadFrameworkPackages(): Promise<Record<string, PackageCon
     const frameworkPackages: Record<string, PackageConfig[]> = {};
     const frameworkDirs = ['react-vite', 'tanstack-start', 'astro-vite', 'hono'];
 
-    try {
-        // For each known framework directory, try to load its packages
-        for (const dir of frameworkDirs) {
-            try {
-                const frameworkDir = path.join(packagesBaseDir, dir);
+    logger.info('Loading framework packages...', { icon: '📦' });
 
-                // Check if directory exists
-                if (!fs.existsSync(frameworkDir)) {
-                    console.log(`Framework directory not found: ${frameworkDir}`);
-                    continue;
-                }
-
-                console.log(`Loading packages from framework directory: ${frameworkDir}`);
-
-                // Try to import the index file
-                const indexPath = path.join(frameworkDir, 'index.js');
-
-                if (!fs.existsSync(indexPath)) {
-                    console.log(`Index file not found: ${indexPath}`);
-                    continue;
-                }
-
-                // Import the module using a relative path
-                const relativePath = path.relative(__dirname, indexPath).replace(/\\/g, '/');
-                const importPath = relativePath.startsWith('.')
-                    ? relativePath
-                    : `./${relativePath}`;
-
-                console.log(`Importing from: ${importPath}`);
-                const module = await import(importPath);
-
-                // Find the packages array in the module
-                const packagesKey = Object.keys(module).find((key) =>
-                    key.toLowerCase().includes('packages'),
-                );
-
-                if (packagesKey && Array.isArray(module[packagesKey])) {
-                    frameworkPackages[dir] = module[packagesKey];
-                    console.log(`Loaded ${module[packagesKey].length} packages for ${dir}`);
-                } else {
-                    console.log(`No packages found for ${dir}`);
-                }
-            } catch (error) {
-                console.error(`Error loading packages for ${dir}:`, error);
-            }
-        }
-    } catch (error) {
-        console.error('Error loading framework packages:', error);
-    }
-
-    // Fallback to hardcoded packages if none were loaded
-    if (Object.keys(frameworkPackages).length === 0) {
-        console.log('Using fallback hardcoded framework packages');
-
-        // Import the hardcoded packages from utils/packages.ts
+    for (const dir of frameworkDirs) {
         try {
-            const hardcodedPackagesModule = await import('../utils/packages.js');
-            return hardcodedPackagesModule.frameworkPackages || {};
+            const frameworkDir = path.join(packagesDir, `packages/${dir}`);
+
+            try {
+                await fs.access(frameworkDir);
+            } catch {
+                continue;
+            }
+
+            const entries = await fs.readdir(frameworkDir, { withFileTypes: true });
+            const packages: PackageConfig[] = [];
+
+            for (const entry of entries) {
+                if (
+                    !entry.isFile() ||
+                    (!entry.name.endsWith('.ts') && !entry.name.endsWith('.js'))
+                ) {
+                    continue;
+                }
+
+                try {
+                    const filePath = path.join(frameworkDir, entry.name);
+                    const module = await import(filePath);
+
+                    // Look for exports that match our package config pattern
+                    for (const [key, value] of Object.entries(module)) {
+                        if (key.toLowerCase().includes('package') && getPackageConfig(value)) {
+                            packages.push(value as PackageConfig);
+                        }
+                    }
+                } catch (error) {
+                    logger.error(`Error loading package ${entry.name}:`, {
+                        subtitle: String(error),
+                    });
+                }
+            }
+
+            if (packages.length > 0) {
+                frameworkPackages[dir] = packages;
+                logger.success(`Loaded ${packages.length} packages for ${dir}`);
+            }
         } catch (error) {
-            console.error('Failed to load fallback hardcoded packages:', error);
-            return {};
+            logger.error(`Error loading packages for ${dir}:`, { subtitle: String(error) });
         }
     }
 
@@ -104,77 +93,42 @@ export async function loadFrameworkPackages(): Promise<Record<string, PackageCon
  */
 export async function loadGenericPackages(): Promise<PackageConfig[]> {
     const genericPackages: PackageConfig[] = [];
+    const genericDir = path.join(packagesDir, 'packages/generic');
+
+    logger.info('Loading generic packages...', { icon: '📦' });
 
     try {
-        // Check if the generic directory exists
-        if (!fs.existsSync(genericPackagesDir)) {
-            console.log(`Generic packages directory not found: ${genericPackagesDir}`);
+        await fs.access(genericDir);
+        const entries = await fs.readdir(genericDir, { withFileTypes: true });
 
-            // Fallback to hardcoded generic packages
-            console.log('Using fallback hardcoded generic packages');
-
-            try {
-                const hardcodedPackagesModule = await import('../utils/packages.js');
-                return hardcodedPackagesModule.genericPackages || [];
-            } catch (error) {
-                console.error('Failed to load fallback hardcoded packages:', error);
-                return [];
+        for (const entry of entries) {
+            if (!entry.isFile() || (!entry.name.endsWith('.ts') && !entry.name.endsWith('.js'))) {
+                continue;
             }
-        }
 
-        // Get all files in the generic directory
-        const files = fs
-            .readdirSync(genericPackagesDir)
-            .filter((file) => file.endsWith('.js') && file !== 'index.js');
-
-        console.log(`Found generic package files: ${files.join(', ')}`);
-
-        // For each file, dynamically import it and get the package config
-        for (const file of files) {
             try {
-                // Get the base name without extension
-                const baseName = path.basename(file, '.js');
+                const filePath = path.join(genericDir, entry.name);
+                const module = await import(filePath);
 
-                // Import the module using a relative path
-                const filePath = path.join(genericPackagesDir, file);
-                const relativePath = path.relative(__dirname, filePath).replace(/\\/g, '/');
-                const importPath = relativePath.startsWith('.')
-                    ? relativePath
-                    : `./${relativePath}`;
-
-                console.log(`Importing generic package from: ${importPath}`);
-                const module = await import(importPath);
-
-                // Find the package config export
-                const packageKey = Object.keys(module).find((key) =>
-                    key.toLowerCase().includes('package'),
-                );
-
-                if (packageKey && module[packageKey]) {
-                    genericPackages.push(module[packageKey]);
-                    console.log(`Loaded generic package: ${module[packageKey].name}`);
-                } else {
-                    console.log(`No package found in ${file}`);
+                // Look for exports that match our package config pattern
+                for (const [key, value] of Object.entries(module)) {
+                    if (key.toLowerCase().includes('package') && getPackageConfig(value)) {
+                        genericPackages.push(value as PackageConfig);
+                    }
                 }
             } catch (error) {
-                console.error(`Error loading generic package ${file}:`, error);
+                logger.error(`Error loading generic package ${entry.name}:`, {
+                    subtitle: String(error),
+                });
             }
         }
-    } catch (error) {
-        console.error('Error loading generic packages:', error);
-    }
 
-    // Fallback to hardcoded generic packages if none were loaded
-    if (genericPackages.length === 0) {
-        console.log('Using fallback hardcoded generic packages');
-
-        try {
-            const hardcodedPackagesModule = await import('../utils/packages.js');
-            return hardcodedPackagesModule.genericPackages || [];
-        } catch (error) {
-            console.error('Failed to load fallback hardcoded packages:', error);
-            return [];
+        if (genericPackages.length > 0) {
+            logger.success(`Loaded ${genericPackages.length} generic packages`);
         }
+    } catch (error) {
+        logger.error('Error loading generic packages:', { subtitle: String(error) });
+        return [];
     }
 
     return genericPackages;
