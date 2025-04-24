@@ -1,7 +1,7 @@
 import path from 'node:path';
+import { logger } from '@repo/logger';
 import chalk from 'chalk';
 import fs from 'fs-extra';
-import { logger } from './logger.js';
 
 /**
  * Checks if a folder exists and prompts the user to confirm overwriting it

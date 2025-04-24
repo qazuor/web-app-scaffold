@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { logger } from '@repo/logger';
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import inquirer from 'inquirer';
@@ -25,7 +26,6 @@ import {
     updatePackageJson,
     updatePortInConfigs,
 } from './utils/file-operations.js';
-import { logger } from './utils/logger.js';
 import { addSelectedPackages, updateEnvVars } from './utils/package-manager.js';
 import { updateReadme } from './utils/package-manager copy.js';
 import { registerPort } from './utils/port-manager.js';
@@ -96,11 +96,8 @@ export async function runGenerator(options: GeneratorOptions): Promise<void> {
 
         const appDir = path.join(process.cwd(), 'apps', appName);
 
-        // console.log('app', { appDir, appName, framework, description, port });
-
         // if has selected packages to install add it before run pnpm install
         if (selectedPackages.length > 0) {
-            // console.log('Selected packages:', selectedPackages);
             await addSelectedPackages(
                 appDir,
                 appName,
@@ -272,22 +269,22 @@ function showNextSteps(
     selectedPackages: PackageConfig[],
 ): void {
     logger.subtitle('Next steps:', { icon: '👉' });
-    console.log(`  1. Navigate to the app folder: ${chalk.cyan(`cd apps/${appName}`)}`);
+    logger.log(`  1. Navigate to the app folder: ${chalk.cyan(`cd apps/${appName}`)}`);
 
     if (!dependenciesInstalled) {
-        console.log(`  2. Install dependencies: ${chalk.cyan('pnpm install')}`);
-        console.log(`  3. Start dev server: ${chalk.cyan('pnpm dev')}`);
+        logger.log(`  2. Install dependencies: ${chalk.cyan('pnpm install')}`);
+        logger.log(`  3. Start dev server: ${chalk.cyan('pnpm dev')}`);
     } else {
-        console.log(`  2. Start dev server: ${chalk.cyan('pnpm dev')}`);
+        logger.log(`  2. Start dev server: ${chalk.cyan('pnpm dev')}`);
     }
 
-    console.log(
-        `  ${dependenciesInstalled ? 3 : 4}. Visit: ${chalk.cyan(`http://localhost:${port}`)}`,
+    logger.log(
+        `  ${dependenciesInstalled ? 3 : 4}. Visit: ${chalk.cyan(`http://localhost:${port}`)}`
     );
 
     if (framework === 'tanstack-start') {
-        console.log(
-            `  ${dependenciesInstalled ? 4 : 5}. Explore the API at: ${chalk.cyan(`http://localhost:${port}/api/hello`)}`,
+        logger.log(
+            `  ${dependenciesInstalled ? 4 : 5}. Explore the API at: ${chalk.cyan(`http://localhost:${port}/api/hello`)}`
         );
 
         logger.info('TanStack Start Notes:', {
@@ -304,8 +301,8 @@ function showNextSteps(
             icon: '📚',
         });
     } else if (!dependenciesInstalled) {
-        console.log(`  5. Run Biome linter: ${chalk.cyan('pnpm lint')}`);
-        console.log(`  6. Format code with Biome: ${chalk.cyan('pnpm format')}`);
+        logger.log(`  5. Run Biome linter: ${chalk.cyan('pnpm lint')}`);
+        logger.log(`  6. Format code with Biome: ${chalk.cyan('pnpm format')}`);
     }
 
     // Show information about selected packages

@@ -1,10 +1,10 @@
 import path from 'node:path';
+import { logger } from '@repo/logger';
 import fs from 'fs-extra';
 import Handlebars from 'handlebars';
 import type { PackageJson } from 'type-fest';
 import type { PackageConfig } from '../types/package.js';
 import { createDirectory } from './file-operations.js';
-import { logger } from './logger.js';
 
 // Register Handlebars helpers
 Handlebars.registerHelper('eq', (a, b) => a === b);

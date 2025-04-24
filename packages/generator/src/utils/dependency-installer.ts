@@ -1,5 +1,5 @@
 import { execSync } from 'node:child_process';
-import { logger } from './logger.js';
+import { logger } from '@repo/logger';
 
 /**
  * Installs dependencies in the specified directory

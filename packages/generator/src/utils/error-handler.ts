@@ -1,4 +1,4 @@
-import { logger } from './logger';
+import { logger } from '@repo/logger';
 
 /**
  * Custom error class for generator-specific errors

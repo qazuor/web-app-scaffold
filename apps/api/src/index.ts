@@ -1,4 +1,5 @@
 import { serve } from '@hono/node-server';
+import { logger } from '@repo/logger';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 
@@ -6,7 +7,7 @@ const app = new Hono();
 
 // Middleware de logging simple
 app.use('*', async (c, next) => {
-    console.log(`${c.req.method} ${c.req.url}`);
+    logger.log(`${c.req.method} ${c.req.url}`);
     await next();
 });
 
@@ -45,7 +46,7 @@ export default app;
 
 if (process.env.NODE_ENV === 'development') {
     const port = 3001;
-    console.log(`Server is running on http://localhost:${port}`);
+    logger.log(`Server is running on http://localhost:${port}`);
     serve({
         fetch: app.fetch,
         port

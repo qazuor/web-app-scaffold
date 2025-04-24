@@ -1,8 +1,8 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { logger } from '@repo/logger';
 import fs from 'fs-extra';
 import type { PackageConfig } from '../types/package.js';
-import { logger } from './logger.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const packagesDir = path.join(__dirname, 'templates/packages');

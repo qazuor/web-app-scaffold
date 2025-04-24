@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { logger } from '@repo/logger';
 import { program } from 'commander';
 import fs from 'fs-extra';
 import { setupCLI } from './cli.js';
 import { runGenerator } from './generator.js';
 import { printBanner } from './utils/banner.js';
-import { logger } from './utils/logger.js';
 
 // Generator version
 const version = '0.1.0';

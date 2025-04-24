@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { logger } from '@repo/logger';
 import fs from 'fs-extra';
-import { logger } from './logger.js';
 
 // Get the directory where the port tracking file will be stored
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

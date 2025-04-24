@@ -15,6 +15,7 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
+        "@repo/logger": "workspace:*",
         "@hono/node-server": "^1.14.1",
         "hono": "^4.7.7"
     },

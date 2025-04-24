@@ -1,3 +1,4 @@
+import { logger } from '@repo/logger';
 import chalk from 'chalk';
 import figlet from 'figlet';
 
@@ -8,6 +9,6 @@ export function printBanner(bannerTitle: string, bannerSubtitle: string, font = 
         verticalLayout: 'default',
     });
 
-    console.log(chalk.cyan(banner));
-    console.log(chalk.bold.bgCyan(`${bannerSubtitle}\n`));
+    logger.log(chalk.cyan(banner));
+    logger.log(chalk.bold.bgCyan(`${bannerSubtitle}\n`));
 }

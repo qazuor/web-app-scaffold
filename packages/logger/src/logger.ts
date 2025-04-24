@@ -1,8 +1,7 @@
 import chalk from 'chalk';
+import type { LogOptions } from './types';
 
-/**
- * Color palette for different log types
- */
+// Color palette for different log types
 export const colors = {
     info: chalk.hex('#00BFFF'),
     success: chalk.hex('#32CD32'),
@@ -13,12 +12,10 @@ export const colors = {
     step: chalk.hex('#00CED1'),
     file: chalk.hex('#7B68EE'),
     dir: chalk.hex('#9370DB'),
-    path: chalk.cyan,
+    path: chalk.cyan
 };
 
-/**
- * Default icons for different log types
- */
+// Default icons for different log types
 export const defaultIcons = {
     info: 'ℹ️',
     success: '✅',
@@ -28,7 +25,7 @@ export const defaultIcons = {
     subtitle: '📌',
     step: '🔹',
     file: '📄',
-    dir: '📁',
+    dir: '📁'
 };
 
 /**
@@ -43,42 +40,8 @@ export const defaultTitles = {
     file: 'FILE',
     dir: 'DIRECTORY',
     title: 'TITLE',
-    subtitle: 'SUBTITLE',
+    subtitle: 'SUBTITLE'
 };
-
-/**
- * Options for log messages
- */
-interface LogOptions {
-    /**
-     * Optional title to display before the message
-     * If not provided, a default title based on log type will be used
-     */
-    title?: string;
-
-    /**
-     * If true, no title will be displayed
-     * @default false
-     */
-    dontUseTitle?: boolean;
-
-    /**
-     * Optional icon to display before the title/message
-     * If not provided, a default icon based on log type will be used
-     */
-    icon?: string;
-
-    /**
-     * If true, no icon will be displayed
-     * @default false
-     */
-    dontUseIcon?: boolean;
-
-    /**
-     * Optional subtitle to display between title and message
-     */
-    subtitle?: string;
-}
 
 /**
  * Enhanced logger with customizable formatting options
@@ -94,14 +57,14 @@ export const logger = {
     formatLog(
         type: Exclude<keyof typeof colors, 'path'>,
         message: string,
-        options: LogOptions = {},
+        options: LogOptions = {}
     ): string {
         const {
             title = defaultTitles[type] || '',
             dontUseTitle = false,
             icon = defaultIcons[type] || '',
             dontUseIcon = false,
-            subtitle = '',
+            subtitle
         } = options;
 
         const prefix = this.buildPrefix(icon, dontUseIcon, title, dontUseTitle, type);
@@ -116,7 +79,7 @@ export const logger = {
         dontUseIcon: boolean,
         title: string,
         dontUseTitle: boolean,
-        type: Exclude<keyof typeof colors, 'path'>,
+        type: Exclude<keyof typeof colors, 'path'>
     ): string {
         let prefix = '';
         if (!dontUseIcon && icon) {
@@ -131,7 +94,7 @@ export const logger = {
     /**
      * Builds the complete message with prefix and optional subtitle
      */
-    buildMessage(prefix: string, message: string, subtitle: string): string {
+    buildMessage(prefix: string, message: string, subtitle: string | undefined): string {
         if (subtitle) {
             return `${prefix + subtitle}\n${' '.repeat(prefix.length)}${message}`;
         }
@@ -182,7 +145,7 @@ export const logger = {
     title(message: string, options: LogOptions = {}): void {
         const formattedTitle = this.formatLog('title', message.toUpperCase(), {
             ...options,
-            dontUseTitle: true,
+            dontUseTitle: true
         });
         console.log(`\n${formattedTitle}`);
         console.log(colors.title('─'.repeat(message.length + 2)));
@@ -197,8 +160,8 @@ export const logger = {
         console.log(
             this.formatLog('subtitle', message, {
                 ...options,
-                dontUseTitle: true,
-            }),
+                dontUseTitle: true
+            })
         );
     },
 
@@ -230,4 +193,17 @@ export const logger = {
     directory(message: string, dirPath: string, options: LogOptions = {}): void {
         console.log(this.formatLog('dir', `${message} ${colors.path(dirPath)}`, options));
     },
+
+    /**
+     * Log a plain console log
+     * @param message Operation description
+     * @param title Label for Log message
+     */
+    log(message: string, title?: string): void {
+        if (title) {
+            console.log(`${title} ==> ${message}`);
+        } else {
+            console.log(message);
+        }
+    }
 };
