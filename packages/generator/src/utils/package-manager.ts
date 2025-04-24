@@ -567,15 +567,15 @@ export async function updateReadme(
 
     logger.info('Updating README.md with package documentation', { icon: '📝' });
 
-    const content = await fs.readFile(readmePath, 'utf8');
+    let content = await fs.readFile(readmePath, 'utf8');
     const section = generatePackagesSection(selectedPackages, appName);
 
-    await replaceReadmeSection(content, section);
-    await fs.writeFile(readmePath, content);
+    content = await replaceReadmeSection(content, section);
+    await fs.writeFile(readmePath, content, 'utf8');
 }
 
 /**
- * Replaces or appends the \"Installed Packages\" section in the README content.
+ * Replaces or appends the "Installed Packages" section in the README content.
  * Ensures the section is updated if it exists, or appended if missing.
  *
  * @param content - The original README markdown content.

@@ -20,7 +20,7 @@ export class ProgressTracker {
         const prefix = `[${this.currentStep}/${this.steps.length}]`;
         logger.step(this.steps[this.currentStep - 1], {
             subtitle: details,
-            title: prefix,
+            title: prefix
         });
     }
 
@@ -42,6 +42,6 @@ export function createAppGenerationTracker(): ProgressTracker {
         'Create application structure',
         'Install dependencies',
         'Configure packages',
-        'Finalize setup',
+        'Finalize setup'
     ]);
 }

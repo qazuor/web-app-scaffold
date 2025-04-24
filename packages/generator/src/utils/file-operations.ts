@@ -157,8 +157,8 @@ export async function processFile(
             });
         }
 
-        await fs.writeFile(filePath, content);
-    } catch (_error) {
+        await fs.writeFile(filePath, content, 'utf8');
+    } catch (error) {
         logger.warn(`Could not process file: ${chalk.cyan(relativeFilePath)}`, {
             subtitle: 'This file will be copied as-is without processing'
         });
@@ -211,7 +211,7 @@ export async function updateBiomeConfig(appDir: string): Promise<void> {
                 await fs.writeJson(biomeConfigPath, biomeConfig, { spaces: 2 });
                 logger.success('Biome configuration updated successfully');
             }
-        } catch (_error) {
+        } catch (error) {
             logger.warn('Failed to update Biome configuration', {
                 subtitle: 'You may need to manually update the extends path in biome.json'
             });
@@ -250,7 +250,7 @@ export async function updatePortInConfigs(
         }
 
         logger.success(`Port configuration updated to ${port}`);
-    } catch (_error) {
+    } catch (error) {
         logger.warn('Failed to update port in configuration files', {
             subtitle: 'You may need to manually update the port in the configuration files'
         });
