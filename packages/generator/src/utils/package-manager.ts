@@ -469,25 +469,30 @@ export async function updateEnvVars(
 
     logger.info('Adding environment variables for selected packages', { icon: '🔑' });
 
-    if (await fs.pathExists(envPath)) {
-        let content = await fs.readFile(envPath, 'utf8');
-        for (const [key, value] of Object.entries(envVars)) {
-            if (!content.includes(`${key}=`)) {
-                content += `\n# Added for ${key.split('_')[0].toLowerCase()} integration\n${key}=${value}\n`;
-            }
+    await updateEnvFile(envPath, envVars);
+    await updateEnvFile(envExamplePath, envVars);
+}
+
+/**
+ * Updates a .env-style file by appending environment variables if they don't already exist.
+ * Adds comments to clarify which integration each variable is for.
+ *
+ * @param envFilePath - The absolute path to the environment file (e.g., `.env` or `.env.example`).
+ * @param envVars - A record of environment variables to insert (key-value pairs).
+ * @returns A Promise that resolves once the file is updated.
+ */
+async function updateEnvFile(envFilePath: string, envVars: Record<string, string>) {
+    if (!(await fs.pathExists(envFilePath))) return;
+
+    let content = await fs.readFile(envFilePath, 'utf8');
+
+    for (const [key, value] of Object.entries(envVars)) {
+        if (!content.includes(`${key}=`)) {
+            content += `\n# Added for ${key.split('_')[0].toLowerCase()} integration\n${key}=${value}\n`;
         }
-        await fs.writeFile(envPath, content);
     }
 
-    if (await fs.pathExists(envExamplePath)) {
-        let content = await fs.readFile(envExamplePath, 'utf8');
-        for (const [key, value] of Object.entries(envVars)) {
-            if (!content.includes(`${key}=`)) {
-                content += `\n# Added for ${key.split('_')[0].toLowerCase()} integration\n${key}=${value}\n`;
-            }
-        }
-        await fs.writeFile(envExamplePath, content);
-    }
+    await fs.writeFile(envFilePath, content);
 }
 
 /**
@@ -510,17 +515,26 @@ export async function updateReadme(
 
     logger.info('Updating README.md with package documentation', { icon: '📝' });
 
-    let content = await fs.readFile(readmePath, 'utf8');
+    const content = await fs.readFile(readmePath, 'utf8');
     const section = generatePackagesSection(selectedPackages, appName);
 
-    if (content.includes('## Installed Packages')) {
-        const regex = /## Installed Packages[\s\S]*?(?=##|$)/;
-        content = content.replace(regex, section);
-    } else {
-        content += section;
-    }
-
+    await replaceReadmeSection(content, section);
     await fs.writeFile(readmePath, content);
+}
+
+/**
+ * Replaces or appends the \"Installed Packages\" section in the README content.
+ * Ensures the section is updated if it exists, or appended if missing.
+ *
+ * @param content - The original README markdown content.
+ * @param newSection - The new markdown section to insert.
+ * @returns The modified README content with the section updated or appended.
+ */
+function replaceReadmeSection(content: string, newSection: string): string {
+    const regex = /## Installed Packages[\s\S]*?(?=##|$)/;
+    return content.includes('## Installed Packages')
+        ? content.replace(regex, newSection)
+        : content + newSection;
 }
 
 /**
