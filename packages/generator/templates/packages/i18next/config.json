@@ -5,7 +5,7 @@
     "description": "Internationalization framework",
     "version": "^23.7.16",
     "dependencies": ["react-i18next@^14.0.0"],
-    "frameworks": ["react-vite", "tanstack-start"],
+    "frameworks": ["react-vite", "tanstack-start", "hono"],
     "isUILibrary": false,
     "isIconLibrary": false,
     "canBeSharedPackage": true,
