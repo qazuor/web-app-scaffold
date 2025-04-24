@@ -76,7 +76,7 @@ async function loadPackageFiles(
                     try {
                         const content = await fs.readFile(absPath, 'utf-8');
                         extraFilesContent[relPath] = content;
-                    } catch (err) {
+                    } catch (_error) {
                         logger.warn(`Failed to read extra file: ${relPath}`);
                     }
                 }
