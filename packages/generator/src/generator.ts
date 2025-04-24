@@ -14,6 +14,7 @@ import {
 } from './prompts.js';
 import type { PackageConfig } from './types/package.js';
 import { installDependencies } from './utils/dependency-installer.js';
+import { withErrorHandling } from './utils/error-handler.js';
 import {
     copyDirectory,
     copySharedConfig,
@@ -51,17 +52,27 @@ interface GeneratorOptions {
  * @param options CLI options
  */
 export async function runGenerator(options: GeneratorOptions): Promise<void> {
-    // Show title
-    logger.title('Qazuor App Generator for Turborepo', { icon: '🚀' });
+    await withErrorHandling(async () => {
+        logger.title('Qazuor App Generator for Turborepo', {
+            icon: '🚀',
+            subtitle: 'Creating a new application in your Turborepo monorepo',
+        });
 
-    try {
         // Prompt the user for required information
+        logger.step('Configuring application settings...', {
+            icon: '⚙️',
+            subtitle: 'Framework, name, description, and port',
+        });
         const framework = await promptForFramework(options);
         const appName = await promptForName({ name: options.name }, framework);
         const description = await promptForDescription(options, framework, appName);
         const port = await promptForPort({ port: options.port });
 
         // Load packages - if this fails, it will throw an error
+        logger.step('Selecting additional packages...', {
+            icon: '📦',
+            subtitle: 'UI library, icon library, and other packages',
+        });
         const uiLibrary = await promptForUILibrary(framework);
         const iconLibrary = await promptForIconLibrary(framework);
         const selectedPackages = await promptForPackages(framework);
@@ -77,6 +88,10 @@ export async function runGenerator(options: GeneratorOptions): Promise<void> {
         const shouldInstall = await promptForInstall(options);
 
         // Create the app
+        logger.step(`Creating ${framework} application: ${appName}`, {
+            icon: '🏗️',
+            subtitle: `Port: ${port}\nDescription: ${description}`,
+        });
         await createApp(appName, framework, description, port, selectedPackages);
 
         const appDir = path.join(process.cwd(), 'apps', appName);
@@ -110,11 +125,7 @@ export async function runGenerator(options: GeneratorOptions): Promise<void> {
         } else {
             showNextSteps(appName, framework, false, port, selectedPackages);
         }
-    } catch (error) {
-        logger.error('Failed to create the app:', { subtitle: String(error) });
-        console.error(error);
-        process.exit(1);
-    }
+    }, 'app generation');
 }
 
 /**
