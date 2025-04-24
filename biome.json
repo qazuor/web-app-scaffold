@@ -37,7 +37,15 @@
         "rules": {
             "recommended": true,
             "correctness": {
+                "noUnusedVariables": "error",
                 "noUnusedImports": "error"
+            },
+            "suspicious": {
+                "noConsoleLog": "warn"
+            },
+            "style": {
+                "useConst": "error",
+                "useTemplate": "error"
             },
             "nursery": {
                 "useSortedClasses": {
@@ -50,7 +58,21 @@
     },
     "javascript": {
         "formatter": {
+            "trailingCommas": "none",
+            "semicolons": "always",
             "quoteStyle": "single"
         }
-    }
+    },
+    "overrides": [
+        {
+            "include": ["tests/**", "__tests__/**"],
+            "linter": {
+                "rules": {
+                    "suspicious": {
+                        "noExplicitAny": "off"
+                    }
+                }
+            }
+        }
+    ]
 }

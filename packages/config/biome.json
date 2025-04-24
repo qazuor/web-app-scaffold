@@ -37,7 +37,8 @@
         "rules": {
             "recommended": true,
             "correctness": {
-                "noUnusedVariables": "error"
+                "noUnusedVariables": "error",
+                "noUnusedImports": "error"
             },
             "suspicious": {
                 "noConsoleLog": "warn"
@@ -45,14 +46,33 @@
             "style": {
                 "useConst": "error",
                 "useTemplate": "error"
+            },
+            "nursery": {
+                "useSortedClasses": {
+                    "level": "error",
+                    "fix": "safe",
+                    "options": {}
+                }
             }
         }
     },
     "javascript": {
         "formatter": {
-            "quoteStyle": "single",
             "trailingCommas": "none",
-            "semicolons": "always"
+            "semicolons": "always",
+            "quoteStyle": "single"
         }
-    }
+    },
+    "overrides": [
+        {
+            "include": ["tests/**", "__tests__/**"],
+            "linter": {
+                "rules": {
+                    "suspicious": {
+                        "noExplicitAny": "off"
+                    }
+                }
+            }
+        }
+    ]
 }

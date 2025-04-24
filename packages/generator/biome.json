@@ -1,0 +1,29 @@
+{
+    "$schema": "https://biomejs.dev/schemas/1.4.1/schema.json",
+    "extends": ["../../packages/config/biome.json"],
+    "files": {
+        "include": ["src/**/*.{ts,tsx,js,jsx,astro}"]
+    },
+    "overrides": [
+        {
+            "include": ["tests/**", "__tests__/**"],
+            "linter": {
+                "rules": {
+                    "suspicious": {
+                        "noExplicitAny": "off"
+                    }
+                }
+            }
+        },
+        {
+            "include": ["packages/generator/templates/**"],
+            "linter": {
+                "rules": {
+                    "correctness": {
+                        "noUnusedImports": "off"
+                    }
+                }
+            }
+        }
+    ]
+}
