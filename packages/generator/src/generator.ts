@@ -3,6 +3,8 @@ import { logger } from '@repo/logger';
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import inquirer from 'inquirer';
+import type { KeyDescriptor } from 'inquirer-press-to-continue';
+import PressToContinuePrompt from 'inquirer-press-to-continue';
 import {
     promptForDescription,
     promptForFramework,
@@ -29,6 +31,8 @@ import {
 import { addSelectedPackages, updateEnvVars } from './utils/package-manager.js';
 import { updateReadme } from './utils/package-manager copy.js';
 import { registerPort } from './utils/port-manager.js';
+
+inquirer.registerPrompt('press-to-continue', PressToContinuePrompt);
 
 // Declare global variable for templates directory
 declare global {
@@ -86,6 +90,13 @@ export async function runGenerator(options: GeneratorOptions): Promise<void> {
         }
 
         const shouldInstall = await promptForInstall(options);
+
+        await inquirer.prompt<{ key: KeyDescriptor }>({
+            name: 'key',
+            type: 'press-to-continue',
+            pressToContinueMessage: 'We are ready to install. Press Enter to continue...',
+            enter: true
+        });
 
         // Create the app
         logger.step(`Creating ${framework} application: ${appName}`, {
