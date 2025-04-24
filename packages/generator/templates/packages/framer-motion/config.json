@@ -1,0 +1,11 @@
+{
+    "$schema": "../../../src/schemas/package.schema.json",
+    "name": "framer-motion",
+    "displayName": "Framer Motion",
+    "description": "Production-ready animation library for React",
+    "version": "^10.16.16",
+    "frameworks": ["react-vite", "tanstack-start", "astro-vite"],
+    "isUILibrary": false,
+    "isIconLibrary": false,
+    "canBeSharedPackage": false
+}

@@ -1,0 +1,11 @@
+{
+    "$schema": "../../../src/schemas/package.schema.json",
+    "name": "@astrojs/router",
+    "displayName": "Astro Router",
+    "description": "Client-side routing for Astro",
+    "version": "^0.3.0",
+    "frameworks": ["astro-vite"],
+    "isUILibrary": false,
+    "isIconLibrary": false,
+    "canBeSharedPackage": false
+}

@@ -1,0 +1,11 @@
+{
+    "$schema": "../../../src/schemas/package.schema.json",
+    "name": "iconoir-react",
+    "displayName": "Iconoir",
+    "description": "The biggest open source icon library",
+    "version": "^7.3.0",
+    "frameworks": ["react-vite", "tanstack-start"],
+    "isUILibrary": false,
+    "isIconLibrary": true,
+    "canBeSharedPackage": false
+}

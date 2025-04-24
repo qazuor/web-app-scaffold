@@ -2,7 +2,7 @@ import { execa } from 'execa';
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-    entry: ['src/index.ts', 'src/packages/*/*.ts'],
+    entry: ['src/index.ts'],
     format: ['esm'],
     splitting: false,
     dts: false,
@@ -12,7 +12,7 @@ export default defineConfig({
     outDir: 'dist',
     async onSuccess() {
         // Copy only templates
-        await execa('cp', ['-r', 'templates', 'dist/']);
+        await execa('cp', ['-r', 'templates', 'dist']);
     },
     esbuildOptions(options) {
         options.bundle = true;

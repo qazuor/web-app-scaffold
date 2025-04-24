@@ -1,0 +1,13 @@
+{
+    "$schema": "../../../src/schemas/package.schema.json",
+    "name": "tailwindcss",
+    "displayName": "TailwindCSS",
+    "description": "Utility-first CSS framework",
+    "version": "^3.4.0",
+    "isDev": true,
+    "devDependencies": ["postcss@^8.4.32", "autoprefixer@^10.4.16"],
+    "frameworks": ["react-vite", "tanstack-start", "astro-vite"],
+    "isUILibrary": false,
+    "isIconLibrary": false,
+    "canBeSharedPackage": false
+}

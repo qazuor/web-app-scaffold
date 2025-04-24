@@ -1,0 +1,12 @@
+{
+    "$schema": "../../../src/schemas/package.schema.json",
+    "name": "zod",
+    "displayName": "Zod",
+    "description": "TypeScript-first schema validation with static type inference",
+    "version": "^3.22.4",
+    "frameworks": [],
+    "isUILibrary": false,
+    "isIconLibrary": false,
+    "canBeSharedPackage": true,
+    "sharedPackageDefaultName": "schema"
+}

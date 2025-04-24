@@ -1,9 +1,7 @@
-import { execSync } from 'node:child_process';
 import path from 'node:path';
 import fs from 'fs-extra';
 import type { PackageJson } from 'type-fest';
-import type { PackageConfig } from '../packages/types.js';
-import { promptForInstallationType } from '../prompts.js';
+import type { PackageConfig } from '../types/package.js';
 import { logger } from './logger.js';
 
 /**
@@ -141,12 +139,12 @@ async function createSharedPackage(pkg: PackageConfig, packageName: string): Pro
 }
 
 /**
- * Installs selected packages
+ * Add selected packages
  * @param appDir Application directory
  * @param selectedPackages Selected packages
  * @returns true if installation was successful, false otherwise
  */
-export async function installSelectedPackages(
+export async function addSelectedPackages(
     appDir: string,
     selectedPackages: PackageConfig[],
 ): Promise<boolean> {
@@ -160,94 +158,77 @@ export async function installSelectedPackages(
         packageJson.scripts = packageJson.scripts || {};
 
         // Add selected packages to package.json
+
+        console.log('packageJson', packageJson);
         for (const pkg of selectedPackages) {
+            console.log('pkg', pkg);
             // Handle shared packages
-            if (pkg.installationType?.isShared && pkg.canBeShared) {
-                // Create shared package
-                const success = await createSharedPackage(
-                    pkg,
-                    pkg.installationType.packageName || pkg.defaultSharedName || 'shared-package',
-                );
-
-                if (success) {
-                    // Add shared package as workspace dependency
-                    packageJson.dependencies[`@repo/${pkg.installationType.packageName}`] =
-                        'workspace:*';
-                    continue;
-                }
-            }
-
+            // if (pkg.installationType?.isShared && pkg.canBeSharedPackage) {
+            //     // Create shared package
+            //     const success = await createSharedPackage(
+            //         pkg,
+            //         pkg.installationType.packageName || pkg.defaultSharedName || 'shared-package',
+            //     );
+            //     if (success) {
+            //         // Add shared package as workspace dependency
+            //         packageJson.dependencies[`@repo/${pkg.installationType.packageName}`] =
+            //             'workspace:*';
+            //         continue;
+            //     }
+            // }
             // Handle direct installation
             const target = pkg.isDev ? packageJson.devDependencies : packageJson.dependencies;
             target[pkg.name] = pkg.version;
-
             // Add additional dependencies
             if (pkg.dependencies) {
                 for (const dep of pkg.dependencies) {
                     const [name, version] = dep.split(/(?!^)@(.+)/).filter(Boolean);
                     packageJson.dependencies[name] = version;
+                    logger.info(`Adding dependencies: ${dep}`, { icon: '📦' });
                 }
             }
-
             // Add additional dev dependencies
             if (pkg.devDependencies) {
                 for (const dep of pkg.devDependencies) {
                     const [name, version] = dep.split(/(?!^)@(.+)/).filter(Boolean);
                     packageJson.devDependencies[name] = version;
+                    logger.info(`Adding dev dependencies: ${dep}`, { icon: '🔧' });
                 }
             }
-
             // Add scripts for direct installation
-            if (
-                !pkg.installationType?.isShared &&
-                pkg.configOptions?.scripts &&
-                pkg.selectedConfig
-            ) {
-                const scripts = pkg.configOptions.scripts[pkg.selectedConfig];
-                if (scripts) {
-                    Object.assign(packageJson.scripts, {
-                        ...scripts,
-                        studio: 'drizzle-kit studio', // Studio command is the same for all providers
-                    });
-                }
-            }
-
-            // Handle configuration-specific dependencies
-            if (pkg.configOptions?.dependencies && pkg.selectedConfig) {
-                const configDeps = pkg.configOptions.dependencies[pkg.selectedConfig];
-                if (configDeps) {
-                    // Add configuration-specific dependencies
-                    for (const dep of configDeps.dependencies) {
-                        const [name, version] = dep.split(/(?!^)@(.+)/).filter(Boolean);
-                        packageJson.dependencies[name] = version;
-                    }
-                    // Add configuration-specific dev dependencies
-                    for (const dep of configDeps.devDependencies) {
-                        const [name, version] = dep.split(/(?!^)@(.+)/).filter(Boolean);
-                        packageJson.devDependencies[name] = version;
-                    }
-                }
-            }
+            // if (
+            //     !pkg.installationType?.isShared &&
+            //     pkg.configOptions?.scripts &&
+            //     pkg.selectedConfig
+            // ) {
+            //     const scripts = pkg.configOptions.scripts[pkg.selectedConfig];
+            //     if (scripts) {
+            //         Object.assign(packageJson.scripts, {
+            //             ...scripts,
+            //             studio: 'drizzle-kit studio', // Studio command is the same for all providers
+            //         });
+            //     }
+            // }
+            // // Handle configuration-specific dependencies
+            // if (pkg.configOptions?.dependencies && pkg.selectedConfig) {
+            //     const configDeps = pkg.configOptions.dependencies[pkg.selectedConfig];
+            //     if (configDeps) {
+            //         // Add configuration-specific dependencies
+            //         for (const dep of configDeps.dependencies) {
+            //             const [name, version] = dep.split(/(?!^)@(.+)/).filter(Boolean);
+            //             packageJson.dependencies[name] = version;
+            //         }
+            //         // Add configuration-specific dev dependencies
+            //         for (const dep of configDeps.devDependencies) {
+            //             const [name, version] = dep.split(/(?!^)@(.+)/).filter(Boolean);
+            //             packageJson.devDependencies[name] = version;
+            //         }
+            //     }
+            // }
         }
 
         // Write updated package.json
         await fs.writeJson(packageJsonPath, packageJson, { spaces: 4 });
-
-        // Log the packages being installed
-        const regularDeps = Object.entries(packageJson.dependencies || {}).map(
-            ([name, version]) => `${name}@${version}`,
-        );
-        const devDeps = Object.entries(packageJson.devDependencies || {}).map(
-            ([name, version]) => `${name}@${version}`,
-        );
-
-        if (regularDeps.length > 0) {
-            logger.info(`Adding dependencies: ${regularDeps.join(', ')}`, { icon: '📦' });
-        }
-
-        if (devDeps.length > 0) {
-            logger.info(`Adding dev dependencies: ${devDeps.join(', ')}`, { icon: '🔧' });
-        }
 
         logger.success('All packages added successfully to package.json.');
         return true;

@@ -1,0 +1,11 @@
+{
+    "$schema": "../../../src/schemas/package.schema.json",
+    "name": "react-feather",
+    "displayName": "Feather",
+    "description": "Simply beautiful icons",
+    "version": "^2.0.10",
+    "frameworks": ["react-vite", "tanstack-start"],
+    "isUILibrary": false,
+    "isIconLibrary": true,
+    "canBeSharedPackage": false
+}

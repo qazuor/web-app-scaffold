@@ -1,0 +1,11 @@
+{
+    "$schema": "../../../src/schemas/package.schema.json",
+    "name": "@astrojs/react",
+    "displayName": "Astro React Integration",
+    "description": "Use React components in Astro",
+    "version": "^3.0.10",
+    "frameworks": ["astro-vite"],
+    "isUILibrary": false,
+    "isIconLibrary": false,
+    "canBeSharedPackage": false
+}

@@ -1,0 +1,13 @@
+{
+    "$schema": "../../../src/schemas/package.schema.json",
+    "name": "i18next",
+    "displayName": "i18next",
+    "description": "Internationalization framework",
+    "version": "^23.7.16",
+    "dependencies": ["react-i18next@^14.0.0"],
+    "frameworks": ["react-vite", "tanstack-start"],
+    "isUILibrary": false,
+    "isIconLibrary": false,
+    "canBeSharedPackage": true,
+    "sharedPackageDefaultName": "i18n"
+}

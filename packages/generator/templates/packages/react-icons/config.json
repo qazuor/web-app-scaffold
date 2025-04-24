@@ -1,0 +1,11 @@
+{
+    "$schema": "../../../src/schemas/package.schema.json",
+    "name": "react-icons",
+    "displayName": "React Icons",
+    "description": "Popular icons in one package",
+    "version": "^4.12.0",
+    "frameworks": ["react-vite", "tanstack-start"],
+    "isUILibrary": false,
+    "isIconLibrary": true,
+    "canBeSharedPackage": false
+}

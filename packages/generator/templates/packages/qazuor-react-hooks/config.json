@@ -1,0 +1,11 @@
+{
+    "$schema": "../../../src/schemas/package.schema.json",
+    "name": "@qazuor/react-hooks",
+    "displayName": "Qazuor React Hooks",
+    "description": "Collection of useful React hooks",
+    "version": "^1.0.0",
+    "frameworks": ["react-vite", "tanstack-start", "astro-vite"],
+    "isUILibrary": false,
+    "isIconLibrary": false,
+    "canBeSharedPackage": false
+}

@@ -1,0 +1,146 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Package Configuration Schema",
+    "description": "Schema for validating package configurations in the generator",
+    "type": "object",
+    "required": ["name", "displayName", "description", "version"],
+    "additionalProperties": false,
+    "properties": {
+        "$schema": {
+            "description": "A field for the [JSON schema](https://json-schema.org/) specification"
+        },
+        "name": {
+            "type": "string",
+            "description": "Package name as it appears in package.json",
+            "pattern": "^(@[a-z0-9-]+/)?[a-z0-9-:]+$"
+        },
+        "displayName": {
+            "type": "string",
+            "description": "Display name for the package in the selection prompt"
+        },
+        "description": {
+            "type": "string",
+            "description": "Short description of the package"
+        },
+        "version": {
+            "type": "string",
+            "description": "Version of the package to install",
+            "pattern": "^(\\^|~)?\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9.]+)?$|^latest$|^built-in$"
+        },
+        "isDev": {
+            "type": "boolean",
+            "description": "Whether this is a dev dependency",
+            "default": false
+        },
+        "dependencies": {
+            "type": "array",
+            "description": "Additional dependencies that should be installed with this package",
+            "items": {
+                "type": "string",
+                "pattern": "^(@[a-z0-9-]+/)?[a-z0-9-]+@\\^?\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9.]+)?$"
+            }
+        },
+        "devDependencies": {
+            "type": "array",
+            "description": "Additional dev dependencies that should be installed with this package",
+            "items": {
+                "type": "string",
+                "pattern": "^(@[a-z0-9-]+/)?[a-z0-9-]+@\\^?\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9.]+)?$"
+            }
+        },
+        "frameworks": {
+            "type": "array",
+            "description": "Frameworks this package is compatible with (empty means all)",
+            "items": {
+                "type": "string",
+                "enum": ["react-vite", "tanstack-start", "astro-vite", "hono"]
+            }
+        },
+        "isUILibrary": {
+            "type": "boolean",
+            "description": "Whether this package is a UI library",
+            "default": false
+        },
+        "isIconLibrary": {
+            "type": "boolean",
+            "description": "Whether this package is an icon library",
+            "default": false
+        },
+        "canBeSharedPackage": {
+            "type": "boolean",
+            "description": "Whether this package can be installed as a shared package",
+            "default": false
+        },
+        "sharedPackageTemplate": {
+            "type": "string",
+            "description": "Template directory for shared package if supported"
+        },
+        "sharedPackageDefaultName": {
+            "type": "string",
+            "description": "Default name for the shared package",
+            "pattern": "^[a-z0-9-]+$"
+        },
+        "configOptions": {
+            "type": "object",
+            "description": "Configuration options for packages",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": ["list"]
+                },
+                "message": {
+                    "type": "string"
+                },
+                "choices": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": ["name", "value"],
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "value": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "dependencies": {
+                    "type": "object",
+                    "patternProperties": {
+                        "^[a-z-]+$": {
+                            "type": "object",
+                            "properties": {
+                                "dependencies": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "devDependencies": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "scripts": {
+                    "type": "object",
+                    "patternProperties": {
+                        "^[a-z-]+$": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "required": ["type", "message", "choices"]
+        }
+    }
+}

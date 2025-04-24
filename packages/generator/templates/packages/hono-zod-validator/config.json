@@ -1,0 +1,12 @@
+{
+    "$schema": "../../../src/schemas/package.schema.json",
+    "name": "@hono/zod-validator",
+    "displayName": "Hono Zod Validator",
+    "description": "Zod validator middleware for Hono",
+    "version": "^0.1.11",
+    "frameworks": ["hono"],
+    "isUILibrary": false,
+    "isIconLibrary": false,
+    "canBeSharedPackage": false,
+    "dependencies": ["zod@^3.22.4"]
+}

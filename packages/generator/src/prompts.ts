@@ -1,13 +1,11 @@
 import inquirer from 'inquirer';
-import { iconLibraries } from './packages/icon-libraries/index.js';
-import { type PackageConfig, getPackagesForFramework } from './packages/index.js';
-import type { IconLibraryConfig } from './packages/types.js';
-import { uiLibraries } from './packages/ui-libraries/index.js';
+import type { PackageConfig } from './types/package.js';
 import {
     availableFrameworks,
     getDefaultDescriptionForFramework,
     getDefaultNameForFramework,
 } from './utils/defaults.js';
+import { loadPackageConfigs } from './utils/package-loader.js';
 import { getNextAvailablePort, isPortInUse } from './utils/port-manager.js';
 
 /**
@@ -139,7 +137,11 @@ export async function promptForPort(options: { port?: number }): Promise<number>
  */
 export async function promptForPackages(framework: string): Promise<PackageConfig[]> {
     try {
-        const availablePackages = await getPackagesForFramework(framework);
+        const allPackages = await loadPackageConfigs();
+        const availablePackages = allPackages
+            .filter((pkg) => !pkg.frameworks || pkg.frameworks.includes(framework))
+            .filter((pkg) => !pkg.isUILibrary)
+            .filter((pkg) => !pkg.isIconLibrary);
 
         if (availablePackages.length === 0) {
             return [];
@@ -169,7 +171,7 @@ export async function promptForPackages(framework: string): Promise<PackageConfi
             if (pkg.configOptions) {
                 pkg.selectedConfig = await promptForConfigOption(pkg);
             }
-            if (pkg.canBeShared) {
+            if (pkg.canBeSharedPackage) {
                 pkg.installationType = await promptForInstallationType(pkg);
             }
         }
@@ -192,7 +194,7 @@ export async function promptForInstallationType(pkg: PackageConfig): Promise<{
     isShared: boolean;
     packageName?: string;
 }> {
-    if (!pkg.canBeShared) {
+    if (!pkg.canBeSharedPackage) {
         return { isShared: false };
     }
 
@@ -279,6 +281,9 @@ export async function promptForUILibrary(framework: string): Promise<PackageConf
         return null;
     }
 
+    const allPackages = await loadPackageConfigs();
+    const uiLibraries = allPackages.filter((pkg) => pkg.isUILibrary);
+
     const { uiLibrary } = await inquirer.prompt([
         {
             type: 'list',
@@ -307,13 +312,16 @@ export async function promptForIconLibrary(framework: string): Promise<PackageCo
         return null;
     }
 
+    const allPackages = await loadPackageConfigs();
+    const iconLibraries = allPackages.filter((pkg) => pkg.isIconLibrary);
+
     const { iconLibrary } = await inquirer.prompt([
         {
             type: 'list',
             name: 'iconLibrary',
             message: 'Which icon library would you like to use?',
             choices: [
-                ...iconLibraries.map((lib: IconLibraryConfig) => ({
+                ...iconLibraries.map((lib) => ({
                     name: `${lib.displayName} - ${lib.description}`,
                     value: lib,
                 })),

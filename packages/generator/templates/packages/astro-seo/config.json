@@ -1,0 +1,11 @@
+{
+    "$schema": "../../../src/schemas/package.schema.json",
+    "name": "astro-seo",
+    "displayName": "Astro SEO",
+    "description": "SEO component for Astro",
+    "version": "^0.8.0",
+    "frameworks": ["astro-vite"],
+    "isUILibrary": false,
+    "isIconLibrary": false,
+    "canBeSharedPackage": false
+}

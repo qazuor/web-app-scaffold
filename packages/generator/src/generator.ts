@@ -2,7 +2,6 @@ import path from 'node:path';
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import inquirer from 'inquirer';
-import type { PackageConfig } from './packages/types.js';
 import {
     promptForDescription,
     promptForFramework,
@@ -13,6 +12,7 @@ import {
     promptForPort,
     promptForUILibrary,
 } from './prompts.js';
+import type { PackageConfig } from './types/package.js';
 import { installDependencies } from './utils/dependency-installer.js';
 import {
     copyDirectory,
@@ -26,8 +26,8 @@ import {
 } from './utils/file-operations.js';
 import { logger } from './utils/logger.js';
 import {
+    addSelectedPackages,
     createPackageConfigs,
-    installSelectedPackages,
     updateEnvVars,
     updateReadme,
 } from './utils/package-manager.js';
@@ -84,34 +84,28 @@ export async function runGenerator(options: GeneratorOptions): Promise<void> {
         await createApp(appName, framework, description, port, selectedPackages);
         logger.success(`App "${appName}" successfully created with ${framework}!`);
 
-        // Install dependencies if requested
-        if (shouldInstall) {
-            const appDir = path.join(process.cwd(), 'apps', appName);
+        const appDir = path.join(process.cwd(), 'apps', appName);
 
-            // if has selected packages to install add it before run pnpm install
-            if (selectedPackages.length > 0) {
-                await installSelectedPackages(appDir, selectedPackages);
-            }
+        // if has selected packages to install add it before run pnpm install
+        if (selectedPackages.length > 0) {
+            await addSelectedPackages(appDir, selectedPackages);
 
-            const installed = await installDependencies(appDir);
+            // Create configuration files for selected packages
+            await createPackageConfigs(appDir, selectedPackages, appName, port);
 
-            if (installed && selectedPackages.length > 0) {
-                // Create configuration files for selected packages
-                await createPackageConfigs(appDir, selectedPackages, appName, port);
+            // Update environment variables
+            await updateEnvVars(appDir, selectedPackages);
 
-                // Update environment variables
-                await updateEnvVars(appDir, selectedPackages);
-
-                // Update README.md
-                await updateReadme(appDir, selectedPackages, appName);
-            }
-
-            // Show next steps
-            showNextSteps(appName, framework, installed, port, selectedPackages);
-        } else {
-            // Show next steps without installation
-            showNextSteps(appName, framework, false, port, selectedPackages);
+            // Update README.md
+            await updateReadme(appDir, selectedPackages, appName);
         }
+
+        if (shouldInstall) {
+            const installed = await installDependencies(appDir);
+            showNextSteps(appName, framework, installed, port, selectedPackages);
+        }
+
+        // Show next steps
     } catch (error) {
         logger.error('Failed to create the app:', { subtitle: String(error) });
         console.error(error);
@@ -203,7 +197,7 @@ async function createApp(
     // Update package.json
     const packageJsonPath = path.join(appDir, 'package.json');
     await updatePackageJson(packageJsonPath, {
-        name: `@${name}/app`,
+        name: `@${name}`,
         description: description,
     });
 
