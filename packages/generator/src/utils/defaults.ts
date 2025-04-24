@@ -5,10 +5,10 @@
  */
 export function getDefaultNameForFramework(framework: string): string {
     const frameworkMap: Record<string, string> = {
-        hono: 'my-api',
-        'react-vite': 'my-react-web',
-        'astro-vite': 'my-astro-site',
-        'tanstack-start': 'my-tanstack-fullstack-app',
+        hono: 'my-hono-api',
+        'react-vite': 'my-react-web-app',
+        'astro-vite': 'my-astro-website',
+        'tanstack-start': 'my-tanstack-fullstack-app'
     };
 
     return frameworkMap[framework] || 'my-app';
