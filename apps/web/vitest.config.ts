@@ -3,6 +3,6 @@ import { mergeConfig } from 'vite';
 
 export default mergeConfig(baseConfig, {
     test: {
-        setupFiles: ['./src/setupTests.ts'],
-    },
+        setupFiles: ['./src/setupTests.ts']
+    }
 });

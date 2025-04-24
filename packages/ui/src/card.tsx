@@ -5,7 +5,7 @@ export function Card({
     className,
     title,
     children,
-    href,
+    href
 }: {
     className?: string;
     title: string;

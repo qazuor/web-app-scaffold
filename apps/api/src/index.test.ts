@@ -24,9 +24,9 @@ describe('Hono API', () => {
         const res = await app.request('http://localhost/echo', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify(testBody),
+            body: JSON.stringify(testBody)
         });
 
         expect(res.status).toBe(200);

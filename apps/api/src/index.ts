@@ -20,8 +20,8 @@ app.use(
         allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Añade los métodos que tu frontend pueda usar
         exposeHeaders: ['Content-Length'], // Encabezados a exponer al frontend
         maxAge: 600, // Cachea la respuesta preflight por 10 minutos
-        credentials: true, // Permite enviar cookies/auth headers si tu frontend los usa
-    }),
+        credentials: true // Permite enviar cookies/auth headers si tu frontend los usa
+    })
 );
 
 // Ruta básica de bienvenida
@@ -48,6 +48,6 @@ if (process.env.NODE_ENV === 'development') {
     console.log(`Server is running on http://localhost:${port}`);
     serve({
         fetch: app.fetch,
-        port,
+        port
     });
 }

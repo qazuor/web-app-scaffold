@@ -14,15 +14,15 @@ module.exports = {
             // Ejemplo: Puedes sobrescribir un color definido en la base o añadir uno nuevo
             colors: {
                 'brand-primary': '#FF0000', // Sobrescribe el color primario solo para esta app
-                'web-specific-color': '#abcdef', // Añade un color solo para esta app
+                'web-specific-color': '#abcdef' // Añade un color solo para esta app
             },
             // Ejemplo: Añadir una configuración de espaciado adicional
             spacing: {
-                128: '32rem',
-            },
-        },
+                128: '32rem'
+            }
+        }
     },
 
     // Puedes añadir plugins específicos para esta app
-    plugins: [],
+    plugins: []
 };

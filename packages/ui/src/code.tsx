@@ -3,7 +3,7 @@ import React = require('react');
 
 export function Code({
     children,
-    className,
+    className
 }: {
     children: React.ReactNode;
     className?: string;

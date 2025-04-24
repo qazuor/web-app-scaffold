@@ -8,26 +8,26 @@ function App() {
     const appName = 'My React App'; // Declared appName variable
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+        <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100">
             <header className="py-6 text-center">
-                <h1 className="text-4xl font-bold text-gray-800">{appName}</h1>
-                <p className="mt-2 text-gray-600">Creado con React + Vite</p>
+                <h1 className="font-bold text-4xl text-gray-800">{appName}</h1>
+                <p className="mt-2 text-gray-600">Built with React + Vite</p>
             </header>
 
-            <main className="flex-1 flex flex-col items-center justify-center p-4">
-                <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
+            <main className="flex flex-1 flex-col items-center justify-center p-4">
+                <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
                     <div className="text-center">
                         <button
                             type="button"
                             onClick={() => setCount((count) => count + 1)}
-                            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                            className="rounded bg-blue-500 px-4 py-2 text-white transition-colors hover:bg-blue-600"
                         >
                             Contador: {count}
                         </button>
 
                         <p className="mt-4 text-gray-700">
                             Edita{' '}
-                            <code className="font-mono bg-gray-100 p-1 rounded">src/App.tsx</code> y
+                            <code className="rounded bg-gray-100 p-1 font-mono">src/App.tsx</code> y
                             guarda para probar HMR
                         </p>
                     </div>
@@ -41,6 +41,6 @@ function App() {
             </footer>
         </div>
     );
-}
+};
 
 export default App;

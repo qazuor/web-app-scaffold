@@ -4,6 +4,6 @@ import { mergeConfig } from 'vite';
 export default mergeConfig(baseConfig, {
     test: {
         environment: 'node',
-        setupFiles: [],
-    },
+        setupFiles: []
+    }
 });
