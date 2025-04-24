@@ -3,6 +3,7 @@ import fs from 'fs-extra';
 import Handlebars from 'handlebars';
 import type { PackageJson } from 'type-fest';
 import type { PackageConfig } from '../types/package.js';
+import { createDirectory } from './file-operations.js';
 import { logger } from './logger.js';
 
 // Register Handlebars helpers
@@ -18,6 +19,7 @@ type ContextForTemplate = {
     iconLibrary: string | undefined;
     // biome-ignore lint/suspicious/noExplicitAny: dynamic structure depends on package
     contextPackageVars?: any;
+    packageName?: string | undefined;
 };
 
 /**
@@ -123,7 +125,7 @@ export async function addDependency(
     packageJson[target] = packageJson[target] || {};
     packageJson[target][name.trim()] = version.trim();
     logger.info(
-        `Adding ${isDev ? 'devDependencies' : 'dependencies'}: ${name.trim()}@${version.trim()}`,
+        `Adding ${isDev ? 'devDependencies' : 'dependencies'}: '${name.trim()}' version: '${version.trim()}'`,
         {
             icon: isDev ? '📦' : '🔧',
         },
@@ -224,9 +226,13 @@ export async function generatePackageFiles(
     appDir: string,
     pkg: PackageConfig,
     context: ContextForTemplate,
+    includePackageJson = false,
 ) {
     if (pkg.extraFilesContent) {
         for (const [filePath, content] of Object.entries(pkg.extraFilesContent)) {
+            if (filePath === 'package.json.hbs' && !includePackageJson) {
+                continue;
+            }
             const fullPath = path.join(appDir, filePath);
             const isHandlebars = filePath.endsWith('.hbs');
             const targetPath = isHandlebars ? fullPath.slice(0, -4) : fullPath;
@@ -254,6 +260,7 @@ export async function generateSelectedPackagesFiles(
     appDir: string,
     selectedPackages: PackageConfig[],
     context: ContextForTemplate,
+    includePackageJson?: boolean,
 ) {
     for (const pkg of selectedPackages) {
         if (pkg.configOptions?.resultForPrompt) {
@@ -266,7 +273,7 @@ export async function generateSelectedPackagesFiles(
         } else if (pkg.configOptions?.result) {
             context.contextPackageVars = pkg.configOptions.result.contextPackageVars;
         }
-        await generatePackageFiles(appDir, pkg, context);
+        await generatePackageFiles(appDir, pkg, context, includePackageJson);
     }
     logger.info('Generated all selected packages files', { icon: '📝' });
 }
@@ -337,18 +344,27 @@ export async function addSelectedPackages(
 }
 
 /**
- * Adds a single package directly to the application's dependencies.
- * @param appDir - Root directory of the app.
- * @param appName - App name.
- * @param framework - Framework used.
- * @param description - App description.
- * @param port - App port.
- * @param packageJson - The current package.json.
- * @param pkg - Package to install.
- * @param uiLibrary - UI library config.
- * @param iconLibrary - Icon library config.
- * @param selectedPackages - All packages selected.
- * @returns True if the package was added successfully.
+ * Installs a package directly into the application's local package.json.
+ *
+ * This function performs several tasks:
+ * 1. Adds the main package as a dependency (or devDependency).
+ * 2. Adds any extra dependencies and devDependencies from the package's config.
+ * 3. Processes additional config-based dependencies from all selected packages.
+ * 4. Injects npm scripts defined in the package or its config into package.json.
+ * 5. Generates any additional files for the selected packages (using Handlebars if needed).
+ * 6. Persists the updated package.json on disk.
+ *
+ * @param appDir - The application directory where the package will be installed.
+ * @param appName - The name of the application being created or modified.
+ * @param framework - The framework used (e.g., react-vite, astro, etc).
+ * @param description - A short description of the application.
+ * @param port - The port the application will use (used in templating).
+ * @param packageJson - The current state of the app's package.json file.
+ * @param pkg - The specific package to install directly into the app.
+ * @param uiLibrary - Optional UI library selected for use in the project.
+ * @param iconLibrary - Optional icon library selected for use in the project.
+ * @param selectedPackages - All packages selected for the current installation session.
+ * @returns A Promise that resolves to `true` if the operation succeeded, `false` if an error occurred.
  */
 export async function addPackageDirectlyToApp(
     appDir: string,
@@ -395,16 +411,26 @@ export async function addPackageDirectlyToApp(
 }
 
 /**
- * Add shared package
- * @param appDir Application directory
- * @param appName Application name
- * @param framework Selected Framework name
- * @param description Application description
- * @param port Selected application port
- * @param packageJson PackageJson object to save
- * @param pkg Selected package to install
- * @param selectedPackages all Selected packages
- * @returns true if installation was successful, false otherwise
+ * Adds a shared package to the monorepo workspace and links it to the current application.
+ * This is useful for centralizing logic or UI in `packages/*` and referencing it via workspace protocols.
+ *
+ * Steps performed:
+ * 1. Creates the shared package folder (e.g., `../../packages/my-shared-lib`).
+ * 2. Generates files in the shared package using templates.
+ * 3. Adds the shared package as a dependency in the app's package.json using `workspace:*`.
+ * 4. Saves the updated package.json.
+ *
+ * @param appDir - The root directory of the app.
+ * @param appName - The name of the application.
+ * @param framework - The framework used by the app (e.g., react, astro, etc).
+ * @param description - A brief description of the application.
+ * @param port - The port number assigned to the application.
+ * @param packageJson - The current state of the app's package.json.
+ * @param pkg - The package being installed as shared.
+ * @param uiLibrary - Optional selected UI library package.
+ * @param iconLibrary - Optional selected icon library package.
+ * @param selectedPackages - All selected packages for this setup, passed for context/template generation.
+ * @returns A Promise that resolves to `true` if the operation was successful, or `false` otherwise.
  */
 export async function addSharedPackage(
     appDir: string,
@@ -419,21 +445,49 @@ export async function addSharedPackage(
     selectedPackages: PackageConfig[],
 ): Promise<boolean> {
     try {
-        // const packageJson: PackageJson = await getAppPakageJson(appDir);
+        if (!pkg.installationType || !pkg.installationType.packageName) {
+            return false;
+        }
 
-        // console.log('packageJson', packageJson);
+        const sharedPackageDir = path.join(
+            appDir,
+            '../../packages',
+            pkg.installationType.packageName,
+        );
 
-        // // Add selected packages to dependencies
-        // // for (const pkg of selectedPackages) {
-        // //     if (pkg.version) {
-        // //         packageJson.dependencies[pkg.name] = pkg.version;
-        // //     }
-        // // }
+        await createDirectory(sharedPackageDir);
 
-        // // Write updated package.json
-        // // await fs.writeJson(packageJsonPath, packageJson, { spaces: 2 });
-        // logger.success('Selected packages added to package.json');
-        console.log('FALTA IMPLEMENTAR addSharedPackages');
+        const contextForTemplates: ContextForTemplate = {
+            appDir,
+            appName,
+            framework,
+            description,
+            port,
+            uiLibrary: uiLibrary?.name,
+            iconLibrary: iconLibrary?.name,
+            packageName: pkg.installationType.packageName,
+        };
+
+        console.log('sharedPackageDir', sharedPackageDir);
+
+        await generateSelectedPackagesFiles(
+            sharedPackageDir,
+            selectedPackages,
+            contextForTemplates,
+            true,
+        );
+
+        await addDependency(
+            packageJson,
+            false,
+            `@repo/${pkg.installationType.packageName}`,
+            'workspace:*',
+        );
+
+        await savePackageJson(getPackageJsonPath(appDir), packageJson);
+        logger.success(`${pkg.name} shared package successfully created`);
+        logger.success(`${pkg.name} package added as dependency to package.json`);
+
         return true;
     } catch (error) {
         logger.error('Failed to add selected packages to package.json', {

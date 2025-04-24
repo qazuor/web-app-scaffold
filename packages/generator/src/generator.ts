@@ -166,6 +166,38 @@ async function createApp(
         await fs.remove(appDir);
     }
 
+    // Check if the shared directory already exists
+    for (const pkg of selectedPackages) {
+        const sharedPackageName = pkg.installationType?.packageName;
+        if (!sharedPackageName) {
+            continue;
+        }
+        const sharedPackageDir = path.join(process.cwd(), 'packages', sharedPackageName);
+        if (sharedPackageDir && fs.existsSync(sharedPackageDir)) {
+            const { overwriteSharedPackage } = await inquirer.prompt([
+                {
+                    type: 'confirm',
+                    name: 'overwriteSharedPackage',
+                    message: `Folder packages/${sharedPackageName} already exists. Do you want to overwrite it?`,
+                    default: false,
+                },
+            ]);
+
+            if (!overwriteSharedPackage) {
+                logger.warn('Operation cancelled.', { icon: '🛑' });
+                process.exit(0);
+            }
+
+            logger.warn(
+                `Removing existing folder: ${chalk.cyan(`packages/${sharedPackageName}`)}`,
+                {
+                    icon: '🗑️',
+                },
+            );
+            await fs.remove(sharedPackageDir);
+        }
+    }
+
     // Create the app folder
     await createDirectory(appDir);
 

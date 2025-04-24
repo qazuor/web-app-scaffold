@@ -1,0 +1,37 @@
+{
+    "name": "@repo/{{packageName}}",
+    "version": "0.1.0",
+    "private": true,
+    "main": "./src/index.ts",
+    "types": "./src/index.ts",
+    "scripts": {
+        "lint": "biome check .",
+        "format": "biome format --write .",
+        "generate": "drizzle-kit generate:{{contextPackageVars.provider}}",
+        "push": "drizzle-kit push:{{contextPackageVars.provider}}",
+        "studio": "drizzle-kit studio"
+    },
+    "dependencies": {
+        "@repo/config": "workspace:*",
+        {{#if (eq contextPackageVars.provider "better-sqlite3")}}
+        "better-sqlite3": "^9.2.2",
+        {{/if}}
+        {{#if (eq contextPackageVars.provider "postgres")}}
+        "postgres": "^3.4.3",
+        {{/if}}
+        {{#if (eq contextPackageVars.provider "mysql2")}}
+        "mysql2": "^3.6.5",
+        {{/if}}
+        {{#if (eq contextPackageVars.provider "singlestore")}}
+        "mysql2": "^3.4.0",
+        "@singlestore/http-client": "^1.0.0",
+        {{/if}}
+        "drizzle-orm": "^0.29.3"
+    },
+    "devDependencies": {
+        {{#if (eq contextPackageVars.provider "better-sqlite3")}}
+        "@types/better-sqlite3": "^7.6.8",
+        {{/if}}
+        "drizzle-kit": "^0.20.10"
+    }
+}
