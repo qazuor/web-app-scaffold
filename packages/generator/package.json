@@ -13,6 +13,9 @@
         "lint:fix": "biome check --write .",
         "format": "biome format --write .",
         "check": "biome check --write",
+        "test": "vitest",
+        "test:file": "vitest run",
+        "test:coverage": "vitest run --coverage",
         "clean": "rm -rf dist"
     },
     "keywords": ["turborepo", "generator", "cli"],

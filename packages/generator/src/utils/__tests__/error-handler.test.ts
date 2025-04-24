@@ -1,29 +1,34 @@
-import { describe, expect, it, vi } from 'vitest';
+import { logger } from '@repo/logger';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { GeneratorError, handleError, withErrorHandling } from '../error-handler';
-import { logger } from '../logger';
 
-vi.mock('../logger', () => ({
+vi.mock('@repo/logger', () => ({
     logger: {
-        error: vi.fn(),
-    },
+        error: vi.fn()
+    }
 }));
 
 describe('Error Handler', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        vi.resetAllMocks();
+    });
+
     it('should handle GeneratorError with details', () => {
         const error = new GeneratorError('Test error', 'Error details');
+        expect(() => handleError(error, 'test')).toThrow(error);
 
-        expect(() => handleError(error, 'test')).toThrow();
         expect(logger.error).toHaveBeenCalledWith('Test error', {
-            subtitle: 'Error details',
+            subtitle: 'Error details'
         });
     });
 
     it('should handle unknown errors', () => {
         const error = new Error('Unknown error');
+        expect(() => handleError(error, 'test')).toThrow(error);
 
-        expect(() => handleError(error, 'test')).toThrow();
         expect(logger.error).toHaveBeenCalledWith('Error in test:', {
-            subtitle: 'Unknown error',
+            subtitle: `Error: ${error.message}`
         });
     });
 
@@ -36,6 +41,11 @@ describe('Error Handler', () => {
         const result = await withErrorHandling(successFn, 'success test');
         expect(result).toBe('success');
 
-        await expect(withErrorHandling(failFn, 'fail test')).rejects.toThrow('Test error');
+        const error = new Error('Test error');
+        await expect(withErrorHandling(failFn, 'fail test')).rejects.toThrow(error);
+
+        expect(logger.error).toHaveBeenCalledWith('Error in fail test:', {
+            subtitle: `Error: ${error.message}`
+        });
     });
 });

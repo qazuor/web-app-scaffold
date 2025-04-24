@@ -1,12 +1,12 @@
+import { logger } from '@repo/logger';
 import { describe, expect, it, vi } from 'vitest';
-import { logger } from '../logger';
 import { ProgressTracker, createAppGenerationTracker } from '../progress';
 
-vi.mock('../logger', () => ({
+vi.mock('@repo/logger', () => ({
     logger: {
         step: vi.fn(),
-        success: vi.fn(),
-    },
+        success: vi.fn()
+    }
 }));
 
 describe('Progress Tracker', () => {
@@ -17,7 +17,7 @@ describe('Progress Tracker', () => {
         tracker.nextStep('Details for step 1');
         expect(logger.step).toHaveBeenCalledWith('Step 1', {
             subtitle: 'Details for step 1',
-            title: '[1/3]',
+            title: '[1/3]'
         });
 
         tracker.completeStep();
@@ -30,7 +30,7 @@ describe('Progress Tracker', () => {
 
         expect(logger.step).toHaveBeenCalledWith(
             'Configure application settings',
-            expect.any(Object),
+            expect.any(Object)
         );
     });
 });
