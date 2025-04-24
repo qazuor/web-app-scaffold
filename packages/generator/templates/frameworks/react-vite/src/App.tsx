@@ -1,11 +1,12 @@
-'use client';
-
-import { useState } from 'react';
+import { type FC, useState } from 'react';
 import './App.css';
 
-function App() {
+/**
+ * Main application component
+ */
+const App: FC = () => {
     const [count, setCount] = useState(0);
-    const appName = 'My React App'; // Declared appName variable
+    const appName = import.meta.env.VITE_APP_TITLE || 'My React App';
 
     return (
         <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100">
