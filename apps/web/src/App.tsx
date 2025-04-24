@@ -1,73 +1,45 @@
 // apps/web/src/App.tsx
-import { useEffect, useState } from 'react';
-import viteLogo from '/vite.svg';
-import reactLogo from './assets/react.svg';
+import { type FC, useState } from 'react';
 import './App.css';
 
-function App() {
+const App: FC = () => {
     const [count, setCount] = useState(0);
-    const [apiMessage, setApiMessage] = useState('Cargando...');
-
-    useEffect(() => {
-        // Asegúrate de que la API esté corriendo en http://localhost:3001
-        // En un despliegue real, esta URL debería ser una variable de entorno
-        fetch('http://localhost:3001/')
-            .then((res) => {
-                if (!res.ok) {
-                    throw new Error(`HTTP error! status: ${res.status}`);
-                }
-                return res.json();
-            })
-            .then((data) => setApiMessage(data.message))
-            .catch((err) => {
-                console.error('Error fetching API:', err);
-                setApiMessage(`Error al conectar con la API: ${err.message}`);
-            });
-    }, []);
+    const appName = import.meta.env.VITE_APP_TITLE || 'My React App';
 
     return (
-        <>
-            <div>
-                <a
-                    href="https://vitejs.dev"
-                    target="_blank"
-                    rel="noreferrer"
-                >
-                    <img
-                        src={viteLogo}
-                        className="logo"
-                        alt="Vite logo"
-                    />
-                </a>
-                <a
-                    href="https://react.dev"
-                    target="_blank"
-                    rel="noreferrer"
-                >
-                    <img
-                        src={reactLogo}
-                        className="logo react"
-                        alt="React logo"
-                    />
-                </a>
-            </div>
-            <h1>Vite + React</h1>
-            <div className="card">
-                <button
-                    type="button"
-                    onClick={() => setCount((count) => count + 1)}
-                >
-                    count is {count}
-                </button>
+        <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100">
+            <header className="py-6 text-center">
+                <h1 className="font-bold text-4xl text-gray-800">{appName}</h1>
+                <p className="mt-2 text-gray-600">Built with React + Vite</p>
+            </header>
+
+            <main className="flex flex-1 flex-col items-center justify-center p-4">
+                <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
+                    <div className="text-center">
+                        <button
+                            type="button"
+                            onClick={() => setCount((count) => count + 1)}
+                            className="rounded bg-blue-500 px-4 py-2 text-white transition-colors hover:bg-blue-600"
+                        >
+                            {`Contador: ${count}`}
+                        </button>
+
+                        <p className="mt-4 text-gray-700">
+                            Edita{' '}
+                            <code className="rounded bg-gray-100 p-1 font-mono">src/App.tsx</code> y
+                            guarda para probar HMR
+                        </p>
+                    </div>
+                </div>
+            </main>
+
+            <footer className="py-6 text-center text-gray-500">
                 <p>
-                    Edit <code>src/App.tsx</code> and save to test HMR
+                    © {new Date().getFullYear()} {appName}
                 </p>
-            </div>
-            <p className="read-the-docs">Click on the Vite and React logos to learn more</p>
-            <h2>Mensaje de la App API:</h2>
-            <h2 className="border border-1">{apiMessage}</h2> {/* Muestra el mensaje de la API */}
-        </>
+            </footer>
+        </div>
     );
-}
+};
 
 export default App;

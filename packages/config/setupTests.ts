@@ -1,7 +1,5 @@
-// apps/web/src/setupTests.ts
 import '@testing-library/jest-dom';
-import { setupServer } from 'msw/node'; // O mock service worker si planeas mockear requests más complejos
-import { afterAll, afterEach, beforeAll } from 'vitest';
+import { vi } from 'vitest';
 
 // Example: Mocking fetch API calls
 // const server = setupServer(
@@ -20,6 +18,13 @@ global.fetch = () =>
     Promise.resolve({
         json: () => Promise.resolve({ message: 'Mock API Message' }),
         ok: true,
-        status: 200,
+        status: 200
         // Add other properties needed by the fetch API if necessary
     } as Response); // Type assertion for simplicity in mock
+
+// Mock environment variables
+vi.stubGlobal('import.meta', {
+    env: {
+        VITE_APP_TITLE: 'My React App'
+    }
+});

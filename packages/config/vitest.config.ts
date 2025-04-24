@@ -9,7 +9,7 @@ export default defineConfig({
         // Configuraciones de Vitest que se aplican a menos que se sobrescriban
         globals: true, // Hace que las APIs de Vitest (describe, it, expect) estén disponibles globalmente
         environment: 'node', // Entorno por defecto, se sobrescribirá en apps web (jsdom)
-        setupFiles: ['setupTest.ts'], // Archivos de setup globales (ej: para mocks o matchers globales)
+        setupFiles: ['@repo/config/setupTests.ts'], // Archivos de setup globales (ej: para mocks o matchers globales)
         coverage: {
             provider: 'v8', // O 'istanbul'
             reporter: ['text', 'json', 'html'], // Reportes de cobertura
