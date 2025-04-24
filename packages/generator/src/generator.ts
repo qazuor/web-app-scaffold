@@ -25,12 +25,8 @@ import {
     updatePortInConfigs,
 } from './utils/file-operations.js';
 import { logger } from './utils/logger.js';
-import {
-    addSelectedPackages,
-    createPackageConfigs,
-    updateEnvVars,
-    updateReadme,
-} from './utils/package-manager.js';
+import { addSelectedPackages, updateEnvVars } from './utils/package-manager.js';
+import { updateReadme } from './utils/package-manager copy.js';
 import { registerPort } from './utils/port-manager.js';
 
 // Declare global variable for templates directory
@@ -82,16 +78,24 @@ export async function runGenerator(options: GeneratorOptions): Promise<void> {
 
         // Create the app
         await createApp(appName, framework, description, port, selectedPackages);
-        logger.success(`App "${appName}" successfully created with ${framework}!`);
 
         const appDir = path.join(process.cwd(), 'apps', appName);
 
+        // console.log('app', { appDir, appName, framework, description, port });
+
         // if has selected packages to install add it before run pnpm install
         if (selectedPackages.length > 0) {
-            await addSelectedPackages(appDir, selectedPackages);
-
-            // Create configuration files for selected packages
-            await createPackageConfigs(appDir, selectedPackages, appName, port);
+            // console.log('Selected packages:', selectedPackages);
+            await addSelectedPackages(
+                appDir,
+                appName,
+                framework,
+                description,
+                port,
+                uiLibrary,
+                iconLibrary,
+                selectedPackages,
+            );
 
             // Update environment variables
             await updateEnvVars(appDir, selectedPackages);
@@ -103,9 +107,9 @@ export async function runGenerator(options: GeneratorOptions): Promise<void> {
         if (shouldInstall) {
             const installed = await installDependencies(appDir);
             showNextSteps(appName, framework, installed, port, selectedPackages);
+        } else {
+            showNextSteps(appName, framework, false, port, selectedPackages);
         }
-
-        // Show next steps
     } catch (error) {
         logger.error('Failed to create the app:', { subtitle: String(error) });
         console.error(error);

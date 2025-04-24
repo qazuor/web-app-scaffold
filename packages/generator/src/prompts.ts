@@ -233,16 +233,16 @@ export async function promptForInstallationType(pkg: PackageConfig): Promise<{
 }
 
 async function promptForConfigOption(pkg: PackageConfig): Promise<string | undefined> {
-    if (!pkg.configOptions) {
+    if (!pkg.configOptions || !pkg.configOptions.prompt) {
         return undefined;
     }
 
     const { option } = await inquirer.prompt([
         {
-            type: pkg.configOptions.type,
+            type: pkg.configOptions.prompt.type,
             name: 'option',
-            message: pkg.configOptions.message,
-            choices: pkg.configOptions.choices,
+            message: pkg.configOptions.prompt.message,
+            choices: pkg.configOptions.prompt.choices,
         },
     ]);
 

@@ -1,14 +1,14 @@
-{{#if (eq config.driver "better-sqlite3")}}
+{{#if (eq contextPackageVars.driver "better-sqlite3")}}
 import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 const sqlite = new Database('sqlite.db');
 export const db = drizzle(sqlite);
-{{else if (eq config.driver "pg")}}
+{{else if (eq contextPackageVars.driver "pg")}}
 import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
 const client = postgres(process.env.DATABASE_URL);
 export const db = drizzle(client);
-{{else if (eq config.driver "mysql2")}}
+{{else if (eq contextPackageVars.driver "mysql2")}}
 import mysql from 'mysql2/promise';
 import { drizzle } from 'drizzle-orm/mysql2';
 const connection = await mysql.createConnection(process.env.DATABASE_URL);

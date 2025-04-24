@@ -1,33 +1,33 @@
 import {
-    {{#if (eq config.driver "better-sqlite3")}}
+    {{#if (eq contextPackageVars.driver "better-sqlite3")}}
     integer,
     text,
     sqliteTable as table
-    {{else if (eq config.driver "pg")}}
+    {{else if (eq contextPackageVars.driver "pg")}}
     serial,
     text,
     timestamp,
     pgTable as table
-    {{else if (eq config.driver "mysql2")}}
+    {{else if (eq contextPackageVars.driver "mysql2")}}
     int,
     varchar,
     timestamp,
     mysqlTable as table
     {{/if}}
-} from 'drizzle-orm/{{config.provider}}';
+} from 'drizzle-orm/{{contextPackageVars.provider}}';
 
 export const users = table('users', {
-    {{#if (eq config.driver "better-sqlite3")}}
+    {{#if (eq contextPackageVars.driver "better-sqlite3")}}
     id: integer('id').primaryKey({ autoIncrement: true }),
     name: text('name').notNull(),
     email: text('email').notNull().unique(),
     createdAt: integer('created_at', { mode: 'timestamp' }).notNull().defaultNow()
-    {{else if (eq config.driver "pg")}}
+    {{else if (eq contextPackageVars.driver "pg")}}
     id: serial('id').primaryKey(),
     name: text('name').notNull(),
     email: text('email').notNull().unique(),
     createdAt: timestamp('created_at').notNull().defaultNow()
-    {{else if (eq config.driver "mysql2")}}
+    {{else if (eq contextPackageVars.driver "mysql2")}}
     id: int('id').primaryKey().autoincrement(),
     name: varchar('name', { length: 255 }).notNull(),
     email: varchar('email', { length: 255 }).notNull().unique(),
@@ -36,19 +36,19 @@ export const users = table('users', {
 });
 
 export const posts = table('posts', {
-    {{#if (eq config.driver "better-sqlite3")}}
+    {{#if (eq contextPackageVars.driver "better-sqlite3")}}
     id: integer('id').primaryKey({ autoIncrement: true }),
     title: text('title').notNull(),
     content: text('content').notNull(),
     authorId: integer('author_id').notNull().references(() => users.id),
     createdAt: integer('created_at', { mode: 'timestamp' }).notNull().defaultNow()
-    {{else if (eq config.driver "pg")}}
+    {{else if (eq contextPackageVars.driver "pg")}}
     id: serial('id').primaryKey(),
     title: text('title').notNull(),
     content: text('content').notNull(),
     authorId: integer('author_id').notNull().references(() => users.id),
     createdAt: timestamp('created_at').notNull().defaultNow()
-    {{else if (eq config.driver "mysql2")}}
+    {{else if (eq contextPackageVars.driver "mysql2")}}
     id: int('id').primaryKey().autoincrement(),
     title: varchar('title', { length: 255 }).notNull(),
     content: text('content').notNull(),

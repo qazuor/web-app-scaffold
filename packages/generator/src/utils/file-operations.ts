@@ -71,11 +71,9 @@ export async function updatePackageJson(
         const relativePath = path.relative(process.cwd(), packageJsonPath);
         logger.file('Updating', relativePath, { icon: '📝' });
         const packageJson = await fs.readJson(packageJsonPath);
-
         // Apply updates
         Object.assign(packageJson, updates);
-
-        await fs.writeJson(packageJsonPath, packageJson, { spaces: 2 });
+        await fs.writeJson(packageJsonPath, packageJson, { spaces: 4 });
     }
 }
 

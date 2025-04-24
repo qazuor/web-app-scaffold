@@ -1,397 +1,453 @@
 import path from 'node:path';
 import fs from 'fs-extra';
+import Handlebars from 'handlebars';
 import type { PackageJson } from 'type-fest';
 import type { PackageConfig } from '../types/package.js';
 import { logger } from './logger.js';
 
+// Register Handlebars helpers
+Handlebars.registerHelper('eq', (a, b) => a === b);
+
+type ContextForTemplate = {
+    appDir: string;
+    appName: string;
+    framework: string;
+    description: string;
+    port: number;
+    uiLibrary: string | undefined;
+    iconLibrary: string | undefined;
+    // biome-ignore lint/suspicious/noExplicitAny: dynamic structure depends on package
+    contextPackageVars?: any;
+};
+
 /**
- * Creates a shared package
- * @param packageName Package name
- * @param templateName Template to use
- * @returns true if package was created successfully
+ * Retrieves the application's package.json as a JSON object.
+ * @param appDir - The path to the application directory.
+ * @returns A Promise that resolves with the parsed package.json content.
  */
-async function createSharedPackage(pkg: PackageConfig, packageName: string): Promise<boolean> {
-    try {
-        const packagesDir = path.join(process.cwd(), 'packages');
-        const packageDir = path.join(packagesDir, packageName);
-        const templateDir = path.join(
-            global.templatesDir,
-            'packages',
-            pkg.sharedPackageTemplate || 'default',
-        );
+export async function getAppPakageJson(appDir: string) {
+    return await fs.readJson(getPackageJsonPath(appDir));
+}
 
-        // Check if template exists
-        if (!fs.existsSync(templateDir)) {
-            logger.error(`Template ${pkg.sharedPackageTemplate} not found`);
-            return false;
+/**
+ * Constructs the absolute path to the package.json file.
+ * @param appDir - The path to the application directory.
+ * @returns The full path to package.json.
+ */
+export function getPackageJsonPath(appDir: string) {
+    return path.join(appDir, 'package.json');
+}
+
+/**
+ * Writes the modified package.json file to disk.
+ * @param packageJsonPath - The path to save the package.json file.
+ * @param packageJson - The PackageJson object to persist.
+ * @returns A Promise that resolves once the file is written.
+ */
+export async function savePackageJson(packageJsonPath: string, packageJson: PackageJson) {
+    return await fs.writeJson(packageJsonPath, packageJson, { spaces: 4 });
+}
+
+/**
+ * Adds or updates a single npm script entry in package.json.
+ * @param packageJson - The current package.json content.
+ * @param name - The script name.
+ * @param code - The script command.
+ * @returns The updated packageJson object.
+ */
+export async function addScript(packageJson: PackageJson, name: string, code: string) {
+    packageJson.scripts = packageJson.scripts || {};
+    packageJson.scripts[name.trim()] = code.trim();
+    logger.info(`Adding Script: ${name.trim()}:'${code.trim()}' to package.json`, { icon: '⚙️' });
+    return packageJson;
+}
+
+/**
+ * Adds or updates multiple npm scripts in package.json.
+ * @param packageJson - The current package.json content.
+ * @param scripts - A record of script names and their corresponding commands.
+ */
+export async function addScripts(
+    packageJson: PackageJson,
+    scripts: Record<string, string> | undefined,
+) {
+    if (scripts && typeof scripts === 'object') {
+        for (const [name, code] of Object.entries(scripts)) {
+            await addScript(packageJson, name, code);
         }
-
-        // Create package directory
-        await fs.ensureDir(packageDir);
-
-        // Copy template files
-        await fs.copy(templateDir, packageDir);
-
-        // Update drizzle.config.ts based on selected database provider
-        if (pkg.name === 'drizzle-orm' && pkg.selectedConfig) {
-            const drizzleConfigPath = path.join(packageDir, 'drizzle.config.ts');
-            if (await fs.pathExists(drizzleConfigPath)) {
-                let content = await fs.readFile(drizzleConfigPath, 'utf8');
-
-                // Update driver and credentials based on selected provider
-                const configMap = {
-                    sqlite: {
-                        driver: 'better-sqlite3',
-                        credentials: "{ url: 'sqlite.db' }",
-                    },
-                    postgres: {
-                        driver: 'pg',
-                        credentials: '{ connectionString: process.env.DATABASE_URL }',
-                    },
-                    mysql: {
-                        driver: 'mysql2',
-                        credentials: '{ url: process.env.DATABASE_URL }',
-                    },
-                    singlestore: {
-                        driver: 'mysql2',
-                        credentials: '{ url: process.env.DATABASE_URL }',
-                    },
-                };
-
-                const config = configMap[pkg.selectedConfig as keyof typeof configMap];
-                content = content.replace(/driver:\s*'[^']*'/, `driver: '${config.driver}'`);
-                content = content.replace(
-                    /dbCredentials:\s*{[^}]*}/,
-                    `dbCredentials: ${config.credentials}`,
-                );
-
-                await fs.writeFile(drizzleConfigPath, content);
-            }
-        }
-
-        // Apply configuration options if any
-        if (pkg.configOptions?.dependencies && pkg.selectedConfig) {
-            const configDeps = pkg.configOptions.dependencies[pkg.selectedConfig];
-            if (configDeps) {
-                const packageJsonPath = path.join(packageDir, 'package.json');
-                const packageJson = await fs.readJson(packageJsonPath);
-
-                // Add configuration-specific dependencies
-                for (const dep of configDeps.dependencies) {
-                    const [name, version] = dep.split(/(?!^)@(.+)/).filter(Boolean);
-                    packageJson.dependencies[name] = version;
-                }
-
-                // Add configuration-specific dev dependencies
-                for (const dep of configDeps.devDependencies) {
-                    const [name, version] = dep.split(/(?!^)@(.+)/).filter(Boolean);
-                    packageJson.devDependencies[name] = version;
-                }
-
-                await fs.writeJson(packageJsonPath, packageJson, { spaces: 4 });
-            }
-        }
-
-        // Update package.json
-        const packageJsonPath = path.join(packageDir, 'package.json');
-        if (fs.existsSync(packageJsonPath)) {
-            const packageJson = await fs.readJson(packageJsonPath);
-            packageJson.name = `@repo/${packageName}`;
-            packageJson.dependencies = packageJson.dependencies || {};
-            packageJson.devDependencies = packageJson.devDependencies || {};
-            packageJson.scripts = packageJson.scripts || {};
-
-            // Add provider-specific dependencies
-            const configDeps = pkg.selectedConfig
-                ? pkg.configOptions?.dependencies[pkg.selectedConfig]
-                : undefined;
-            if (configDeps) {
-                for (const dep of configDeps.dependencies) {
-                    const [name, version] = dep.split(/(?!^)@(.+)/).filter(Boolean);
-                    packageJson.dependencies[name] = version;
-                }
-                for (const dep of configDeps.devDependencies) {
-                    const [name, version] = dep.split(/(?!^)@(.+)/).filter(Boolean);
-                    packageJson.devDependencies[name] = version;
-                }
-            }
-
-            // Update scripts based on selected provider
-            const scripts = pkg.selectedConfig
-                ? (pkg.configOptions?.scripts?.[pkg.selectedConfig] ?? {})
-                : undefined;
-            if (scripts) {
-                Object.assign(packageJson.scripts, {
-                    ...scripts,
-                    studio: 'drizzle-kit studio',
-                });
-            }
-
-            await fs.writeJson(packageJsonPath, packageJson, { spaces: 4 });
-        }
-
-        logger.success(`Created shared package @repo/${packageName}`);
-        return true;
-    } catch (error) {
-        logger.error('Failed to create shared package:', { subtitle: String(error) });
-        return false;
     }
 }
 
 /**
- * Add selected packages
- * @param appDir Application directory
- * @param selectedPackages Selected packages
- * @returns true if installation was successful, false otherwise
+ * Adds scripts to package.json based on the selected packages' config options.
+ * @param packageJson - The current package.json content.
+ * @param selectedPackages - A list of selected packages with optional script config.
+ */
+export async function addScriptsFromOptionsConfig(
+    packageJson: PackageJson,
+    selectedPackages: PackageConfig[],
+) {
+    for (const pkg of selectedPackages) {
+        if (pkg.configOptions?.resultForPrompt) {
+            if (pkg.selectedConfig) {
+                await addScripts(
+                    packageJson,
+                    pkg.configOptions.resultForPrompt[pkg.selectedConfig].scripts,
+                );
+            } else {
+                if (pkg.configOptions?.result) {
+                    await addScripts(packageJson, pkg.configOptions.result.scripts);
+                }
+            }
+        } else if (pkg.configOptions?.result) {
+            await addScripts(packageJson, pkg.configOptions.result.scripts);
+        }
+    }
+}
+
+/**
+ * Adds a dependency to either 'dependencies' or 'devDependencies' in package.json.
+ * @param packageJson - The package.json object to update.
+ * @param isDev - Whether the dependency is a development dependency.
+ * @param name - The name of the dependency.
+ * @param version - The version to install.
+ * @returns The updated packageJson object.
+ */
+export async function addDependency(
+    packageJson: PackageJson,
+    isDev: boolean,
+    name: string,
+    version: string,
+) {
+    const target = isDev ? 'devDependencies' : 'dependencies';
+    packageJson[target] = packageJson[target] || {};
+    packageJson[target][name.trim()] = version.trim();
+    logger.info(
+        `Adding ${isDev ? 'devDependencies' : 'dependencies'}: ${name.trim()}@${version.trim()}`,
+        {
+            icon: isDev ? '📦' : '🔧',
+        },
+    );
+    return packageJson;
+}
+
+/**
+ * Adds dependencies defined in a config array to package.json.
+ * @param packageJson - The package.json object to update.
+ * @param isDev - Whether to add to devDependencies.
+ * @param dependencies - An array of strings in the form 'name@version'.
+ */
+export async function addDependenciesFromConfig(
+    packageJson: PackageJson,
+    isDev: boolean,
+    dependencies: string[] | undefined,
+) {
+    if (!dependencies) {
+        return packageJson;
+    }
+    for (const dep of dependencies) {
+        const [name, version] = dep.split(/(?!^)@(.+)/).filter(Boolean);
+        return await addDependency(packageJson, isDev, name, version);
+    }
+}
+
+/**
+ * Adds dependencies to package.json from selected packages' config options.
+ * @param packageJson - The package.json object to update.
+ * @param selectedPackages - Packages whose dependencies should be added.
+ */
+export async function addDependenciesFromOptionsConfig(
+    packageJson: PackageJson,
+    selectedPackages: PackageConfig[],
+) {
+    for (const pkg of selectedPackages) {
+        if (pkg.configOptions?.resultForPrompt) {
+            if (pkg.selectedConfig) {
+                await addDependenciesFromConfig(
+                    packageJson,
+                    false,
+                    pkg.configOptions.resultForPrompt[pkg.selectedConfig].dependencies,
+                );
+                await addDependenciesFromConfig(
+                    packageJson,
+                    true,
+                    pkg.configOptions.resultForPrompt[pkg.selectedConfig].devDependencies,
+                );
+            } else {
+                if (pkg.configOptions?.result) {
+                    await addDependenciesFromConfig(
+                        packageJson,
+                        false,
+                        pkg.configOptions.result.dependencies,
+                    );
+                    await addDependenciesFromConfig(
+                        packageJson,
+                        true,
+                        pkg.configOptions.result.devDependencies,
+                    );
+                }
+            }
+        } else if (pkg.configOptions?.result) {
+            await addDependenciesFromConfig(
+                packageJson,
+                false,
+                pkg.configOptions.result.dependencies,
+            );
+            await addDependenciesFromConfig(
+                packageJson,
+                true,
+                pkg.configOptions.result.devDependencies,
+            );
+        }
+    }
+}
+
+/**
+ * Processes a Handlebars template using the provided context.
+ * @param content - Raw template content.
+ * @param context - Context to inject into the template.
+ * @returns Rendered template string.
+ */
+function processTemplate(content: string, context: ContextForTemplate): string {
+    const template = Handlebars.compile(content);
+    return template(context);
+}
+
+/**
+ * Generates files for a specific package based on its extraFilesContent.
+ * If file ends in .hbs, it will be processed as a Handlebars template.
+ * @param appDir - The root directory of the app.
+ * @param pkg - The package containing template definitions.
+ * @param context - Data to inject into templates.
+ */
+export async function generatePackageFiles(
+    appDir: string,
+    pkg: PackageConfig,
+    context: ContextForTemplate,
+) {
+    if (pkg.extraFilesContent) {
+        for (const [filePath, content] of Object.entries(pkg.extraFilesContent)) {
+            const fullPath = path.join(appDir, filePath);
+            const isHandlebars = filePath.endsWith('.hbs');
+            const targetPath = isHandlebars ? fullPath.slice(0, -4) : fullPath;
+
+            await fs.ensureDir(path.dirname(targetPath));
+
+            const finalContent = isHandlebars ? processTemplate(content, context) : content;
+
+            await fs.writeFile(targetPath, finalContent);
+
+            logger.info(`Generated ${path.relative(process.cwd(), targetPath)} for ${pkg.name}`, {
+                icon: '📝',
+            });
+        }
+    }
+}
+
+/**
+ * Generates all necessary files for selected packages.
+ * @param appDir - Application directory.
+ * @param selectedPackages - List of selected packages.
+ * @param context - Template context for rendering.
+ */
+export async function generateSelectedPackagesFiles(
+    appDir: string,
+    selectedPackages: PackageConfig[],
+    context: ContextForTemplate,
+) {
+    for (const pkg of selectedPackages) {
+        if (pkg.configOptions?.resultForPrompt) {
+            if (pkg.selectedConfig) {
+                context.contextPackageVars =
+                    pkg.configOptions.resultForPrompt[pkg.selectedConfig].contextPackageVars;
+            } else if (pkg.configOptions?.result) {
+                context.contextPackageVars = pkg.configOptions.result.contextPackageVars;
+            }
+        } else if (pkg.configOptions?.result) {
+            context.contextPackageVars = pkg.configOptions.result.contextPackageVars;
+        }
+        await generatePackageFiles(appDir, pkg, context);
+    }
+    logger.info('Generated all selected packages files', { icon: '📝' });
+}
+
+/**
+ * Adds selected packages to the app by modifying package.json, adding scripts, generating files, etc.
+ * @param appDir - Application directory.
+ * @param appName - Application name.
+ * @param framework - Selected framework.
+ * @param description - Project description.
+ * @param port - App port.
+ * @param uiLibrary - UI library configuration.
+ * @param iconLibrary - Icon library configuration.
+ * @param selectedPackages - List of selected packages.
+ * @returns True if successful, otherwise false.
  */
 export async function addSelectedPackages(
     appDir: string,
+    appName: string,
+    framework: string,
+    description: string,
+    port: number,
+    uiLibrary: PackageConfig | null,
+    iconLibrary: PackageConfig | null,
     selectedPackages: PackageConfig[],
 ): Promise<boolean> {
     try {
-        const packageJsonPath = path.join(appDir, 'package.json');
-        const packageJson = (await fs.readJson(packageJsonPath)) as PackageJson;
+        const packageJson: PackageJson = await getAppPakageJson(appDir);
 
-        // Initialize dependencies objects if they don't exist
-        packageJson.dependencies = packageJson.dependencies || {};
-        packageJson.devDependencies = packageJson.devDependencies || {};
-        packageJson.scripts = packageJson.scripts || {};
-
-        // Add selected packages to package.json
-
-        console.log('packageJson', packageJson);
         for (const pkg of selectedPackages) {
-            console.log('pkg', pkg);
-            // Handle shared packages
-            // if (pkg.installationType?.isShared && pkg.canBeSharedPackage) {
-            //     // Create shared package
-            //     const success = await createSharedPackage(
-            //         pkg,
-            //         pkg.installationType.packageName || pkg.defaultSharedName || 'shared-package',
-            //     );
-            //     if (success) {
-            //         // Add shared package as workspace dependency
-            //         packageJson.dependencies[`@repo/${pkg.installationType.packageName}`] =
-            //             'workspace:*';
-            //         continue;
-            //     }
-            // }
-            // Handle direct installation
-            const target = pkg.isDev ? packageJson.devDependencies : packageJson.dependencies;
-            target[pkg.name] = pkg.version;
-            // Add additional dependencies
-            if (pkg.dependencies) {
-                for (const dep of pkg.dependencies) {
-                    const [name, version] = dep.split(/(?!^)@(.+)/).filter(Boolean);
-                    packageJson.dependencies[name] = version;
-                    logger.info(`Adding dependencies: ${dep}`, { icon: '📦' });
-                }
+            if (pkg.installationType?.isShared) {
+                await addSharedPackage(
+                    appDir,
+                    appName,
+                    framework,
+                    description,
+                    port,
+                    packageJson,
+                    pkg,
+                    uiLibrary,
+                    iconLibrary,
+                    selectedPackages,
+                );
+            } else {
+                await addPackageDirectlyToApp(
+                    appDir,
+                    appName,
+                    framework,
+                    description,
+                    port,
+                    packageJson,
+                    pkg,
+                    uiLibrary,
+                    iconLibrary,
+                    selectedPackages,
+                );
             }
-            // Add additional dev dependencies
-            if (pkg.devDependencies) {
-                for (const dep of pkg.devDependencies) {
-                    const [name, version] = dep.split(/(?!^)@(.+)/).filter(Boolean);
-                    packageJson.devDependencies[name] = version;
-                    logger.info(`Adding dev dependencies: ${dep}`, { icon: '🔧' });
-                }
-            }
-            // Add scripts for direct installation
-            // if (
-            //     !pkg.installationType?.isShared &&
-            //     pkg.configOptions?.scripts &&
-            //     pkg.selectedConfig
-            // ) {
-            //     const scripts = pkg.configOptions.scripts[pkg.selectedConfig];
-            //     if (scripts) {
-            //         Object.assign(packageJson.scripts, {
-            //             ...scripts,
-            //             studio: 'drizzle-kit studio', // Studio command is the same for all providers
-            //         });
-            //     }
-            // }
-            // // Handle configuration-specific dependencies
-            // if (pkg.configOptions?.dependencies && pkg.selectedConfig) {
-            //     const configDeps = pkg.configOptions.dependencies[pkg.selectedConfig];
-            //     if (configDeps) {
-            //         // Add configuration-specific dependencies
-            //         for (const dep of configDeps.dependencies) {
-            //             const [name, version] = dep.split(/(?!^)@(.+)/).filter(Boolean);
-            //             packageJson.dependencies[name] = version;
-            //         }
-            //         // Add configuration-specific dev dependencies
-            //         for (const dep of configDeps.devDependencies) {
-            //             const [name, version] = dep.split(/(?!^)@(.+)/).filter(Boolean);
-            //             packageJson.devDependencies[name] = version;
-            //         }
-            //     }
-            // }
         }
 
-        // Write updated package.json
-        await fs.writeJson(packageJsonPath, packageJson, { spaces: 4 });
-
-        logger.success('All packages added successfully to package.json.');
+        logger.success('All selected packages added');
         return true;
     } catch (error) {
-        logger.error('Failed to add packages:', {
-            subtitle: 'You can add them manually later.',
+        logger.error('Failed to add selected packages', {
+            subtitle: String(error),
         });
-        console.error(error);
         return false;
     }
 }
 
 /**
- * Creates configuration files for selected packages
- * @param appDir Application directory
- * @param selectedPackages Selected packages
- * @param appName Application name
- * @param port Port number
+ * Adds a single package directly to the application's dependencies.
+ * @param appDir - Root directory of the app.
+ * @param appName - App name.
+ * @param framework - Framework used.
+ * @param description - App description.
+ * @param port - App port.
+ * @param packageJson - The current package.json.
+ * @param pkg - Package to install.
+ * @param uiLibrary - UI library config.
+ * @param iconLibrary - Icon library config.
+ * @param selectedPackages - All packages selected.
+ * @returns True if the package was added successfully.
  */
-export async function createPackageConfigs(
+export async function addPackageDirectlyToApp(
     appDir: string,
-    selectedPackages: PackageConfig[],
     appName: string,
+    framework: string,
+    description: string,
     port: number,
-): Promise<void> {
-    for (const pkg of selectedPackages) {
-        if (!pkg.configFiles || pkg.configFiles.length === 0) {
-            continue;
-        }
-
-        // Skip all config files for shared packages
-        if (pkg.installationType?.isShared) {
-            continue;
-        }
-
-        logger.info(`Setting up configuration for ${pkg.displayName}`, {
-            icon: '⚙️',
-        });
-
-        for (const configFile of pkg.configFiles) {
-            const filePath = path.join(appDir, configFile.path);
-
-            // Ensure directory exists
-            await fs.ensureDir(path.dirname(filePath));
-
-            // Get content
-            let content =
-                typeof configFile.content === 'function'
-                    ? configFile.content(appName, port)
-                    : configFile.content;
-
-            // Replace placeholders
-            content = content
-                .replace(/{{appName}}/g, appName)
-                .replace(/{{port}}/g, port.toString());
-
-            // Write or append to file
-            if (configFile.append && (await fs.pathExists(filePath))) {
-                const existingContent = await fs.readFile(filePath, 'utf8');
-
-                // Special handling for astro.config.mjs
-                if (filePath.endsWith('astro.config.mjs')) {
-                    await updateAstroConfig(filePath, pkg.name);
-                } else {
-                    // Generic append
-                    await fs.writeFile(filePath, `${existingContent}\n${content}`);
-                }
-            } else {
-                await fs.writeFile(filePath, content);
-            }
-
-            // Special handling for TanStack Start
-            if (filePath.endsWith('tanstack.config.ts') && pkg.name.includes('drizzle')) {
-                await updateTanStackConfig(filePath, pkg.name);
-            }
-
-            logger.file('Created', configFile.path);
-        }
-    }
-}
-
-/**
- * Updates Astro configuration file with new integrations
- * @param configPath Path to astro.config.mjs
- * @param packageName Package name to add
- */
-async function updateAstroConfig(configPath: string, packageName: string): Promise<void> {
+    packageJson: PackageJson,
+    pkg: PackageConfig,
+    uiLibrary: PackageConfig | null,
+    iconLibrary: PackageConfig | null,
+    selectedPackages: PackageConfig[],
+): Promise<boolean> {
     try {
-        let content = await fs.readFile(configPath, 'utf8');
+        await addDependency(packageJson, !!pkg.isDev, pkg.name, pkg.version);
+        await addDependenciesFromConfig(packageJson, false, pkg.dependencies);
+        await addDependenciesFromConfig(packageJson, true, pkg.devDependencies);
+        await addDependenciesFromOptionsConfig(packageJson, selectedPackages);
 
-        // Map package names to import names and integration names
-        const integrationMap: Record<string, { import: string; integration: string }> = {
-            '@astrojs/router': { import: 'router', integration: 'router()' },
-            'astro:transitions': { import: '{ transitions }', integration: 'transitions()' },
-            '@astrojs/react': { import: 'react', integration: 'react()' },
-            '@astrojs/tailwind': { import: 'tailwind', integration: 'tailwind()' },
-            '@astrojs/i18n': { import: 'i18n', integration: 'i18n()' },
+        const contextForTemplates: ContextForTemplate = {
+            appDir,
+            appName,
+            framework,
+            description,
+            port,
+            uiLibrary: uiLibrary?.name,
+            iconLibrary: iconLibrary?.name,
         };
 
-        const integration = integrationMap[packageName];
+        await addScripts(packageJson, pkg.scripts);
+        await addScriptsFromOptionsConfig(packageJson, selectedPackages);
 
-        if (!integration) {
-            return;
-        }
+        await generateSelectedPackagesFiles(appDir, selectedPackages, contextForTemplates);
 
-        // Check if import already exists
-        if (!content.includes(`import ${integration.import} from '${packageName}'`)) {
-            // Add import
-            const importStatement = `import ${integration.import} from '${packageName}';\n`;
-            content = content.replace(/import {/m, `${importStatement}import {`);
-        }
-
-        // Check if integration already exists in the integrations array
-        if (!content.includes(integration.integration)) {
-            // Add integration to the integrations array
-            content = content.replace(/integrations:\s*\[(.*?)\]/s, (match, integrations) => {
-                const newIntegrations = integrations.trim()
-                    ? `${integrations.trim()}, ${integration.integration}`
-                    : integration.integration;
-                return `integrations: [${newIntegrations}]`;
-            });
-        }
-
-        await fs.writeFile(configPath, content);
-        logger.success(`Added ${packageName} integration to Astro config`);
+        await savePackageJson(getPackageJsonPath(appDir), packageJson);
+        logger.success(`${pkg.name} package added to package.json`);
+        return true;
     } catch (error) {
-        logger.warn(`Failed to update Astro config for ${packageName}`, {
-            subtitle: 'You may need to manually update astro.config.mjs',
+        logger.error('Failed to add selected packages to package.json', {
+            subtitle: String(error),
         });
+        return false;
     }
 }
 
 /**
- * Updates TanStack Start configuration file with new integrations
- * @param configPath Path to tanstack.config.ts
- * @param packageName Package name to add
- */
-async function updateTanStackConfig(configPath: string, packageName: string): Promise<void> {
-    try {
-        let content = await fs.readFile(configPath, 'utf8');
-
-        // For Drizzle, add database configuration
-        if (packageName.includes('drizzle')) {
-            if (!content.includes('database:')) {
-                content = content.replace(
-                    /export default defineConfig\(\{/,
-                    `export default defineConfig({\n  database: {\n    provider: "sqlite",\n    url: process.env.DATABASE_URL || "sqlite.db"\n  },`,
-                );
-                await fs.writeFile(configPath, content);
-                logger.success('Added database configuration to TanStack config');
-            }
-        }
-    } catch (error) {
-        logger.warn(`Failed to update TanStack config for ${packageName}`, {
-            subtitle: 'You may need to manually update tanstack.config.ts',
-        });
-    }
-}
-
-/**
- * Updates environment variables for selected packages
+ * Add shared package
  * @param appDir Application directory
- * @param selectedPackages Selected packages
+ * @param appName Application name
+ * @param framework Selected Framework name
+ * @param description Application description
+ * @param port Selected application port
+ * @param packageJson PackageJson object to save
+ * @param pkg Selected package to install
+ * @param selectedPackages all Selected packages
+ * @returns true if installation was successful, false otherwise
+ */
+export async function addSharedPackage(
+    appDir: string,
+    appName: string,
+    framework: string,
+    description: string,
+    port: number,
+    packageJson: PackageJson,
+    pkg: PackageConfig,
+    uiLibrary: PackageConfig | null,
+    iconLibrary: PackageConfig | null,
+    selectedPackages: PackageConfig[],
+): Promise<boolean> {
+    try {
+        // const packageJson: PackageJson = await getAppPakageJson(appDir);
+
+        // console.log('packageJson', packageJson);
+
+        // // Add selected packages to dependencies
+        // // for (const pkg of selectedPackages) {
+        // //     if (pkg.version) {
+        // //         packageJson.dependencies[pkg.name] = pkg.version;
+        // //     }
+        // // }
+
+        // // Write updated package.json
+        // // await fs.writeJson(packageJsonPath, packageJson, { spaces: 2 });
+        // logger.success('Selected packages added to package.json');
+        console.log('FALTA IMPLEMENTAR addSharedPackages');
+        return true;
+    } catch (error) {
+        logger.error('Failed to add selected packages to package.json', {
+            subtitle: String(error),
+        });
+        return false;
+    }
+}
+
+/**
+ * Updates .env and .env.example with environment variables from selected packages.
+ * If a variable already exists, it won't be duplicated.
+ * @param appDir - Application directory.
+ * @param selectedPackages - List of selected packages.
  */
 export async function updateEnvVars(
     appDir: string,
@@ -400,58 +456,45 @@ export async function updateEnvVars(
     const envPath = path.join(appDir, '.env');
     const envExamplePath = path.join(appDir, '.env.example');
 
-    // Collect all environment variables
     const envVars: Record<string, string> = {};
-
     for (const pkg of selectedPackages) {
         if (pkg.envVars) {
             Object.assign(envVars, pkg.envVars);
         }
     }
 
-    // If no environment variables to add, return
     if (Object.keys(envVars).length === 0) {
         return;
     }
 
-    logger.info('Adding environment variables for selected packages', {
-        icon: '🔑',
-    });
+    logger.info('Adding environment variables for selected packages', { icon: '🔑' });
 
-    // Update .env file
     if (await fs.pathExists(envPath)) {
         let content = await fs.readFile(envPath, 'utf8');
-
-        // Add each environment variable if it doesn't exist
         for (const [key, value] of Object.entries(envVars)) {
             if (!content.includes(`${key}=`)) {
                 content += `\n# Added for ${key.split('_')[0].toLowerCase()} integration\n${key}=${value}\n`;
             }
         }
-
         await fs.writeFile(envPath, content);
     }
 
-    // Update .env.example file
     if (await fs.pathExists(envExamplePath)) {
         let content = await fs.readFile(envExamplePath, 'utf8');
-
-        // Add each environment variable if it doesn't exist
         for (const [key, value] of Object.entries(envVars)) {
             if (!content.includes(`${key}=`)) {
                 content += `\n# Added for ${key.split('_')[0].toLowerCase()} integration\n${key}=${value}\n`;
             }
         }
-
         await fs.writeFile(envExamplePath, content);
     }
 }
 
 /**
- * Updates README.md with information about selected packages
- * @param appDir Application directory
- * @param selectedPackages Selected packages
- * @param appName Application name
+ * Updates README.md to include a list of installed packages and their documentation.
+ * @param appDir - Application directory.
+ * @param selectedPackages - List of selected packages.
+ * @param appName - Name of the application.
  */
 export async function updateReadme(
     appDir: string,
@@ -465,31 +508,26 @@ export async function updateReadme(
         return;
     }
 
-    logger.info('Updating README.md with package documentation', {
-        icon: '📝',
-    });
+    logger.info('Updating README.md with package documentation', { icon: '📝' });
 
     let content = await fs.readFile(readmePath, 'utf8');
+    const section = generatePackagesSection(selectedPackages, appName);
 
-    // Check if we already have an "Installed Packages" section
     if (content.includes('## Installed Packages')) {
-        // If it exists, we'll replace it
         const regex = /## Installed Packages[\s\S]*?(?=##|$)/;
-        const packagesSection = generatePackagesSection(selectedPackages, appName);
-        content = content.replace(regex, packagesSection);
+        content = content.replace(regex, section);
     } else {
-        // Otherwise, add it at the end
-        content += generatePackagesSection(selectedPackages, appName);
+        content += section;
     }
 
     await fs.writeFile(readmePath, content);
 }
 
 /**
- * Generates the "Installed Packages" section for the README
- * @param selectedPackages Selected packages
- * @param appName Application name
- * @returns Formatted section content
+ * Generates the markdown section that describes the installed packages.
+ * @param selectedPackages - List of packages to document.
+ * @param appName - Application name for dynamic replacements.
+ * @returns Markdown string.
  */
 function generatePackagesSection(selectedPackages: PackageConfig[], appName: string): string {
     if (selectedPackages.length === 0) {
@@ -503,7 +541,6 @@ function generatePackagesSection(selectedPackages: PackageConfig[], appName: str
         section += `- **${pkg.displayName}**: ${pkg.description}\n`;
     }
 
-    // Add detailed documentation for each package
     for (const pkg of selectedPackages) {
         if (pkg.readmeSection) {
             const packageSection =

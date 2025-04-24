@@ -82,35 +82,50 @@
         },
         "configOptions": {
             "type": "object",
-            "description": "Configuration options for packages",
+            "description": "Prompt configuration",
+            "additionalProperties": false,
             "properties": {
-                "type": {
-                    "type": "string",
-                    "enum": ["list"]
-                },
-                "message": {
-                    "type": "string"
-                },
-                "choices": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "required": ["name", "value"],
-                        "properties": {
-                            "name": {
-                                "type": "string"
-                            },
-                            "value": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                },
-                "dependencies": {
+                "prompt": {
                     "type": "object",
+                    "description": "Prompt configuration",
+                    "additionalProperties": false,
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "enum": ["list"]
+                        },
+                        "message": {
+                            "type": "string"
+                        },
+                        "choices": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "required": ["name", "value"],
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "value": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        },
+                        "default": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["type", "message", "choices", "default"]
+                },
+                "resultForPrompt": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "description": "Result for the prompt",
                     "patternProperties": {
-                        "^[a-z-]+$": {
+                        "^[a-z0-9-]+$": {
                             "type": "object",
+                            "additionalProperties": false,
                             "properties": {
                                 "dependencies": {
                                     "type": "array",
@@ -123,15 +138,46 @@
                                     "items": {
                                         "type": "string"
                                     }
+                                },
+                                "scripts": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                },
+                                "contextPackageVars": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
                                 }
                             }
                         }
                     }
                 },
-                "scripts": {
+                "result": {
                     "type": "object",
-                    "patternProperties": {
-                        "^[a-z-]+$": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "dependencies": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "devDependencies": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "scripts": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        },
+                        "contextPackageVars": {
                             "type": "object",
                             "additionalProperties": {
                                 "type": "string"
@@ -139,8 +185,7 @@
                         }
                     }
                 }
-            },
-            "required": ["type", "message", "choices"]
+            }
         }
     }
 }

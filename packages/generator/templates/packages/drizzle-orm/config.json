@@ -11,48 +11,64 @@
     "canBeSharedPackage": true,
     "sharedPackageDefaultName": "db",
     "configOptions": {
-        "type": "list",
-        "message": "Which database provider would you like to use?",
-        "choices": [
-            { "name": "SQLite - Lightweight local database", "value": "sqlite" },
-            { "name": "PostgreSQL - Full-featured SQL database", "value": "postgres" },
-            { "name": "MySQL - Popular open-source database", "value": "mysql" },
-            { "name": "SingleStore - Distributed SQL database", "value": "singlestore" }
-        ],
-        "dependencies": {
+        "prompt": {
+            "type": "list",
+            "message": "Which database provider would you like to use?",
+            "choices": [
+                { "name": "SQLite - Lightweight local database", "value": "sqlite" },
+                { "name": "PostgreSQL - Full-featured SQL database", "value": "postgres" },
+                { "name": "MySQL - Popular open-source database", "value": "mysql" },
+                { "name": "SingleStore - Distributed SQL database", "value": "singlestore" }
+            ],
+            "default": "sqlite"
+        },
+        "resultForPrompt": {
             "sqlite": {
                 "dependencies": ["better-sqlite3@^9.2.2"],
-                "devDependencies": ["@types/better-sqlite3@^7.6.8"]
+                "devDependencies": ["@types/better-sqlite3@^7.6.8"],
+                "scripts": {
+                    "generate": "drizzle-kit generate:sqlite",
+                    "push": "drizzle-kit push:sqlite"
+                },
+                "contextPackageVars": {
+                    "driver": "better-sqlite3",
+                    "provider": "sqlite"
+                }
             },
             "postgres": {
                 "dependencies": ["postgres@^3.4.3"],
-                "devDependencies": []
+                "devDependencies": [],
+                "scripts": {
+                    "generate": "drizzle-kit generate:pg",
+                    "push": "drizzle-kit push:pg"
+                },
+                "contextPackageVars": {
+                    "driver": "pg",
+                    "provider": "postgres"
+                }
             },
             "mysql": {
                 "dependencies": ["mysql2@^3.6.5"],
-                "devDependencies": []
+                "devDependencies": [],
+                "scripts": {
+                    "generate": "drizzle-kit generate:mysql",
+                    "push": "drizzle-kit push:mysql"
+                },
+                "contextPackageVars": {
+                    "driver": "mysql2",
+                    "provider": "mysql"
+                }
             },
             "singlestore": {
                 "dependencies": ["@singlestore/http-client@^1.0.0"],
-                "devDependencies": []
-            }
-        },
-        "scripts": {
-            "sqlite": {
-                "generate": "drizzle-kit generate:sqlite",
-                "push": "drizzle-kit push:sqlite"
-            },
-            "postgres": {
-                "generate": "drizzle-kit generate:pg",
-                "push": "drizzle-kit push:pg"
-            },
-            "mysql": {
-                "generate": "drizzle-kit generate:mysql",
-                "push": "drizzle-kit push:mysql"
-            },
-            "singlestore": {
-                "generate": "drizzle-kit generate:mysql",
-                "push": "drizzle-kit push:mysql"
+                "devDependencies": [],
+                "scripts": {
+                    "generate": "drizzle-kit generate:mysql",
+                    "push": "drizzle-kit push:mysql"
+                },
+                "contextPackageVars": {
+                    "provider": "singlestore"
+                }
             }
         }
     }

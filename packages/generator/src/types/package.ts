@@ -54,22 +54,35 @@ export interface PackageConfig {
     /** Environment variables to add */
     envVars?: Record<string, string>;
 
+    /** Scripts to add */
+    scripts?: Record<string, string>;
+
     /** Configuration options for packages */
     configOptions?: {
-        type: 'list';
-        message: string;
-        choices: Array<{
-            name: string;
-            value: string;
-        }>;
-        dependencies: Record<
+        prompt?: {
+            type: 'list';
+            message: string;
+            choices: Array<{
+                name: string;
+                value: string;
+            }>;
+            default?: string;
+        };
+        resultForPrompt?: Record<
             string,
             {
-                dependencies: string[];
-                devDependencies: string[];
+                dependencies?: string[];
+                devDependencies?: string[];
+                scripts?: Record<string, string>;
+                contextPackageVars?: Record<string, Record<string, string>>;
             }
         >;
-        scripts?: Record<string, Record<string, string>>;
+        result?: {
+            dependencies?: string[];
+            devDependencies?: string[];
+            scripts?: Record<string, string>;
+            contextPackageVars?: Record<string, Record<string, string>>;
+        };
     };
 
     /** Selected configuration option */

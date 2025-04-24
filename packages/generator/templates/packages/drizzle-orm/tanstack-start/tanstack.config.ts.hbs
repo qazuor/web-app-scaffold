@@ -2,7 +2,7 @@ import { defineConfig } from '@tanstack/config';
 
 export default defineConfig({
     database: {
-        provider: '{{config.provider}}',
+        provider: '{{contextPackageVars.provider}}',
         url: process.env.DATABASE_URL || 'sqlite.db'
     }
 });
