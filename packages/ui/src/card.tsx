@@ -1,5 +1,6 @@
 import type { JSX } from 'react';
-import React = require('react');
+// biome-ignore lint/style/useImportType: <explanation>
+import React from 'react';
 
 export function Card({
     className,

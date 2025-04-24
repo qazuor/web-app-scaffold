@@ -1,7 +1,8 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import React = require('react');
+// biome-ignore lint/correctness/noUnusedImports: <explanation>
+import React from 'react';
 
 interface ButtonProps {
     children: ReactNode;
