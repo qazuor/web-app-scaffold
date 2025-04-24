@@ -1,0 +1,10 @@
+import { defineConfig } from 'astro/config';
+import tailwind from '@astrojs/tailwind';
+import { transitions } from 'astro:transitions';
+
+export default defineConfig({
+    integrations: [tailwind(), transitions()],
+    server: {
+        port: {{port}},
+    },
+});
