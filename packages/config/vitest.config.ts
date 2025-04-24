@@ -14,8 +14,8 @@ export default defineConfig({
             provider: 'v8', // O 'istanbul'
             reporter: ['text', 'json', 'html'], // Reportes de cobertura
             include: ['**/src/**/*.{ts,tsx}'], // Incluye archivos en src para cobertura
-            exclude: ['**/dist/**', '**/node_modules/**', '**/test/**'], // Excluye directorios
-        },
+            exclude: ['**/dist/**', '**/node_modules/**', '**/test/**'] // Excluye directorios
+        }
         // Puedes añadir otras configuraciones globales aquí
         // Por ejemplo, aliases de módulos si usas paths absolutos en tu tsconfig
         // resolve: {
@@ -23,5 +23,5 @@ export default defineConfig({
         //     '@/': new URL('./src/', import.meta.url).pathname, // Ejemplo de alias si tienes src/@/
         //   },
         // },
-    },
+    }
 });
