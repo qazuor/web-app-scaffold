@@ -1,6 +1,6 @@
 // apps/api/src/index.test.ts
 import { describe, expect, it } from 'vitest';
-import app from './index'; // Importa la instancia de Hono
+import app from '../index'; // Importa la instancia de Hono
 
 describe('Hono API', () => {
     it('should return "Hello from Hono API!" on GET /', async () => {
