@@ -3,11 +3,10 @@ import type { PackageConfig } from './types/package.js';
 import {
     availableFrameworks,
     getDefaultDescriptionForFramework,
-    getDefaultNameForFramework,
+    getDefaultNameForFramework
 } from './utils/defaults.js';
 import { loadPackageConfigs } from './utils/package-loader.js';
 import { getNextAvailablePort, isPortInUse } from './utils/port-manager.js';
-
 /**
  * Prompts the user to select the framework to use
  * @param options CLI options
@@ -38,7 +37,7 @@ export async function promptForFramework(options: { framework?: string }): Promi
  */
 export async function promptForName(
     options: { name?: string },
-    framework: string,
+    framework: string
 ): Promise<string> {
     if (options.name) {
         return options.name;
@@ -70,7 +69,7 @@ export async function promptForName(
 export async function promptForDescription(
     options: { description?: string },
     framework: string,
-    appName: string,
+    appName: string
 ): Promise<string> {
     if (options.description) {
         return options.description;
@@ -155,14 +154,14 @@ export async function promptForPackages(framework: string): Promise<PackageConfi
                 choices: availablePackages.map((pkg) => ({
                     name: `${pkg.displayName} - ${pkg.description}`,
                     value: pkg.name,
-                    checked: false,
+                    checked: false
                 })),
             },
         ]);
 
         // Return the full package configs for selected packages
         const selectedPackages = availablePackages.filter((pkg) =>
-            selectedPackageNames.includes(pkg.name),
+            selectedPackageNames.includes(pkg.name)
         );
 
         // Process each selected package for additional configuration
@@ -180,7 +179,7 @@ export async function promptForPackages(framework: string): Promise<PackageConfi
     } catch (error) {
         console.error('Error loading packages:', error);
         throw new Error(
-            `Failed to load packages for framework ${framework}. The generator will continue without additional packages.`,
+            `Failed to load packages for framework ${framework}. The generator will continue without additional packages.`
         );
     }
 }
@@ -205,7 +204,7 @@ export async function promptForInstallationType(pkg: PackageConfig): Promise<{
             message: `How would you like to install ${pkg.displayName}?`,
             choices: [
                 { name: 'Direct installation in the app', value: 'direct' },
-                { name: 'As a shared package in the monorepo', value: 'shared' },
+                { name: 'As a shared package in the monorepo', value: 'shared' }
             ],
         },
     ]);
@@ -292,9 +291,9 @@ export async function promptForUILibrary(framework: string): Promise<PackageConf
             choices: [
                 ...uiLibraries.map((lib) => ({
                     name: `${lib.displayName} - ${lib.description}`,
-                    value: lib,
+                    value: lib
                 })),
-                { name: 'None', value: null },
+                { name: 'None', value: null }
             ],
         },
     ]);
@@ -323,9 +322,9 @@ export async function promptForIconLibrary(framework: string): Promise<PackageCo
             choices: [
                 ...iconLibraries.map((lib) => ({
                     name: `${lib.displayName} - ${lib.description}`,
-                    value: lib,
+                    value: lib
                 })),
-                { name: 'None', value: null },
+                { name: 'None', value: null }
             ],
         },
     ]);

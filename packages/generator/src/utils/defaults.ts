@@ -25,7 +25,7 @@ export function getDefaultDescriptionForFramework(framework: string, appName: st
         hono: `REST API built with Hono for ${appName}`,
         'react-vite': `React web app built with Vite for ${appName}`,
         'astro-vite': `Static site built with Astro for ${appName}`,
-        'tanstack-start': `Full-stack app built with TanStack Start for ${appName}`,
+        'tanstack-start': `Full-stack app built with TanStack Start for ${appName}`
     };
 
     return frameworkMap[framework] || `App ${appName}`;
@@ -40,6 +40,6 @@ export const availableFrameworks = [
     { name: 'Astro with Vite - For static sites', value: 'astro-vite' },
     {
         name: 'TanStack Start - Full-stack React framework with SSR, streaming & more',
-        value: 'tanstack-start',
-    },
+        value: 'tanstack-start'
+    }
 ];
