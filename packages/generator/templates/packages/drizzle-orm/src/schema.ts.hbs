@@ -1,27 +1,58 @@
-import { table } from 'console';
-import { title } from 'process';
 import {
-{
-    tableType;
-}
-as;
-table, { {columnTypes };
-} } from "drizzle-orm/{{provider}}-core"
+    {{#if (eq config.driver "better-sqlite3")}}
+    integer,
+    text,
+    sqliteTable as table
+    {{else if (eq config.driver "pg")}}
+    serial,
+    text,
+    timestamp,
+    pgTable as table
+    {{else if (eq config.driver "mysql2")}}
+    int,
+    varchar,
+    timestamp,
+    mysqlTable as table
+    {{/if}}
+} from 'drizzle-orm/{{config.provider}}';
 
-export const users = table("users", {
-    id: {{idType}}.primaryKey(),
-    "name": {{stringType}}.notNull(),
-    email: {{stringType}}.notNull().unique(),
-    createdAt: {{timestampType}}.notNull().defaultNow(),
-})
+export const users = table('users', {
+    {{#if (eq config.driver "better-sqlite3")}}
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    name: text('name').notNull(),
+    email: text('email').notNull().unique(),
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull().defaultNow()
+    {{else if (eq config.driver "pg")}}
+    id: serial('id').primaryKey(),
+    name: text('name').notNull(),
+    email: text('email').notNull().unique(),
+    createdAt: timestamp('created_at').notNull().defaultNow()
+    {{else if (eq config.driver "mysql2")}}
+    id: int('id').primaryKey().autoincrement(),
+    name: varchar('name', { length: 255 }).notNull(),
+    email: varchar('email', { length: 255 }).notNull().unique(),
+    createdAt: timestamp('created_at').notNull().defaultNow()
+    {{/if}}
+});
 
-export const posts = table("posts", {
-    id: {{idType}}.primaryKey(),
-    title: {{stringType}}.notNull(),
-    content: {{stringType}}.notNull(),
-    authorId: {{idType}}
-        .notNull()
-        .references(() => users.id),
-    createdAt: {{timestampType}
-}.notNull().defaultNow(),
-})
+export const posts = table('posts', {
+    {{#if (eq config.driver "better-sqlite3")}}
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    title: text('title').notNull(),
+    content: text('content').notNull(),
+    authorId: integer('author_id').notNull().references(() => users.id),
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull().defaultNow()
+    {{else if (eq config.driver "pg")}}
+    id: serial('id').primaryKey(),
+    title: text('title').notNull(),
+    content: text('content').notNull(),
+    authorId: integer('author_id').notNull().references(() => users.id),
+    createdAt: timestamp('created_at').notNull().defaultNow()
+    {{else if (eq config.driver "mysql2")}}
+    id: int('id').primaryKey().autoincrement(),
+    title: varchar('title', { length: 255 }).notNull(),
+    content: text('content').notNull(),
+    authorId: int('author_id').notNull().references(() => users.id),
+    createdAt: timestamp('created_at').notNull().defaultNow()
+    {{/if}}
+});

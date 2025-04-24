@@ -1,8 +1,22 @@
 import type { Config } from 'drizzle-kit';
 
 export default {
-    schema: './src/db/schema.ts',
+    schema: './src/schema.ts',
     out: './drizzle',
-    driver: '{{driver}}',
-    dbCredentials: '{{dbCredentials}}',
+    {{#if (eq config.driver "better-sqlite3")}}
+    driver: 'better-sqlite3',
+    dbCredentials: {
+        url: 'sqlite.db'
+    }
+    {{else if (eq config.driver "pg")}}
+    driver: 'pg',
+    dbCredentials: {
+        connectionString: process.env.DATABASE_URL
+    }
+    {{else if (eq config.driver "mysql2")}}
+    driver: 'mysql2',
+    dbCredentials: {
+        url: process.env.DATABASE_URL
+    }
+    {{/if}}
 } satisfies Config;

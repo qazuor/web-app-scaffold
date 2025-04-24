@@ -1,20 +1,18 @@
-import {
-{
-    clientImport;
-}
-} from "{{clientPackage}}"
-import type * as schema from './schema';
+{{#if (eq config.driver "better-sqlite3")}}
+import Database from 'better-sqlite3';
+import { drizzle } from 'drizzle-orm/better-sqlite3';
+const sqlite = new Database('sqlite.db');
+export const db = drizzle(sqlite);
+{{else if (eq config.driver "pg")}}
+import postgres from 'postgres';
+import { drizzle } from 'drizzle-orm/postgres-js';
+const client = postgres(process.env.DATABASE_URL);
+export const db = drizzle(client);
+{{else if (eq config.driver "mysql2")}}
+import mysql from 'mysql2/promise';
+import { drizzle } from 'drizzle-orm/mysql2';
+const connection = await mysql.createConnection(process.env.DATABASE_URL);
+export const db = drizzle(connection);
+{{/if}}
 
-// Initialize database client
-{
-    clientInit;
-}
-
-// Export types
-export type User = typeof schema.users.$inferSelect;
-export type NewUser = typeof schema.users.$inferInsert;
-export type Post = typeof schema.posts.$inferSelect;
-export type NewPost = typeof schema.posts.$inferInsert;
-
-// Export schema
 export * from './schema';
