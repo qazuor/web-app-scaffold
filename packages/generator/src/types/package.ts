@@ -39,7 +39,7 @@ export interface PackageConfig {
     sharedPackageTemplate?: string;
 
     /** Default name for the shared package */
-    defaultSharedName?: string;
+    sharedPackageDefaultName?: string;
 
     /** Configuration files that need to be created or modified */
     configFiles?: {

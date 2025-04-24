@@ -127,6 +127,7 @@ export async function loadPackageConfigs(): Promise<PackageConfig[]> {
                     dependencies: packageFiles.config.dependencies,
                     devDependencies: packageFiles.config.devDependencies,
                     canBeSharedPackage: packageFiles.config.canBeSharedPackage,
+                    sharedPackageDefaultName: packageFiles.config.sharedPackageDefaultName,
                     readmeSection: packageFiles.readmeContent,
                     envVars: packageFiles.envVars,
                     configOptions: packageFiles.config.configOptions,

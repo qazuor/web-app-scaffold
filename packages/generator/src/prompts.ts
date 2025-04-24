@@ -223,7 +223,7 @@ export async function promptForInstallationType(pkg: PackageConfig): Promise<{
             type: 'input',
             name: 'packageName',
             message: 'Package name:',
-            default: pkg.defaultSharedName || 'shared-package',
+            default: pkg.sharedPackageDefaultName || pkg.name || 'shared-package',
             validate: (input: string) => {
                 if (/^[a-z0-9-]+$/.test(input)) {
                     return true;
