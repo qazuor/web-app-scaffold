@@ -1,4 +1,4 @@
-import { logger } from './logger';
+import { logger } from '@repo/logger';
 
 /**
  * Progress tracker for multi-step operations
