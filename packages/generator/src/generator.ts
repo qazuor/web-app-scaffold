@@ -11,7 +11,7 @@ import {
     promptForName,
     promptForPackages,
     promptForPort,
-    promptForUILibrary,
+    promptForUILibrary
 } from './prompts.js';
 import type { PackageConfig } from './types/package.js';
 import { installDependencies } from './utils/dependency-installer.js';
@@ -24,7 +24,7 @@ import {
     processDirectory,
     updateBiomeConfig,
     updatePackageJson,
-    updatePortInConfigs,
+    updatePortInConfigs
 } from './utils/file-operations.js';
 import { addSelectedPackages, updateEnvVars } from './utils/package-manager.js';
 import { updateReadme } from './utils/package-manager copy.js';
@@ -55,13 +55,13 @@ export async function runGenerator(options: GeneratorOptions): Promise<void> {
     await withErrorHandling(async () => {
         logger.title('Qazuor App Generator for Turborepo', {
             icon: '🚀',
-            subtitle: 'Creating a new application in your Turborepo monorepo',
+            subtitle: 'Creating a new application in your Turborepo monorepo'
         });
 
         // Prompt the user for required information
         logger.step('Configuring application settings...', {
             icon: '⚙️',
-            subtitle: 'Framework, name, description, and port',
+            subtitle: 'Framework, name, description, and port'
         });
         const framework = await promptForFramework(options);
         const appName = await promptForName({ name: options.name }, framework);
@@ -71,7 +71,7 @@ export async function runGenerator(options: GeneratorOptions): Promise<void> {
         // Load packages - if this fails, it will throw an error
         logger.step('Selecting additional packages...', {
             icon: '📦',
-            subtitle: 'UI library, icon library, and other packages',
+            subtitle: 'UI library, icon library, and other packages'
         });
         const uiLibrary = await promptForUILibrary(framework);
         const iconLibrary = await promptForIconLibrary(framework);
@@ -90,7 +90,7 @@ export async function runGenerator(options: GeneratorOptions): Promise<void> {
         // Create the app
         logger.step(`Creating ${framework} application: ${appName}`, {
             icon: '🏗️',
-            subtitle: `Port: ${port}\nDescription: ${description}`,
+            subtitle: `Port: ${port}\nDescription: ${description}`
         });
         await createApp(appName, framework, description, port, selectedPackages);
 
@@ -106,7 +106,7 @@ export async function runGenerator(options: GeneratorOptions): Promise<void> {
                 port,
                 uiLibrary,
                 iconLibrary,
-                selectedPackages,
+                selectedPackages
             );
 
             // Update environment variables
@@ -138,7 +138,7 @@ async function createApp(
     framework: string,
     description: string,
     port: number,
-    selectedPackages: PackageConfig[],
+    selectedPackages: PackageConfig[]
 ): Promise<void> {
     const appDir = path.join(process.cwd(), 'apps', name);
 
@@ -148,7 +148,7 @@ async function createApp(
     // Check if template directory exists
     if (!fs.existsSync(templateDir)) {
         throw new Error(
-            `Template directory for framework "${framework}" not found at ${templateDir}`,
+            `Template directory for framework "${framework}" not found at ${templateDir}`
         );
     }
 
@@ -161,8 +161,8 @@ async function createApp(
                 type: 'confirm',
                 name: 'overwrite',
                 message: `Folder apps/${name} already exists. Do you want to overwrite it?`,
-                default: false,
-            },
+                default: false
+            }
         ]);
 
         if (!overwrite) {
@@ -187,8 +187,8 @@ async function createApp(
                     type: 'confirm',
                     name: 'overwriteSharedPackage',
                     message: `Folder packages/${sharedPackageName} already exists. Do you want to overwrite it?`,
-                    default: false,
-                },
+                    default: false
+                }
             ]);
 
             if (!overwriteSharedPackage) {
@@ -199,8 +199,8 @@ async function createApp(
             logger.warn(
                 `Removing existing folder: ${chalk.cyan(`packages/${sharedPackageName}`)}`,
                 {
-                    icon: '🗑️',
-                },
+                    icon: '🗑️'
+                }
             );
             await fs.remove(sharedPackageDir);
         }
@@ -220,7 +220,7 @@ async function createApp(
         framework,
         description,
         path.join(process.cwd(), 'apps'),
-        port,
+        port
     );
 
     // Copy shared config files
@@ -242,13 +242,13 @@ async function createApp(
     const packageJsonPath = path.join(appDir, 'package.json');
     await updatePackageJson(packageJsonPath, {
         name: name,
-        description: description,
+        description: description
     });
 
     // Special instructions for TanStack Start
     if (framework === 'tanstack-start') {
         logger.info('Setting up TanStack Start...', {
-            subtitle: 'TanStack Start requires specific dependencies to be installed.',
+            subtitle: 'TanStack Start requires specific dependencies to be installed.'
         });
     }
 }
@@ -266,7 +266,7 @@ function showNextSteps(
     framework: string,
     dependenciesInstalled: boolean,
     port: number,
-    selectedPackages: PackageConfig[],
+    selectedPackages: PackageConfig[]
 ): void {
     logger.subtitle('Next steps:', { icon: '👉' });
     logger.log(`  1. Navigate to the app folder: ${chalk.cyan(`cd apps/${appName}`)}`);
@@ -292,13 +292,13 @@ function showNextSteps(
                 '- TanStack Start is in beta and may have breaking changes\n' +
                 '- The first run may take longer as it sets up the environment\n' +
                 "- If you encounter issues, try running 'npx @tanstack/start@latest dev' directly",
-            icon: 'ℹ️',
+            icon: 'ℹ️'
         });
 
         logger.info('For more information, see the TanStack Start documentation:', {
             subtitle: 'https://tanstack.com/start/latest',
             dontUseTitle: true,
-            icon: '📚',
+            icon: '📚'
         });
     } else if (!dependenciesInstalled) {
         logger.log(`  5. Run Biome linter: ${chalk.cyan('pnpm lint')}`);
@@ -309,11 +309,11 @@ function showNextSteps(
     if (selectedPackages.length > 0) {
         logger.info(`Installed ${selectedPackages.length} additional packages:`, {
             icon: '📦',
-            subtitle: selectedPackages.map((pkg) => pkg.displayName).join(', '),
+            subtitle: selectedPackages.map((pkg) => pkg.displayName).join(', ')
         });
 
         logger.info('Check the README.md file for documentation on how to use these packages.', {
-            icon: '📖',
+            icon: '📖'
         });
     }
 }

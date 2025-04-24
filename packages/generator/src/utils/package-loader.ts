@@ -22,7 +22,7 @@ interface PackageFiles {
  */
 async function loadPackageFiles(
     packageDir: string,
-    packageName: string,
+    packageName: string
 ): Promise<PackageFiles | null> {
     try {
         const configFile = path.join(packageDir, 'config.json');
@@ -49,7 +49,7 @@ async function loadPackageFiles(
                 envContent
                     .split('\n')
                     .filter((line) => line && !line.startsWith('#'))
-                    .map((line) => line.split('=')),
+                    .map((line) => line.split('='))
             );
             if (Object.keys(vars).length > 0) {
                 envVars = vars;
@@ -89,11 +89,11 @@ async function loadPackageFiles(
             config,
             readmeContent,
             envVars,
-            extraFilesContent,
+            extraFilesContent
         };
     } catch (error) {
         logger.error(`Error loading package ${packageName}:`, {
-            subtitle: String(error),
+            subtitle: String(error)
         });
         return null;
     }
@@ -131,7 +131,7 @@ export async function loadPackageConfigs(): Promise<PackageConfig[]> {
                     envVars: packageFiles.envVars,
                     configOptions: packageFiles.config.configOptions,
                     extraFilesContent: packageFiles.extraFilesContent,
-                    frameworks: packageFiles.config.frameworks,
+                    frameworks: packageFiles.config.frameworks
                 });
             }
         }
@@ -139,7 +139,7 @@ export async function loadPackageConfigs(): Promise<PackageConfig[]> {
         return packages;
     } catch (error) {
         logger.error('Failed to load package configurations:', {
-            subtitle: String(error),
+            subtitle: String(error)
         });
         return [];
     }

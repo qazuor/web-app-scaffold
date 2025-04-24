@@ -32,7 +32,7 @@ async function main() {
         const templatesExist = await fs.pathExists(templatesDir);
         if (!templatesExist) {
             logger.error('Templates directory not found. Cannot continue.', {
-                subtitle: 'Please make sure the templates directory exists.',
+                subtitle: 'Please make sure the templates directory exists.'
             });
             process.exit(1);
         }

@@ -18,8 +18,8 @@ export async function checkAndConfirmOverwrite(dirPath: string, inquirer: any): 
                 type: 'confirm',
                 name: 'overwrite',
                 message: `Folder ${relativePath} already exists. Do you want to overwrite it?`,
-                default: false,
-            },
+                default: false
+            }
         ]);
 
         if (!overwrite) {
@@ -53,7 +53,7 @@ export async function copyDirectory(sourcePath: string, destPath: string): Promi
     const destRelative = path.relative(process.cwd(), destPath);
     logger.info(`Copying ${chalk.cyan(sourceRelative)} template to ${chalk.cyan(destRelative)}`, {
         icon: '📋',
-        title: 'TEMPLATE',
+        title: 'TEMPLATE'
     });
     await fs.copy(sourcePath, destPath);
 }
@@ -65,7 +65,7 @@ export async function copyDirectory(sourcePath: string, destPath: string): Promi
  */
 export async function updatePackageJson(
     packageJsonPath: string,
-    updates: Record<string, unknown>,
+    updates: Record<string, unknown>
 ): Promise<void> {
     if (fs.existsSync(packageJsonPath)) {
         const relativePath = path.relative(process.cwd(), packageJsonPath);
@@ -92,7 +92,7 @@ export async function processDirectory(
     framework: string,
     description: string,
     basePath: string,
-    port?: number,
+    port?: number
 ): Promise<void> {
     const entries = await fs.readdir(dirPath, { withFileTypes: true });
     const relativePath = path.relative(basePath, dirPath);
@@ -127,7 +127,7 @@ export async function processFile(
     appName: string,
     framework: string,
     description: string,
-    port?: number,
+    port?: number
 ): Promise<void> {
     try {
         logger.file('Processing file:', relativeFilePath);
@@ -153,14 +153,14 @@ export async function processFile(
         if (content !== (await fs.readFile(filePath, 'utf8'))) {
             logger.success(`Replacing placeholders in: ${chalk.cyan(relativeFilePath)}`, {
                 icon: '✏️',
-                title: 'UPDATED',
+                title: 'UPDATED'
             });
         }
 
         await fs.writeFile(filePath, content);
-    } catch (error) {
+    } catch (_error) {
         logger.warn(`Could not process file: ${chalk.cyan(relativeFilePath)}`, {
-            subtitle: 'This file will be copied as-is without processing',
+            subtitle: 'This file will be copied as-is without processing'
         });
     }
 }
@@ -211,9 +211,9 @@ export async function updateBiomeConfig(appDir: string): Promise<void> {
                 await fs.writeJson(biomeConfigPath, biomeConfig, { spaces: 2 });
                 logger.success('Biome configuration updated successfully');
             }
-        } catch (error) {
+        } catch (_error) {
             logger.warn('Failed to update Biome configuration', {
-                subtitle: 'You may need to manually update the extends path in biome.json',
+                subtitle: 'You may need to manually update the extends path in biome.json'
             });
         }
     }
@@ -228,7 +228,7 @@ export async function updateBiomeConfig(appDir: string): Promise<void> {
 export async function updatePortInConfigs(
     appDir: string,
     framework: string,
-    port: number,
+    port: number
 ): Promise<void> {
     logger.info(`Setting port to ${port} in configuration files`, { icon: '🔌' });
 
@@ -250,9 +250,9 @@ export async function updatePortInConfigs(
         }
 
         logger.success(`Port configuration updated to ${port}`);
-    } catch (error) {
+    } catch (_error) {
         logger.warn('Failed to update port in configuration files', {
-            subtitle: 'You may need to manually update the port in the configuration files',
+            subtitle: 'You may need to manually update the port in the configuration files'
         });
     }
 }
@@ -331,7 +331,7 @@ async function updateTanstackPort(appDir: string, port: number): Promise<void> {
         if (!content.includes('port:')) {
             content = content.replace(
                 /export default defineConfig\(\{/,
-                `export default defineConfig({\n  server: {\n    port: ${port}\n  },`,
+                `export default defineConfig({\n  server: {\n    port: ${port}\n  },`
             );
         } else {
             content = content.replace(/port:\s*\d+/g, `port: ${port}`);
@@ -350,7 +350,7 @@ async function updateTanstackPort(appDir: string, port: number): Promise<void> {
 export async function createEnvFile(
     appDir: string,
     framework: string,
-    port: number,
+    port: number
 ): Promise<void> {
     const envPath = path.join(appDir, '.env');
     const envExamplePath = path.join(appDir, '.env.example');
@@ -387,7 +387,7 @@ PORT=${port}
         }
     } catch (error) {
         logger.warn('Failed to create environment files', {
-            subtitle: 'You may need to manually create the .env file',
+            subtitle: 'You may need to manually create the .env file'
         });
         console.error(error);
     }

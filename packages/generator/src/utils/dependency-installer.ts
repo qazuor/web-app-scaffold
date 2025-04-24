@@ -9,7 +9,7 @@ import { logger } from '@repo/logger';
 export async function installDependencies(dirPath: string): Promise<boolean> {
     logger.info('Installing dependencies...', {
         icon: '📦',
-        subtitle: 'This may take a few minutes',
+        subtitle: 'This may take a few minutes'
     });
 
     try {
@@ -18,7 +18,7 @@ export async function installDependencies(dirPath: string): Promise<boolean> {
         return true;
     } catch (error) {
         logger.error('Failed to install dependencies:', {
-            subtitle: 'You can install them manually later with "pnpm install"',
+            subtitle: 'You can install them manually later with "pnpm install"'
         });
         console.error(error);
         return false;

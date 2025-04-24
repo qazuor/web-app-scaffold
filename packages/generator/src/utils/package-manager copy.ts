@@ -42,7 +42,7 @@ async function generateFullContextForTemplate(
     pkg: PackageConfig,
     targetDir: string,
     context: TemplateContext,
-    selectedPackages: PackageConfig[],
+    selectedPackages: PackageConfig[]
 ) {
     // Get selected packages info from context
     const selectedUILibrary = selectedPackages.find((p) => p.isUILibrary);
@@ -57,8 +57,8 @@ async function generateFullContextForTemplate(
             uiLibrary: selectedUILibrary?.name,
             iconLibrary: selectedIconLibrary?.name,
             useTailwind: hasTailwind,
-            framework: pkg.frameworks?.[0],
-        },
+            framework: pkg.frameworks?.[0]
+        }
     };
 }
 
@@ -69,7 +69,7 @@ async function generatePackageFiles(
     pkg: PackageConfig,
     targetDir: string,
     context: TemplateContext,
-    selectedPackages: PackageConfig[],
+    selectedPackages: PackageConfig[]
 ): Promise<void> {
     if (!pkg.extraFilesContent) {
         return;
@@ -79,7 +79,7 @@ async function generatePackageFiles(
         pkg,
         targetDir,
         context,
-        selectedPackages,
+        selectedPackages
     );
 
     for (const [filePath, content] of Object.entries(pkg.extraFilesContent)) {
@@ -107,7 +107,7 @@ async function generatePackageFiles(
  */
 export async function addSelectedPackages(
     appDir: string,
-    selectedPackages: PackageConfig[],
+    selectedPackages: PackageConfig[]
 ): Promise<boolean> {
     try {
         const packageJsonPath = path.join(appDir, 'package.json');
@@ -159,9 +159,9 @@ export async function addSelectedPackages(
                                   url:
                                       pkg.selectedConfig === 'sqlite'
                                           ? 'sqlite.db'
-                                          : 'process.env.DATABASE_URL',
+                                          : 'process.env.DATABASE_URL'
                               }
-                            : undefined,
+                            : undefined
                     },
                     dependencies: pkg.dependencies?.reduce(
                         (acc, dep) => {
@@ -169,7 +169,7 @@ export async function addSelectedPackages(
                             acc[name] = version;
                             return acc;
                         },
-                        {} as Record<string, string>,
+                        {} as Record<string, string>
                     ),
                     devDependencies: pkg.devDependencies?.reduce(
                         (acc, dep) => {
@@ -177,10 +177,10 @@ export async function addSelectedPackages(
                             acc[name] = version;
                             return acc;
                         },
-                        {} as Record<string, string>,
-                    ),
+                        {} as Record<string, string>
+                    )
                 },
-                selectedPackages,
+                selectedPackages
             );
         }
 
@@ -191,7 +191,7 @@ export async function addSelectedPackages(
         return true;
     } catch (error) {
         logger.error('Failed to add packages:', {
-            subtitle: 'You can add them manually later.',
+            subtitle: 'You can add them manually later.'
         });
         console.error(error);
         return false;
@@ -206,7 +206,7 @@ function getDriverForProvider(provider: string): string {
         sqlite: 'better-sqlite3',
         postgres: 'pg',
         mysql: 'mysql2',
-        singlestore: 'mysql2',
+        singlestore: 'mysql2'
     };
     return driverMap[provider] || provider;
 }
@@ -222,7 +222,7 @@ export async function createPackageConfigs(
     appDir: string,
     selectedPackages: PackageConfig[],
     appName: string,
-    port: number,
+    port: number
 ): Promise<void> {
     for (const pkg of selectedPackages) {
         if (!pkg.configFiles || pkg.configFiles.length === 0) {
@@ -235,7 +235,7 @@ export async function createPackageConfigs(
         }
 
         logger.info(`Setting up configuration for ${pkg.displayName}`, {
-            icon: '⚙️',
+            icon: '⚙️'
         });
 
         for (const configFile of pkg.configFiles) {
@@ -278,11 +278,11 @@ export async function createPackageConfigs(
                                   url:
                                       pkg.selectedConfig === 'sqlite'
                                           ? 'sqlite.db'
-                                          : 'process.env.DATABASE_URL',
+                                          : 'process.env.DATABASE_URL'
                               }
-                            : undefined,
+                            : undefined
                     },
-                    selectedPackages,
+                    selectedPackages
                 );
                 content = processTemplate(content, templateContext);
             }
@@ -300,7 +300,7 @@ export async function createPackageConfigs(
  */
 export async function updateEnvVars(
     appDir: string,
-    selectedPackages: PackageConfig[],
+    selectedPackages: PackageConfig[]
 ): Promise<void> {
     const envPath = path.join(appDir, '.env');
     const envExamplePath = path.join(appDir, '.env.example');
@@ -320,7 +320,7 @@ export async function updateEnvVars(
     }
 
     logger.info('Adding environment variables for selected packages', {
-        icon: '🔑',
+        icon: '🔑'
     });
 
     // Update .env file
@@ -361,7 +361,7 @@ export async function updateEnvVars(
 export async function updateReadme(
     appDir: string,
     selectedPackages: PackageConfig[],
-    appName: string,
+    appName: string
 ): Promise<void> {
     const readmePath = path.join(appDir, 'README.md');
 
@@ -371,7 +371,7 @@ export async function updateReadme(
     }
 
     logger.info('Updating README.md with package documentation', {
-        icon: '📝',
+        icon: '📝'
     });
 
     let content = await fs.readFile(readmePath, 'utf8');

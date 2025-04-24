@@ -6,7 +6,7 @@ export function printBanner(bannerTitle: string, bannerSubtitle: string, font = 
     const banner = figlet.textSync(bannerTitle, {
         font: font,
         horizontalLayout: 'default',
-        verticalLayout: 'default',
+        verticalLayout: 'default'
     });
 
     logger.log(chalk.cyan(banner));

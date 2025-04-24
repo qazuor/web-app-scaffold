@@ -71,7 +71,7 @@ export async function addScript(packageJson: PackageJson, name: string, code: st
  */
 export async function addScripts(
     packageJson: PackageJson,
-    scripts: Record<string, string> | undefined,
+    scripts: Record<string, string> | undefined
 ) {
     if (scripts && typeof scripts === 'object') {
         for (const [name, code] of Object.entries(scripts)) {
@@ -87,14 +87,14 @@ export async function addScripts(
  */
 export async function addScriptsFromOptionsConfig(
     packageJson: PackageJson,
-    selectedPackages: PackageConfig[],
+    selectedPackages: PackageConfig[]
 ) {
     for (const pkg of selectedPackages) {
         if (pkg.configOptions?.resultForPrompt) {
             if (pkg.selectedConfig) {
                 await addScripts(
                     packageJson,
-                    pkg.configOptions.resultForPrompt[pkg.selectedConfig].scripts,
+                    pkg.configOptions.resultForPrompt[pkg.selectedConfig].scripts
                 );
             } else {
                 if (pkg.configOptions?.result) {
@@ -119,7 +119,7 @@ export async function addDependency(
     packageJson: PackageJson,
     isDev: boolean,
     name: string,
-    version: string,
+    version: string
 ) {
     const target = isDev ? 'devDependencies' : 'dependencies';
     packageJson[target] = packageJson[target] || {};
@@ -127,8 +127,8 @@ export async function addDependency(
     logger.info(
         `Adding ${isDev ? 'devDependencies' : 'dependencies'}: '${name.trim()}' version: '${version.trim()}'`,
         {
-            icon: isDev ? '📦' : '🔧',
-        },
+            icon: isDev ? '📦' : '🔧'
+        }
     );
     return packageJson;
 }
@@ -142,7 +142,7 @@ export async function addDependency(
 export async function addDependenciesFromConfig(
     packageJson: PackageJson,
     isDev: boolean,
-    dependencies: string[] | undefined,
+    dependencies: string[] | undefined
 ) {
     if (!dependencies) {
         return packageJson;
@@ -160,7 +160,7 @@ export async function addDependenciesFromConfig(
  */
 export async function addDependenciesFromOptionsConfig(
     packageJson: PackageJson,
-    selectedPackages: PackageConfig[],
+    selectedPackages: PackageConfig[]
 ) {
     for (const pkg of selectedPackages) {
         if (pkg.configOptions?.resultForPrompt) {
@@ -168,24 +168,24 @@ export async function addDependenciesFromOptionsConfig(
                 await addDependenciesFromConfig(
                     packageJson,
                     false,
-                    pkg.configOptions.resultForPrompt[pkg.selectedConfig].dependencies,
+                    pkg.configOptions.resultForPrompt[pkg.selectedConfig].dependencies
                 );
                 await addDependenciesFromConfig(
                     packageJson,
                     true,
-                    pkg.configOptions.resultForPrompt[pkg.selectedConfig].devDependencies,
+                    pkg.configOptions.resultForPrompt[pkg.selectedConfig].devDependencies
                 );
             } else {
                 if (pkg.configOptions?.result) {
                     await addDependenciesFromConfig(
                         packageJson,
                         false,
-                        pkg.configOptions.result.dependencies,
+                        pkg.configOptions.result.dependencies
                     );
                     await addDependenciesFromConfig(
                         packageJson,
                         true,
-                        pkg.configOptions.result.devDependencies,
+                        pkg.configOptions.result.devDependencies
                     );
                 }
             }
@@ -193,12 +193,12 @@ export async function addDependenciesFromOptionsConfig(
             await addDependenciesFromConfig(
                 packageJson,
                 false,
-                pkg.configOptions.result.dependencies,
+                pkg.configOptions.result.dependencies
             );
             await addDependenciesFromConfig(
                 packageJson,
                 true,
-                pkg.configOptions.result.devDependencies,
+                pkg.configOptions.result.devDependencies
             );
         }
     }
@@ -226,7 +226,7 @@ export async function generatePackageFiles(
     appDir: string,
     pkg: PackageConfig,
     context: ContextForTemplate,
-    includePackageJson = false,
+    includePackageJson = false
 ) {
     if (pkg.extraFilesContent) {
         for (const [filePath, content] of Object.entries(pkg.extraFilesContent)) {
@@ -244,7 +244,7 @@ export async function generatePackageFiles(
             await fs.writeFile(targetPath, finalContent);
 
             logger.info(`Generated ${path.relative(process.cwd(), targetPath)} for ${pkg.name}`, {
-                icon: '📝',
+                icon: '📝'
             });
         }
     }
@@ -260,7 +260,7 @@ export async function generateSelectedPackagesFiles(
     appDir: string,
     selectedPackages: PackageConfig[],
     context: ContextForTemplate,
-    includePackageJson?: boolean,
+    includePackageJson?: boolean
 ) {
     for (const pkg of selectedPackages) {
         if (pkg.configOptions?.resultForPrompt) {
@@ -298,7 +298,7 @@ export async function addSelectedPackages(
     port: number,
     uiLibrary: PackageConfig | null,
     iconLibrary: PackageConfig | null,
-    selectedPackages: PackageConfig[],
+    selectedPackages: PackageConfig[]
 ): Promise<boolean> {
     try {
         const packageJson: PackageJson = await getAppPakageJson(appDir);
@@ -315,7 +315,7 @@ export async function addSelectedPackages(
                     pkg,
                     uiLibrary,
                     iconLibrary,
-                    selectedPackages,
+                    selectedPackages
                 );
             } else {
                 await addPackageDirectlyToApp(
@@ -328,7 +328,7 @@ export async function addSelectedPackages(
                     pkg,
                     uiLibrary,
                     iconLibrary,
-                    selectedPackages,
+                    selectedPackages
                 );
             }
         }
@@ -337,7 +337,7 @@ export async function addSelectedPackages(
         return true;
     } catch (error) {
         logger.error('Failed to add selected packages', {
-            subtitle: String(error),
+            subtitle: String(error)
         });
         return false;
     }
@@ -376,7 +376,7 @@ export async function addPackageDirectlyToApp(
     pkg: PackageConfig,
     uiLibrary: PackageConfig | null,
     iconLibrary: PackageConfig | null,
-    selectedPackages: PackageConfig[],
+    selectedPackages: PackageConfig[]
 ): Promise<boolean> {
     try {
         await addDependency(packageJson, !!pkg.isDev, pkg.name, pkg.version);
@@ -391,7 +391,7 @@ export async function addPackageDirectlyToApp(
             description,
             port,
             uiLibrary: uiLibrary?.name,
-            iconLibrary: iconLibrary?.name,
+            iconLibrary: iconLibrary?.name
         };
 
         await addScripts(packageJson, pkg.scripts);
@@ -404,7 +404,7 @@ export async function addPackageDirectlyToApp(
         return true;
     } catch (error) {
         logger.error('Failed to add selected packages to package.json', {
-            subtitle: String(error),
+            subtitle: String(error)
         });
         return false;
     }
@@ -442,7 +442,7 @@ export async function addSharedPackage(
     pkg: PackageConfig,
     uiLibrary: PackageConfig | null,
     iconLibrary: PackageConfig | null,
-    selectedPackages: PackageConfig[],
+    selectedPackages: PackageConfig[]
 ): Promise<boolean> {
     try {
         if (!pkg.installationType || !pkg.installationType.packageName) {
@@ -452,7 +452,7 @@ export async function addSharedPackage(
         const sharedPackageDir = path.join(
             appDir,
             '../../packages',
-            pkg.installationType.packageName,
+            pkg.installationType.packageName
         );
 
         await createDirectory(sharedPackageDir);
@@ -465,23 +465,21 @@ export async function addSharedPackage(
             port,
             uiLibrary: uiLibrary?.name,
             iconLibrary: iconLibrary?.name,
-            packageName: pkg.installationType.packageName,
+            packageName: pkg.installationType.packageName
         };
-
-        console.log('sharedPackageDir', sharedPackageDir);
 
         await generateSelectedPackagesFiles(
             sharedPackageDir,
             selectedPackages,
             contextForTemplates,
-            true,
+            true
         );
 
         await addDependency(
             packageJson,
             false,
             `@repo/${pkg.installationType.packageName}`,
-            'workspace:*',
+            'workspace:*'
         );
 
         await savePackageJson(getPackageJsonPath(appDir), packageJson);
@@ -491,7 +489,7 @@ export async function addSharedPackage(
         return true;
     } catch (error) {
         logger.error('Failed to add selected packages to package.json', {
-            subtitle: String(error),
+            subtitle: String(error)
         });
         return false;
     }
@@ -505,7 +503,7 @@ export async function addSharedPackage(
  */
 export async function updateEnvVars(
     appDir: string,
-    selectedPackages: PackageConfig[],
+    selectedPackages: PackageConfig[]
 ): Promise<void> {
     const envPath = path.join(appDir, '.env');
     const envExamplePath = path.join(appDir, '.env.example');
@@ -558,7 +556,7 @@ async function updateEnvFile(envFilePath: string, envVars: Record<string, string
 export async function updateReadme(
     appDir: string,
     selectedPackages: PackageConfig[],
-    appName: string,
+    appName: string
 ): Promise<void> {
     const readmePath = path.join(appDir, 'README.md');
 

@@ -6,7 +6,7 @@ import { logger } from '@repo/logger';
 export class GeneratorError extends Error {
     constructor(
         message: string,
-        public details?: string,
+        public details?: string
     ) {
         super(message);
         this.name = 'GeneratorError';

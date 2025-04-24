@@ -28,18 +28,18 @@ export async function loadPortTracking(): Promise<PortTracking> {
             const data = await fs.readJson(PORT_TRACKING_FILE);
             return {
                 usedPorts: data.usedPorts || {},
-                lastAssignedPort: data.lastAssignedPort || DEFAULT_START_PORT,
+                lastAssignedPort: data.lastAssignedPort || DEFAULT_START_PORT
             };
         }
-    } catch (error) {
+    } catch (_error) {
         logger.warn('Failed to load port tracking data, using defaults', {
-            subtitle: 'This will not affect the app generation process',
+            subtitle: 'This will not affect the app generation process'
         });
     }
 
     return {
         usedPorts: {},
-        lastAssignedPort: DEFAULT_START_PORT,
+        lastAssignedPort: DEFAULT_START_PORT
     };
 }
 
@@ -53,7 +53,7 @@ export async function savePortTracking(data: PortTracking): Promise<void> {
         await fs.writeJson(PORT_TRACKING_FILE, data, { spaces: 2 });
     } catch (error) {
         logger.warn('Failed to save port tracking data', {
-            subtitle: 'Port suggestions may not be accurate in future runs',
+            subtitle: 'Port suggestions may not be accurate in future runs'
         });
     }
 }
@@ -85,7 +85,7 @@ export async function registerPort(appName: string, port: number): Promise<void>
 
     logger.info(`Port ${port} registered for app ${appName}`, {
         icon: '🔌',
-        title: 'PORT',
+        title: 'PORT'
     });
 }
 
