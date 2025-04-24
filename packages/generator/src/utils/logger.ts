@@ -1,7 +1,9 @@
 import chalk from 'chalk';
 
-// Color palette for different log types
-const colors = {
+/**
+ * Color palette for different log types
+ */
+export const colors = {
     info: chalk.hex('#00BFFF'),
     success: chalk.hex('#32CD32'),
     warn: chalk.hex('#FFD700'),
@@ -14,8 +16,10 @@ const colors = {
     path: chalk.cyan,
 };
 
-// Default icons for different log types
-const defaultIcons = {
+/**
+ * Default icons for different log types
+ */
+export const defaultIcons = {
     info: 'ℹ️',
     success: '✅',
     warn: '⚠️',
@@ -27,8 +31,10 @@ const defaultIcons = {
     dir: '📁',
 };
 
-// Default titles for different log types
-const defaultTitles = {
+/**
+ * Default titles for different log types
+ */
+export const defaultTitles = {
     info: 'INFO',
     success: 'SUCCESS',
     warn: 'WARNING',
@@ -95,31 +101,41 @@ export const logger = {
             dontUseTitle = false,
             icon = defaultIcons[type] || '',
             dontUseIcon = false,
-            subtitle,
+            subtitle = '',
         } = options;
 
-        // Build the log prefix
-        let prefix = '';
+        const prefix = this.buildPrefix(icon, dontUseIcon, title, dontUseTitle, type);
+        return this.buildMessage(prefix, message, subtitle);
+    },
 
-        // Add icon if enabled
+    /**
+     * Builds the prefix for a log message
+     */
+    buildPrefix(
+        icon: string,
+        dontUseIcon: boolean,
+        title: string,
+        dontUseTitle: boolean,
+        type: Exclude<keyof typeof colors, 'path'>,
+    ): string {
+        let prefix = '';
         if (!dontUseIcon && icon) {
             prefix += `${icon} `;
         }
-
-        // Add title if enabled
         if (!dontUseTitle && title) {
             prefix += `${colors[type](title)}: `;
         }
+        return prefix;
+    },
 
-        // Build the complete message
-        let fullMessage = prefix + message;
-
-        // Add subtitle if provided
+    /**
+     * Builds the complete message with prefix and optional subtitle
+     */
+    buildMessage(prefix: string, message: string, subtitle: string): string {
         if (subtitle) {
-            fullMessage = `${prefix + subtitle}\n${' '.repeat(prefix.length)}${message}`;
+            return `${prefix + subtitle}\n${' '.repeat(prefix.length)}${message}`;
         }
-
-        return fullMessage;
+        return prefix + message;
     },
 
     /**
