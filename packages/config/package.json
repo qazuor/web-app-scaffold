@@ -8,6 +8,7 @@
     "author": "",
     "license": "ISC",
     "main": "index.js",
+    "type": "module",
     "files": ["tsconfig.json", "tailwind.config.js", "vitest.config.js", "biome.json"],
     "dependencies": {
         "@biomejs/biome": "^1.9.4"
