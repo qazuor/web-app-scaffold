@@ -138,7 +138,12 @@ export async function promptForPackages(framework: string): Promise<PackageConfi
     try {
         const allPackages = await loadPackageConfigs();
         const availablePackages = allPackages
-            .filter((pkg) => !pkg.frameworks || pkg.frameworks.includes(framework))
+            .filter(
+                (pkg) =>
+                    !pkg.frameworks ||
+                    pkg.frameworks.length === 0 ||
+                    pkg.frameworks.includes(framework)
+            )
             .filter((pkg) => !pkg.isUILibrary)
             .filter((pkg) => !pkg.isIconLibrary);
 
