@@ -197,7 +197,7 @@ async function createApp(
     // Update package.json
     const packageJsonPath = path.join(appDir, 'package.json');
     await updatePackageJson(packageJsonPath, {
-        name: `@${name}`,
+        name: name,
         description: description,
     });
 
