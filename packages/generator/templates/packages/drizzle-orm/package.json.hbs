@@ -4,6 +4,17 @@
     "private": true,
     "main": "./src/index.ts",
     "types": "./src/index.ts",
+    "author": "{{packageMetadata.author}}",
+    "license": "{{packageMetadata.license}}",
+    "repository": {
+        "type": "{{packageMetadata.repository.type}}",
+        "url": "{{packageMetadata.repository.url}}"
+    },
+    "bugs": {
+        "url": "{{packageMetadata.bugs.url}}",
+        "email": "{{packageMetadata.bugs.email}}"
+    },
+    "homepage": "{{packageMetadata.homepage}}",
     "scripts": {
         "lint": "biome check .",
         "format": "biome format --write .",

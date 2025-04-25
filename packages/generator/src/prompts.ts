@@ -3,7 +3,8 @@ import type { PackageConfig } from './types/package.js';
 import {
     availableFrameworks,
     getDefaultDescriptionForFramework,
-    getDefaultNameForFramework
+    getDefaultNameForFramework,
+    getPackageDefaults
 } from './utils/defaults.js';
 import { loadPackageConfigs } from './utils/package-loader.js';
 import { getNextAvailablePort, isPortInUse } from './utils/port-manager.js';
@@ -85,6 +86,81 @@ export async function promptForDescription(
     ]);
 
     return description;
+}
+
+/**
+ * Prompts for package metadata
+ * @param options CLI options
+ * @returns Package metadata
+ */
+export async function promptForMetadata(): Promise<Record<string, unknown>> {
+    const defaults = await getPackageDefaults();
+
+    const getDefaultUrl = (objOrString: string | Record<string, unknown> | undefined) => {
+        return objOrString
+            ? typeof objOrString === 'string'
+                ? objOrString
+                : objOrString?.url
+            : null;
+    };
+
+    const defaultRepoUrl = getDefaultUrl(defaults.repository) || 'https://github.com/username/repo';
+    const defaultBugsUrl =
+        getDefaultUrl(defaults.bugs) || 'https://github.com/username/repo/issues';
+
+    const metadata = await inquirer.prompt([
+        {
+            type: 'input',
+            name: 'author',
+            message: 'Author (format: Name <email> (url)):',
+            default: defaults.author || 'John Doe <john@example.com> (https://github.com/johndoe)'
+        },
+        {
+            type: 'input',
+            name: 'license',
+            message: 'License:',
+            default: defaults.license || 'MIT'
+        },
+        {
+            type: 'input',
+            name: 'repository',
+            message: 'Repository URL:',
+            default: defaultRepoUrl
+        },
+        {
+            type: 'input',
+            name: 'bugs',
+            message: 'Issues URL:',
+            default: defaultBugsUrl
+        },
+        {
+            type: 'input',
+            name: 'homepage',
+            message: 'Homepage URL:',
+            default: defaults.homepage || 'https://github.com/username/repo#readme'
+        },
+        {
+            type: 'input',
+            name: 'keywords',
+            message: 'Keywords (comma-separated):',
+            default: ''
+        }
+    ]);
+
+    return {
+        author: metadata.author,
+        license: metadata.license,
+        repository: {
+            type: 'git',
+            url: metadata.repository
+        },
+        bugs: {
+            url: metadata.bugs,
+            email: metadata.author.match(/<(.+?)>/)?.[1] || ''
+        },
+        homepage: metadata.homepage,
+        keywords: metadata.keywords.split(',').map((keyword: string) => keyword.trim())
+    };
 }
 
 /**

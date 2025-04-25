@@ -20,6 +20,7 @@ type ContextForTemplate = {
     // biome-ignore lint/suspicious/noExplicitAny: dynamic structure depends on package
     contextPackageVars?: any;
     packageName?: string | undefined;
+    packageMetadata?: Record<string, string>;
 };
 
 /**
@@ -285,7 +286,8 @@ export async function addSelectedPackages(
     port: number,
     uiLibrary: PackageConfig | null,
     iconLibrary: PackageConfig | null,
-    selectedPackages: PackageConfig[]
+    selectedPackages: PackageConfig[],
+    metadata: Record<string, string>
 ): Promise<boolean> {
     try {
         const packageJson: PackageJson = await getAppPakageJson(appDir);
@@ -301,7 +303,8 @@ export async function addSelectedPackages(
                     packageJson,
                     pkg,
                     uiLibrary,
-                    iconLibrary
+                    iconLibrary,
+                    metadata
                 );
             } else {
                 await addPackageDirectlyToApp(
@@ -425,7 +428,8 @@ export async function addSharedPackage(
     packageJson: PackageJson,
     pkg: PackageConfig,
     uiLibrary: PackageConfig | null,
-    iconLibrary: PackageConfig | null
+    iconLibrary: PackageConfig | null,
+    metadata: Record<string, string>
 ): Promise<boolean> {
     try {
         if (!pkg.installationType || !pkg.installationType.packageName) {
@@ -448,7 +452,8 @@ export async function addSharedPackage(
             port,
             uiLibrary: uiLibrary?.name,
             iconLibrary: iconLibrary?.name,
-            packageName: pkg.installationType.packageName
+            packageName: pkg.installationType.packageName,
+            packageMetadata: metadata
         };
 
         await generateSelectedPackagesFiles(sharedPackageDir, pkg, contextForTemplates, true);

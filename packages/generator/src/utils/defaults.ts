@@ -1,3 +1,6 @@
+import path from 'node:path';
+import fs from 'fs-extra';
+
 /**
  * Returns a default name based on the selected framework
  * @param framework Selected framework
@@ -29,6 +32,29 @@ export function getDefaultDescriptionForFramework(framework: string, appName: st
     };
 
     return frameworkMap[framework] || `App ${appName}`;
+}
+
+/**
+ * Gets package defaults from root package.json
+ * @returns Package defaults
+ */
+export async function getPackageDefaults(): Promise<Record<string, string | undefined>> {
+    try {
+        const rootPackageJsonPath = path.join(process.cwd(), 'package.json');
+        if (await fs.pathExists(rootPackageJsonPath)) {
+            const packageJson = await fs.readJson(rootPackageJsonPath);
+            return {
+                author: packageJson.author,
+                license: packageJson.license,
+                repository: packageJson.repository,
+                bugs: packageJson.bugs,
+                homepage: packageJson.homepage
+            };
+        }
+    } catch (error) {
+        console.error('Error reading root package.json:', error);
+    }
+    return {};
 }
 
 /**

@@ -10,6 +10,7 @@ import {
     promptForFramework,
     promptForIconLibrary,
     promptForInstall,
+    promptForMetadata,
     promptForName,
     promptForPackages,
     promptForPort,
@@ -72,6 +73,13 @@ export async function runGenerator(options: GeneratorOptions): Promise<void> {
         const description = await promptForDescription(options, framework, appName);
         const port = await promptForPort({ port: options.port });
 
+        // Get package metadata
+        logger.step('Configuring package metadata...', {
+            icon: '📝',
+            subtitle: 'Author, license, repository, etc.'
+        });
+        const metadata = await promptForMetadata();
+
         // Load packages - if this fails, it will throw an error
         logger.step('Selecting additional packages...', {
             icon: '📦',
@@ -103,7 +111,7 @@ export async function runGenerator(options: GeneratorOptions): Promise<void> {
             icon: '🏗️',
             subtitle: `Port: ${port}\nDescription: ${description}`
         });
-        await createApp(appName, framework, description, port, selectedPackages);
+        await createApp(appName, framework, description, port, selectedPackages, metadata);
 
         const appDir = path.join(process.cwd(), 'apps', appName);
 
@@ -117,7 +125,8 @@ export async function runGenerator(options: GeneratorOptions): Promise<void> {
                 port,
                 uiLibrary,
                 iconLibrary,
-                selectedPackages
+                selectedPackages,
+                metadata
             );
 
             // Update environment variables
@@ -149,7 +158,8 @@ async function createApp(
     framework: string,
     description: string,
     port: number,
-    selectedPackages: PackageConfig[]
+    selectedPackages: PackageConfig[],
+    metadata: Record<string, unknown>
 ): Promise<void> {
     const appDir = path.join(process.cwd(), 'apps', name);
 
@@ -253,7 +263,8 @@ async function createApp(
     const packageJsonPath = path.join(appDir, 'package.json');
     await updatePackageJson(packageJsonPath, {
         name: name,
-        description: description
+        description: description,
+        ...metadata
     });
 
     // Special instructions for TanStack Start
