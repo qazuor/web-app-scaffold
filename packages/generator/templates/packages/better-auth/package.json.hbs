@@ -1,0 +1,19 @@
+{
+    "name": "@repo/{{packageName}}",
+    "version": "0.1.0",
+    "private": true,
+    "main": "./src/index.ts",
+    "types": "./src/index.ts",
+    "scripts": {
+        "lint": "biome check .",
+        "format": "biome format --write .",
+        "typecheck": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@better-auth/react": "^1.0.0",
+        "@better-auth/core": "^1.0.0"
+    },
+    "devDependencies": {
+        "@types/better-auth__react": "^1.0.0"
+    }
+}

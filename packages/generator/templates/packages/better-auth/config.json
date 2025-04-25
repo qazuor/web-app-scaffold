@@ -1,0 +1,40 @@
+{
+    "$schema": "../../../src/schemas/package.schema.json",
+    "name": "@better-auth/react",
+    "displayName": "Better Auth",
+    "description": "Modern authentication solution with built-in security features",
+    "version": "^1.0.0",
+    "dependencies": ["@better-auth/react@^1.0.0", "@better-auth/core@^1.0.0"],
+    "devDependencies": ["@types/better-auth__react@^1.0.0"],
+    "frameworks": ["react-vite", "tanstack-start"],
+    "isUILibrary": false,
+    "isIconLibrary": false,
+    "canBeSharedPackage": true,
+    "sharedPackageDefaultName": "auth",
+    "configOptions": {
+        "prompt": {
+            "type": "checkbox",
+            "message": "Which authentication strategy would you like to use?",
+            "choices": [
+                {
+                    "name": "Email & Password - Traditional authentication",
+                    "value": "email-password"
+                },
+                { "name": "Google - Social sign-in with Google", "value": "google" },
+                { "name": "Facebook - Social sign-in with Facebook", "value": "facebook" }
+            ],
+            "default": "email-password"
+        },
+        "resultForPrompt": {
+            "email-password": {
+                "dependencies": []
+            },
+            "google": {
+                "dependencies": ["@better-auth/google@^1.0.0"]
+            },
+            "facebook": {
+                "dependencies": ["@better-auth/facebook@^1.0.0"]
+            }
+        }
+    }
+}
