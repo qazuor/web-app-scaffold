@@ -20,7 +20,7 @@ export async function installDependencies(dirPath: string): Promise<boolean> {
         logger.error('Failed to install dependencies:', {
             subtitle: 'You can install them manually later with "pnpm install"'
         });
-        console.error(error);
+        logger.debug(error as Error);
         return false;
     }
 }

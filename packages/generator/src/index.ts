@@ -46,6 +46,7 @@ async function main() {
         await runGenerator(options);
     } catch (err) {
         logger.error('Unexpected error:', { subtitle: String(err) });
+        logger.debug(err as Error);
         process.exit(1);
     }
 }

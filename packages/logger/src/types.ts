@@ -42,4 +42,5 @@ export type LogType =
     | 'step'
     | 'file'
     | 'dir'
-    | 'log';
+    | 'log'
+    | 'debug';

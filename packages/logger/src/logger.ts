@@ -138,6 +138,18 @@ export const logger = {
     },
 
     /**
+     * Log an error object with Stack trace (work only in debug mode)
+     * @param error Error to log
+     */
+    debug(error: Error): void {
+        console.error(this.formatLog('error', error.message));
+        if (process.env.DEBUG) {
+            console.error(error);
+            console.error('Stack trace:', error.stack);
+        }
+    },
+
+    /**
      * Log a title (section header)
      * @param message Title text
      * @param options Formatting options

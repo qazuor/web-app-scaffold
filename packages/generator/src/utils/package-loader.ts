@@ -95,6 +95,7 @@ async function loadPackageFiles(
         logger.error(`Error loading package ${packageName}:`, {
             subtitle: String(error)
         });
+        logger.debug(error as Error);
         return null;
     }
 }
@@ -142,6 +143,7 @@ export async function loadPackageConfigs(): Promise<PackageConfig[]> {
         logger.error('Failed to load package configurations:', {
             subtitle: String(error)
         });
+        logger.debug(error as Error);
         return [];
     }
 }

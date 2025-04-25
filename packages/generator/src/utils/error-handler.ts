@@ -20,6 +20,7 @@ export class GeneratorError extends Error {
 export function handleError(error: unknown, context: string): void {
     if (error instanceof GeneratorError) {
         logger.error(error.message, { subtitle: error.details });
+        logger.debug(error as Error);
     } else {
         logger.error(`Error in ${context}:`, { subtitle: String(error) });
     }

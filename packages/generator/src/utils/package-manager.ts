@@ -327,6 +327,7 @@ export async function addSelectedPackages(
         logger.error('Failed to add selected packages', {
             subtitle: String(error)
         });
+        logger.debug(error as Error);
         return false;
     }
 }
@@ -393,6 +394,7 @@ export async function addPackageDirectlyToApp(
         logger.error('Failed to add selected packages to package.json', {
             subtitle: String(error)
         });
+        logger.debug(error as Error);
         return false;
     }
 }
@@ -474,6 +476,7 @@ export async function addSharedPackage(
         logger.error('Failed to add selected packages to package.json', {
             subtitle: String(error)
         });
+        logger.debug(error as Error);
         return false;
     }
 }
