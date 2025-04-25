@@ -29,7 +29,7 @@ import {
     updatePackageJson,
     updatePortInConfigs
 } from './utils/file-operations.js';
-import { addSelectedPackages, updateEnvVars, updateReadme } from './utils/package-manager.js';
+import { addSelectedPackages } from './utils/package-manager.js';
 import { registerPort } from './utils/port-manager.js';
 
 inquirer.registerPrompt('press-to-continue', PressToContinuePrompt);
@@ -141,12 +141,6 @@ export async function runGenerator(options: GeneratorOptions): Promise<void> {
                 selectedPackages,
                 metadata
             );
-
-            // Update environment variables
-            await updateEnvVars(appDir, selectedPackages);
-
-            // Update README.md
-            await updateReadme(appDir, selectedPackages, appName);
         }
 
         if (shouldInstall) {
