@@ -68,7 +68,12 @@ export const logger = {
         } = options;
 
         const prefix = this.buildPrefix(icon, dontUseIcon, title, dontUseTitle, type);
-        return this.buildMessage(prefix, message, subtitle);
+        return this.buildMessage(
+            prefix,
+            message,
+            subtitle,
+            (title?.length + 2 || 0) + (icon ? 3 : 0)
+        );
     },
 
     /**
@@ -94,9 +99,15 @@ export const logger = {
     /**
      * Builds the complete message with prefix and optional subtitle
      */
-    buildMessage(prefix: string, message: string, subtitle: string | undefined): string {
+    buildMessage(
+        prefix: string,
+        message: string,
+        subtitle: string | undefined,
+        subtitlePadLenght: number
+    ): string {
         if (subtitle) {
-            return `${prefix + subtitle}\n${' '.repeat(prefix.length)}${message}`;
+            return `${prefix + message}\n${' '.repeat(subtitlePadLenght)}${subtitle}`;
+            // return `${prefix + subtitle}\n${' '.repeat(prefix.length)}${message}`;
         }
         return prefix + message;
     },
@@ -183,7 +194,9 @@ export const logger = {
      * @param options Formatting options
      */
     step(message: string, options: LogOptions = {}): void {
+        console.log('\n-----------------------------------------------------');
         console.log(this.formatLog('step', message, options));
+        console.log('\n');
     },
 
     /**
