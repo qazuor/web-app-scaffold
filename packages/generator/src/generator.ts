@@ -254,7 +254,7 @@ async function createApp(
     await updatePortInConfigs(appDir, framework, port);
 
     // Create .env file with port configuration based on template
-    await createEnvFile(appDir, framework, port);
+    await createEnvFile(appDir, framework, port, name, description);
 
     // Register the port for this app
     await registerPort(name, port);

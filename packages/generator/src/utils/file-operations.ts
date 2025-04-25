@@ -341,27 +341,64 @@ async function updateTanstackPort(appDir: string, port: number): Promise<void> {
     }
 }
 
+interface EnvTemplateContext {
+    appName: string;
+    framework: string;
+    port: number;
+    description: string;
+}
+
+/**
+ * Process an environment template with the given context
+ * @param template Template content
+ * @param context Template context
+ * @returns Processed template content
+ */
+async function processEnvTemplate(template: string, context: EnvTemplateContext): Promise<string> {
+    const compiledTemplate = Handlebars.compile(template);
+    return compiledTemplate(context);
+}
+
 /**
  * Creates a .env file with the port configuration based on the template's .env.example
  * @param appDir App directory
  * @param framework Framework name
  * @param port Port number
+ * @param appName Application name
+ * @param description Application description
  */
 export async function createEnvFile(
     appDir: string,
     framework: string,
-    port: number
+    port: number,
+    appName: string,
+    description: string
 ): Promise<void> {
     const envPath = path.join(appDir, '.env');
     const envExamplePath = path.join(appDir, '.env.example');
+    const templateDir = path.join(global.templatesDir, framework);
 
     logger.info('Creating .env file with port configuration', { icon: '📝' });
 
     try {
         // Check if .env.example exists
         if (await fs.pathExists(envExamplePath)) {
-            // Read the example file
-            let envContent = await fs.readFile(envExamplePath, 'utf8');
+            const envTemplate = path.join(templateDir, '.env.hbs');
+            let envContent: string;
+
+            if (await fs.pathExists(envTemplate)) {
+                // Process the template if it exists
+                const template = await fs.readFile(envTemplate, 'utf8');
+                envContent = await processEnvTemplate(template, {
+                    appName,
+                    framework,
+                    port,
+                    description
+                });
+            } else {
+                // Use the example file if no template exists
+                envContent = await fs.readFile(envExamplePath, 'utf8');
+            }
 
             // Replace the port in the content
             envContent = envContent.replace(/PORT=\d+/g, `PORT=${port}`);
@@ -372,7 +409,7 @@ export async function createEnvFile(
             logger.success('Environment file created based on template');
         } else {
             // Create a default .env file if no example exists
-            const defaultEnvContent = `# Application configuration
+            const defaultEnvContent = `# Application configuration for ${appName}
 PORT=${port}
 
 # Add your environment variables below
