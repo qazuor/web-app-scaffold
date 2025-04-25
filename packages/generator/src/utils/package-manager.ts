@@ -8,6 +8,12 @@ import { createDirectory } from './file-operations.js';
 
 // Register Handlebars helpers
 Handlebars.registerHelper('eq', (a, b) => a === b);
+Handlebars.registerHelper('includes', (array, value) => {
+    if (!Array.isArray(array)) {
+        return false;
+    }
+    return array.includes(value);
+});
 
 type ContextForTemplate = {
     appDir: string;
