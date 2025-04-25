@@ -8,5 +8,5 @@
     "isUILibrary": false,
     "isIconLibrary": false,
     "canBeSharedPackage": true,
-    "sharedPackageDefaultName": "schema"
+    "sharedPackageDefaultName": "schemas"
 }

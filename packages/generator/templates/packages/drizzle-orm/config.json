@@ -29,22 +29,14 @@
                 "scripts": {
                     "generate": "drizzle-kit generate:sqlite",
                     "push": "drizzle-kit push:sqlite"
-                },
-                "contextPackageVars": {
-                    "driver": "better-sqlite3",
-                    "provider": "sqlite"
                 }
             },
             "postgres": {
                 "dependencies": ["postgres@^3.4.3"],
-                "devDependencies": [],
+                "devDependencies": ["@types/pg@^8.11.14"],
                 "scripts": {
                     "generate": "drizzle-kit generate:pg",
                     "push": "drizzle-kit push:pg"
-                },
-                "contextPackageVars": {
-                    "driver": "pg",
-                    "provider": "postgres"
                 }
             },
             "mysql": {
@@ -53,10 +45,6 @@
                 "scripts": {
                     "generate": "drizzle-kit generate:mysql",
                     "push": "drizzle-kit push:mysql"
-                },
-                "contextPackageVars": {
-                    "driver": "mysql2",
-                    "provider": "mysql"
                 }
             },
             "singlestore": {
@@ -65,9 +53,6 @@
                 "scripts": {
                     "generate": "drizzle-kit generate:mysql",
                     "push": "drizzle-kit push:mysql"
-                },
-                "contextPackageVars": {
-                    "provider": "singlestore"
                 }
             }
         }

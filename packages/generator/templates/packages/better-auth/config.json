@@ -1,11 +1,11 @@
 {
     "$schema": "../../../src/schemas/package.schema.json",
-    "name": "@better-auth/react",
+    "name": "better-auth",
     "displayName": "Better Auth",
     "description": "Modern authentication solution with built-in security features",
     "version": "^1.0.0",
-    "dependencies": ["@better-auth/react@^1.0.0", "@better-auth/core@^1.0.0"],
-    "devDependencies": ["@types/better-auth__react@^1.0.0"],
+    "dependencies": ["better-auth@^1.2.7"],
+    "devDependencies": [],
     "frameworks": ["react-vite", "tanstack-start"],
     "isUILibrary": false,
     "isIconLibrary": false,
@@ -24,17 +24,6 @@
                 { "name": "Facebook - Social sign-in with Facebook", "value": "facebook" }
             ],
             "default": "email-password"
-        },
-        "resultForPrompt": {
-            "email-password": {
-                "dependencies": []
-            },
-            "google": {
-                "dependencies": ["@better-auth/google@^1.0.0"]
-            },
-            "facebook": {
-                "dependencies": ["@better-auth/facebook@^1.0.0"]
-            }
         }
     }
 }
