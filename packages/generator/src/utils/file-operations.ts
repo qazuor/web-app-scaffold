@@ -2,6 +2,7 @@ import path from 'node:path';
 import { logger } from '@repo/logger';
 import chalk from 'chalk';
 import fs from 'fs-extra';
+import Handlebars from 'handlebars';
 
 /**
  * Checks if a folder exists and prompts the user to confirm overwriting it
@@ -106,7 +107,7 @@ export async function processDirectory(
 
         if (entry.isDirectory()) {
             await processDirectory(fullPath, appName, framework, description, basePath, port);
-        } else if (entry.isFile()) {
+        } else if (entry.isFile() && entry.name !== '.env.example.hbs') {
             await processFile(fullPath, relativeFilePath, appName, framework, description, port);
         }
     }
@@ -379,48 +380,41 @@ export async function createEnvFile(
 ): Promise<void> {
     const envPath = path.join(appDir, '.env');
     const envExamplePath = path.join(appDir, '.env.example');
-    const templateDir = path.join(global.templatesDir, framework);
-
+    const envExampleTemplatePath = path.join(appDir, '.env.example.hbs');
     logger.info('Creating .env file with port configuration', { icon: '📝' });
 
     try {
         // Check if .env.example exists
-        if (await fs.pathExists(envExamplePath)) {
-            const envTemplate = path.join(templateDir, '.env.hbs');
-            let envContent: string;
-
-            if (await fs.pathExists(envTemplate)) {
-                // Process the template if it exists
-                const template = await fs.readFile(envTemplate, 'utf8');
-                envContent = await processEnvTemplate(template, {
-                    appName,
-                    framework,
-                    port,
-                    description
-                });
-            } else {
-                // Use the example file if no template exists
-                envContent = await fs.readFile(envExamplePath, 'utf8');
-            }
-
-            // Replace the port in the content
-            envContent = envContent.replace(/PORT=\d+/g, `PORT=${port}`);
+        if (await fs.pathExists(envExampleTemplatePath)) {
+            const template = await fs.readFile(envExampleTemplatePath, 'utf8');
+            const envContent: string = await processEnvTemplate(template, {
+                appName,
+                framework,
+                port,
+                description
+            });
 
             // Write the .env file
             await fs.writeFile(envPath, envContent);
+            // Write the .env.example file
+            await fs.writeFile(envExamplePath, envContent);
 
-            logger.success('Environment file created based on template');
+            // remove the .env.example.hbs file
+            await fs.remove(envExampleTemplatePath);
+
+            logger.success('Environment files created based on template');
         } else {
             // Create a default .env file if no example exists
-            const defaultEnvContent = `# Application configuration for ${appName}
+            const defaultEnvContent = `# ${framework} Application configuration for ${appName}
+NODE_ENV=development
 PORT=${port}
+PORT={{port}}
+APP_TITLE={{appName}}
 
 # Add your environment variables below
-# Example: API_KEY=your_api_key
+
 `;
             await fs.writeFile(envPath, defaultEnvContent);
-
-            // Also create a .env.example file
             await fs.writeFile(envExamplePath, defaultEnvContent);
 
             logger.success('Default environment files created');
