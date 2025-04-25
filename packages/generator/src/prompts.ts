@@ -23,8 +23,8 @@ export async function promptForFramework(options: { framework?: string }): Promi
             type: 'list',
             name: 'framework',
             message: 'Which framework do you want to use?',
-            choices: availableFrameworks,
-        },
+            choices: availableFrameworks
+        }
     ]);
 
     return framework;
@@ -53,8 +53,8 @@ export async function promptForName(
             validate: (input) => {
                 if (/^[a-z0-9-]+$/.test(input)) return true;
                 return 'Name must only contain lowercase letters, numbers and hyphens';
-            },
-        },
+            }
+        }
     ]);
 
     return name;
@@ -81,8 +81,8 @@ export async function promptForDescription(
             type: 'input',
             name: 'description',
             message: 'Application description:',
-            default: getDefaultDescriptionForFramework(framework, appName),
-        },
+            default: getDefaultDescriptionForFramework(framework, appName)
+        }
     ]);
 
     return description;
@@ -198,8 +198,8 @@ export async function promptForPort(options: { port?: number }): Promise<number>
                 }
 
                 return true;
-            },
-        },
+            }
+        }
     ]);
 
     return Number.parseInt(port, 10);
@@ -236,8 +236,8 @@ export async function promptForPackages(framework: string): Promise<PackageConfi
                     name: `${pkg.displayName} - ${pkg.description}`,
                     value: pkg.name,
                     checked: false
-                })),
-            },
+                }))
+            }
         ]);
 
         // Return the full package configs for selected packages
@@ -286,8 +286,8 @@ export async function promptForInstallationType(pkg: PackageConfig): Promise<{
             choices: [
                 { name: 'Direct installation in the app', value: 'direct' },
                 { name: 'As a shared package in the monorepo', value: 'shared' }
-            ],
-        },
+            ]
+        }
     ]);
 
     if (installationType === 'direct') {
@@ -305,8 +305,8 @@ export async function promptForInstallationType(pkg: PackageConfig): Promise<{
                     return true;
                 }
                 return 'Package name must only contain lowercase letters, numbers and hyphens';
-            },
-        },
+            }
+        }
     ]);
 
     return { isShared: true, packageName };
@@ -322,8 +322,8 @@ async function promptForConfigOption(pkg: PackageConfig): Promise<string | undef
             type: pkg.configOptions.prompt.type,
             name: 'option',
             message: pkg.configOptions.prompt.message,
-            choices: pkg.configOptions.prompt.choices,
-        },
+            choices: pkg.configOptions.prompt.choices
+        }
     ]);
 
     return option;
@@ -344,8 +344,8 @@ export async function promptForInstall(options: { install?: boolean }): Promise<
             type: 'confirm',
             name: 'install',
             message: 'Do you want to automatically install dependencies after setup?',
-            default: true,
-        },
+            default: true
+        }
     ]);
 
     return install;
@@ -375,8 +375,8 @@ export async function promptForUILibrary(framework: string): Promise<PackageConf
                     value: lib
                 })),
                 { name: 'None', value: null }
-            ],
-        },
+            ]
+        }
     ]);
 
     return uiLibrary;
@@ -406,8 +406,8 @@ export async function promptForIconLibrary(framework: string): Promise<PackageCo
                     value: lib
                 })),
                 { name: 'None', value: null }
-            ],
-        },
+            ]
+        }
     ]);
 
     return iconLibrary;
@@ -424,8 +424,8 @@ export async function promptForOverwrite(dirPath: string): Promise<boolean> {
             type: 'confirm',
             name: 'overwrite',
             message: `Folder ${dirPath} already exists. Do you want to overwrite it?`,
-            default: false,
-        },
+            default: false
+        }
     ]);
 
     return overwrite;
