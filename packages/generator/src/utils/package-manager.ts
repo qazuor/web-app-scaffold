@@ -15,7 +15,7 @@ Handlebars.registerHelper('includes', (array, value) => {
     return array.includes(value);
 });
 
-type ContextForTemplate = {
+export type ContextForTemplate = {
     appDir: string;
     appName: string;
     framework: string;
