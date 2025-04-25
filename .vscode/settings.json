@@ -145,7 +145,7 @@
     "typescript.inlayHints.propertyDeclarationTypes.enabled": true,
     "typescript.inlayHints.variableTypes.enabled": true,
     "terminal.integrated.env.linux": {},
-    // "workbench.colorTheme": "One Dark Pro Night Flat",
+    "workbench.colorTheme": "One Dark Pro Night Flat",
     "workbench.iconTheme": "symbols",
     "emojisense.languages": {
         "markdown": true,
@@ -222,7 +222,7 @@
     "typescript.suggest.completeFunctionCalls": true,
     "git.blame.statusBarItem.enabled": true,
     "git.blame.editorDecoration.enabled": false,
-    "github.copilot.nextEditSuggestions.enabled": true,
+    "github.copilot.nextEditSuggestions.enabled": false,
     "github.showAvatar": true,
     "files.associations": {
         "*.css": "tailwindcss"
