@@ -1,6 +1,16 @@
 {
     "name": "web-app-scaffold",
     "private": true,
+    "homepage": "https://github.com/qazuor/web-app-scaffold",
+    "author": "Qazuor <qazuor@gmail.com> (https://github.com/qazuor/)",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/qazuor/web-app-scaffold"
+    },
+    "bugs": {
+        "url": "https://github.com/qazuor/web-app-scaffold/issues",
+        "email": "qazuor@gmail.com"
+    },
     "scripts": {
         "build": "turbo run build",
         "dev": "turbo run dev",
