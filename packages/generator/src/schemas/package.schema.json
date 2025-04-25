@@ -92,7 +92,8 @@
                     "properties": {
                         "type": {
                             "type": "string",
-                            "enum": ["list"]
+                            "enum": ["list", "checkbox", "input"],
+                            "description": "Type of prompt to display"
                         },
                         "message": {
                             "type": "string"
