@@ -29,8 +29,7 @@ import {
     updatePackageJson,
     updatePortInConfigs
 } from './utils/file-operations.js';
-import { addSelectedPackages, updateEnvVars } from './utils/package-manager.js';
-import { updateReadme } from './utils/package-manager copy.js';
+import { addSelectedPackages, updateEnvVars, updateReadme } from './utils/package-manager.js';
 import { registerPort } from './utils/port-manager.js';
 
 inquirer.registerPrompt('press-to-continue', PressToContinuePrompt);
