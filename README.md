@@ -1,84 +1,215 @@
-# Turborepo starter
+# Web App Scaffold 🚀
 
-This Turborepo starter is maintained by the Turborepo core team.
+[![License](https://img.shields.io/github/license/qazuor/web-app-scaffold)](https://github.com/qazuor/web-app-scaffold/blob/main/LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)](https://www.typescriptlang.org/)
+[![Turborepo](https://img.shields.io/badge/Turborepo-latest-blueviolet)](https://turbo.build/)
+[![pnpm](https://img.shields.io/badge/pnpm-10.9.0-orange)](https://pnpm.io/)
 
-## Using this example
+A powerful monorepo generator that helps you create and manage modern web applications with ease. Built with TypeScript, Turborepo, and pnpm.
 
-Run the following command:
+![Scaffold Demo](https://via.placeholder.com/800x400?text=Scaffold+Demo)
 
-```sh
-npx create-turbo@latest
+## 🎯 Why Web App Scaffold?
+
+Web App Scaffold stands out with its powerful app generator that lets you:
+
+- 🎨 **Choose Your Stack**: Select from multiple modern frameworks and customize your setup
+- 🔌 **Add Integrations**: Easily integrate UI libraries, state management, databases, and more
+- 🎭 **Share Code**: Create and manage shared packages across your applications
+- ⚡ **Start Fast**: Get a production-ready application with best practices in minutes
+
+## 🎮 Interactive Generator
+
+Our CLI generator guides you through creating new applications with a rich set of options:
+
+```bash
+pnpm create:app
 ```
 
-## What's inside?
+![Generator Demo](https://via.placeholder.com/600x400?text=Generator+Demo)
 
-This Turborepo includes the following packages/apps:
+### What You Can Configure:
 
-### Apps and Packages
+- 🏗️ **Framework Selection**
+  - React with Vite (SPA)
+  - Astro (Static Sites)
+  - TanStack Start (Full-stack)
+  - Hono (API Server)
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+- 📚 **UI Libraries**
+  - shadcn/ui
+  - Material UI
+  - Chakra UI
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+- 🎨 **Icon Sets**
+  - Lucide
+  - Iconoir
+  - React Icons
+  - Feather
 
-### Utilities
+- 🔧 **Optional Integrations**
+  - Database (Drizzle ORM)
+  - State Management (Zustand)
+  - Form Handling
+  - Validation (Zod)
+  - Internationalization
+  - Authentication
 
-This Turborepo has some additional tools already setup for you:
+- 📝 **Project Metadata**
+  - Package Info
+  - Repository Links
+  - Documentation
+  - License
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+## 🚀 Quick Start
 
-### Build
+1. **Create a new project**:
+   ```bash
+   pnpm create turbo@latest
+   ```
 
-To build all apps and packages, run the following command:
+2. **Install dependencies**:
+   ```bash
+   pnpm install
+   ```
+
+3. **Generate your first app**:
+   ```bash
+   pnpm create:app
+   ```
+
+4. **Start development**:
+   ```bash
+   pnpm dev
+   ```
+
+## 🎨 Generated Apps
+
+Each generated app comes with:
+
+- ✅ Full TypeScript support
+- ✅ Modern tooling (Biome, Vitest)
+- ✅ Best practices configuration
+- ✅ Documentation and examples
+- ✅ Testing setup
+- ✅ CI/CD ready
+
+### Framework-Specific Features
+
+#### React with Vite
+- Hot Module Replacement
+- Component-driven development
+- Rich ecosystem integration
+
+#### Astro
+- Static site generation
+- Partial hydration
+- Multi-framework support
+
+#### TanStack Start
+- Server-side rendering
+- Streaming responses
+- Type-safe routing
+- API routes
+
+#### Hono API
+- High performance
+- Type-safe endpoints
+- Middleware support
+- OpenAPI integration
+
+## 🔌 Integration Examples
+
+### Database with Drizzle
+```typescript
+// Generated type-safe database code
+const users = await db
+  .select()
+  .from(schema.users)
+  .where(eq(schema.users.id, userId));
+```
+
+### UI with shadcn/ui
+```typescript
+// Generated component setup
+<Card>
+  <CardHeader>
+    <CardTitle>Dashboard</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <p>Your content here</p>
+  </CardContent>
+</Card>
+```
+
+### State with Zustand
+```typescript
+// Generated store setup
+const useStore = create((set) => ({
+  count: 0,
+  increment: () => set((state) => ({
+    count: state.count + 1
+  }))
+}));
+```
+
+## 🛠️ Advanced Usage
+
+### Custom Templates
+
+Add your own templates to `packages/generator/templates`:
+
+```bash
+templates/
+├── frameworks/
+│   └── your-framework/
+└── packages/
+    └── your-package/
+```
+
+## 🛠️ Commands
+
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Start development servers |
+| `pnpm build` | Build all apps and packages |
+| `pnpm test` | Run tests |
+| `pnpm lint` | Lint all files |
+| `pnpm format` | Format code |
+
+## 📁 Generated Project Structure
 
 ```
-cd my-turborepo
-pnpm build
+.
+├── apps/                   # Application projects
+│   ├── web/               # Web application
+│   └── api/               # API server
+├── packages/              # Shared packages
+│   ├── ui/                # UI components
+│   ├── config/           # Shared configs
+│   └── logger/           # Logging utility
+└── package.json          # Root package.json
 ```
 
-### Develop
+The rest of the README remains unchanged...
 
-To develop all apps and packages, run the following command:
+## 🤝 Contributing
 
-```
-cd my-turborepo
-pnpm dev
-```
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
-### Remote Caching
+## 📝 License
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-Turborepo can use a technique known as [Remote Caching](https://turbo.build/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+## 🙏 Acknowledgments
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+- [Turborepo](https://turbo.build)
+- [pnpm](https://pnpm.io)
+- [Vite](https://vitejs.dev)
+- [Biome](https://biomejs.dev)
 
-```
-cd my-turborepo
-npx turbo login
-```
+---
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-npx turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turbo.build/docs/core-concepts/monorepos/running-tasks)
-- [Caching](https://turbo.build/docs/core-concepts/caching)
-- [Remote Caching](https://turbo.build/docs/core-concepts/remote-caching)
-- [Filtering](https://turbo.build/docs/core-concepts/monorepos/filtering)
-- [Configuration Options](https://turbo.build/docs/reference/configuration)
-- [CLI Usage](https://turbo.build/docs/reference/command-line-reference)
+<p align="center">
+  Made with ❤️ by <a href="https://github.com/qazuor">Qazuor</a>
+</p>
