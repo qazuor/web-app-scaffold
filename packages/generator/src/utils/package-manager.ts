@@ -26,7 +26,7 @@ type ContextForTemplate = {
     // biome-ignore lint/suspicious/noExplicitAny: dynamic structure depends on package
     contextPackageVars?: any;
     packageName?: string | undefined;
-    packageMetadata?: Record<string, string>;
+    packageMetadata?: Record<string, unknown>;
 };
 
 /**
@@ -297,7 +297,7 @@ export async function addSelectedPackages(
     uiLibrary: PackageConfig | null,
     iconLibrary: PackageConfig | null,
     selectedPackages: PackageConfig[],
-    metadata: Record<string, string>
+    metadata: Record<string, unknown>
 ): Promise<boolean> {
     try {
         const packageJson: PackageJson = await getAppPakageJson(appDir);
@@ -441,7 +441,7 @@ export async function addSharedPackage(
     pkg: PackageConfig,
     uiLibrary: PackageConfig | null,
     iconLibrary: PackageConfig | null,
-    metadata: Record<string, string>
+    metadata: Record<string, unknown>
 ): Promise<boolean> {
     try {
         if (!pkg.installationType || !pkg.installationType.packageName) {
