@@ -10,7 +10,7 @@ const packagesDir = path.join(__dirname, 'templates/packages');
 interface PackageFiles {
     config: PackageConfig;
     readmeContent?: string;
-    envVars?: Record<string, string>;
+    envVars?: string;
     extraFilesContent?: Record<string, string>;
 }
 
@@ -43,18 +43,13 @@ async function loadPackageFiles(
         }
 
         // Load environment variables if exists
-        let envVars: Record<string, string> | undefined;
+        let envVars: string | undefined;
         try {
-            const envContent = await fs.readFile(path.join(packageDir, '.env'), 'utf-8');
-            const vars = Object.fromEntries(
-                envContent
-                    .split('\n')
-                    .filter((line) => line && !line.startsWith('#'))
-                    .map((line) => line.split('='))
+            const envContent = await fs.readFile(
+                path.join(packageDir, '.env.example.hbs'),
+                'utf-8'
             );
-            if (Object.keys(vars).length > 0) {
-                envVars = vars;
-            }
+            envVars = envContent;
         } catch {
             // No env file is ok
         }

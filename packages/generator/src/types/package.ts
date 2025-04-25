@@ -52,7 +52,7 @@ export interface PackageConfig {
     }[];
 
     /** Environment variables to add */
-    envVars?: Record<string, string>;
+    envVars?: string;
 
     /** Scripts to add */
     scripts?: Record<string, string>;
@@ -60,7 +60,7 @@ export interface PackageConfig {
     /** Configuration options for packages */
     configOptions?: {
         prompt?: {
-            type: 'list';
+            type: 'list' | 'checkbox' | 'input';
             message: string;
             choices: Array<{
                 name: string;

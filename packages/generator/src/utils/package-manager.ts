@@ -211,6 +211,25 @@ function processTemplate(content: string, context: ContextForTemplate): string {
     return template(context);
 }
 
+function shouldAddPackageFiles(filePath: string, isASharedPackage = false) {
+    const dopntIncludeFilesNames = ['pre-install.ts', 'post-install.ts', 'TemplateContextVars.ts'];
+    const dopntIncludeFilesNamesInNonSharedPAckage = [
+        'package.json.hbs',
+        '.env.hbs',
+        '.env.example.hbs'
+    ];
+
+    if (dopntIncludeFilesNames.includes(filePath)) {
+        return false;
+    }
+    if (!isASharedPackage) {
+        if (dopntIncludeFilesNamesInNonSharedPAckage.includes(filePath)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 /**
  * Generates files for a specific package based on its extraFilesContent.
  * If file ends in .hbs, it will be processed as a Handlebars template.
@@ -222,11 +241,12 @@ export async function generatePackageFiles(
     appDir: string,
     pkg: PackageConfig,
     context: ContextForTemplate,
-    includePackageJson = false
+    isASharedPackage = false
 ) {
     if (pkg.extraFilesContent) {
         for (const [filePath, content] of Object.entries(pkg.extraFilesContent)) {
-            if (filePath === 'package.json.hbs' && !includePackageJson) {
+            const shouldAddPackageFile = shouldAddPackageFiles(filePath, isASharedPackage);
+            if (!shouldAddPackageFile) {
                 continue;
             }
             const fullPath = path.join(appDir, filePath);
@@ -246,33 +266,41 @@ export async function generatePackageFiles(
     }
 }
 
+function getPackageFilePath(packageName: string, fileName: string) {
+    return path.join(process.cwd(), 'packages/generator/templates/packages', packageName, fileName);
+}
+
+/**
+ * Get context vars for package templates
+ * @param pkg - Selected package.
+ * @param context - Template context.
+ */
+async function getContextVars(pkg: PackageConfig, context: ContextForTemplate) {
+    const templateContextVarsPath = getPackageFilePath(pkg.name, 'TemplateContextVars.ts');
+    try {
+        const templateContextVars = await import(templateContextVarsPath);
+        const contextVars = templateContextVars.getContextVars(pkg, context);
+        return contextVars;
+    } catch (_error) {
+        logger.warn(`No context vars for ${pkg.displayName} package`);
+    }
+    return {};
+}
+
 /**
  * Generates all necessary files for selected packages.
  * @param appDir - Application directory.
  * @param selectedPackages - List of selected packages.
  * @param context - Template context for rendering.
  */
-export async function generateSelectedPackagesFiles(
+async function generateSelectedPackagesFiles(
     appDir: string,
     pkg: PackageConfig,
     context: ContextForTemplate,
-    includePackageJson?: boolean
+    isASharedPackage?: boolean
 ) {
-    if (pkg.configOptions?.resultForPrompt) {
-        if (
-            pkg.selectedConfig &&
-            pkg.configOptions.resultForPrompt[pkg.selectedConfig] &&
-            pkg.configOptions.resultForPrompt[pkg.selectedConfig].contextPackageVars
-        ) {
-            context.contextPackageVars =
-                pkg.configOptions.resultForPrompt[pkg.selectedConfig].contextPackageVars;
-        } else if (pkg.configOptions?.result?.contextPackageVars) {
-            context.contextPackageVars = pkg.configOptions.result.contextPackageVars;
-        }
-    } else if (pkg.configOptions?.result?.contextPackageVars) {
-        context.contextPackageVars = pkg.configOptions.result.contextPackageVars;
-    }
-    await generatePackageFiles(appDir, pkg, context, includePackageJson);
+    context.contextPackageVars = await getContextVars(pkg, context);
+    await generatePackageFiles(appDir, pkg, context, isASharedPackage);
     logger.info('Generated all selected packages files', { icon: '📝' });
 }
 
@@ -389,15 +417,19 @@ export async function addPackageDirectlyToApp(
             description,
             port,
             uiLibrary: uiLibrary?.name,
-            iconLibrary: iconLibrary?.name
+            iconLibrary: iconLibrary?.name,
+            packageName: pkg.name
         };
 
         await addScripts(packageJson, pkg.scripts);
         await addScriptsFromOptionsConfig(packageJson, pkg);
 
-        await generateSelectedPackagesFiles(appDir, pkg, contextForTemplates);
+        await generateSelectedPackagesFiles(appDir, pkg, contextForTemplates, false);
 
         await savePackageJson(getPackageJsonPath(appDir), packageJson);
+
+        await updateEnvVars(appDir, pkg, contextForTemplates);
+        await updateReadme(appDir, pkg, appName);
         logger.success(`${pkg.name} package added to package.json`);
         return true;
     } catch (error) {
@@ -492,33 +524,27 @@ export async function addSharedPackage(
 }
 
 /**
- * Updates .env and .env.example with environment variables from selected packages.
+ * Updates .env and .env.example with environment variables from selected package.
  * If a variable already exists, it won't be duplicated.
  * @param appDir - Application directory.
- * @param selectedPackages - List of selected packages.
+ * @param pkg - Selected package.
  */
 export async function updateEnvVars(
     appDir: string,
-    selectedPackages: PackageConfig[]
+    pkg: PackageConfig,
+    context: ContextForTemplate
 ): Promise<void> {
     const envPath = path.join(appDir, '.env');
     const envExamplePath = path.join(appDir, '.env.example');
 
-    const envVars: Record<string, string> = {};
-    for (const pkg of selectedPackages) {
-        if (pkg.envVars) {
-            Object.assign(envVars, pkg.envVars);
-        }
+    if (pkg.envVars) {
+        logger.info(`Adding environment variables for package: ${pkg.name}`, { icon: '🔑' });
+        await updateEnvFile(envPath, pkg.envVars, context);
+        await updateEnvFile(envExamplePath, pkg.envVars, context);
+        logger.success(`Environment variables for package ${pkg.name} successfully added`, {
+            icon: '🔑'
+        });
     }
-
-    if (Object.keys(envVars).length === 0) {
-        return;
-    }
-
-    logger.info('Adding environment variables for selected packages', { icon: '🔑' });
-
-    await updateEnvFile(envPath, envVars);
-    await updateEnvFile(envExamplePath, envVars);
 }
 
 /**
@@ -526,32 +552,60 @@ export async function updateEnvVars(
  * Adds comments to clarify which integration each variable is for.
  *
  * @param envFilePath - The absolute path to the environment file (e.g., `.env` or `.env.example`).
- * @param envVars - A record of environment variables to insert (key-value pairs).
+ * @param envVarsTemplate - A string with environment variables template
  * @returns A Promise that resolves once the file is updated.
  */
-async function updateEnvFile(envFilePath: string, envVars: Record<string, string>) {
-    if (!(await fs.pathExists(envFilePath))) return;
+async function updateEnvFile(
+    envFilePath: string,
+    envVarsTemplate: string,
+    context: ContextForTemplate
+) {
+    if (!(await fs.pathExists(envFilePath))) {
+        logger.warn(`Environment file not found: ${envFilePath}`);
+        return;
+    }
+    const envContent = await fs.readFile(envFilePath, 'utf8');
+    const envContentLines = envContent.split('\n');
+    const insertionIndex = envContentLines.findIndex(
+        (line) => line.trim() === '# Packages configuration'
+    );
 
-    let content = await fs.readFile(envFilePath, 'utf8');
+    const compiledNewEnvVarsTemplate = processTemplate(envVarsTemplate, context);
+    const newEnvContentLines = compiledNewEnvVarsTemplate.split('\n');
 
-    for (const [key, value] of Object.entries(envVars)) {
-        if (!content.includes(`${key}=`)) {
-            content += `\n# Added for ${key.split('_')[0].toLowerCase()} integration\n${key}=${value}\n`;
-        }
+    if (newEnvContentLines.length === 0) {
+        logger.warn(`No environment vars to add for: ${context.packageName} package`);
+        return;
+    }
+    const envVarForPackageTitle = `# Added for ${context.packageName} integration`;
+    newEnvContentLines.unshift(envVarForPackageTitle);
+
+    if (insertionIndex !== -1) {
+        envContentLines.splice(insertionIndex + 1, 0, ...newEnvContentLines);
+    } else {
+        // fallback: append at the end if marker not found
+        envContentLines.push(...newEnvContentLines);
     }
 
-    await fs.writeFile(envFilePath, content);
+    try {
+        await fs.writeFile(envFilePath, envContentLines.join('\n'), 'utf8');
+    } catch (error) {
+        logger.warn('Failed to update environment file', {
+            subtitle: 'You may need to manually update the .env file'
+        });
+        logger.debug(error as Error);
+    }
 }
 
 /**
  * Updates README.md to include a list of installed packages and their documentation.
  * @param appDir - Application directory.
- * @param selectedPackages - List of selected packages.
+ * @param pkg - Selected package.
  * @param appName - Name of the application.
  */
 export async function updateReadme(
     appDir: string,
-    selectedPackages: PackageConfig[],
+    pkg: PackageConfig,
     appName: string
 ): Promise<void> {
     const readmePath = path.join(appDir, 'README.md');
@@ -564,7 +618,7 @@ export async function updateReadme(
     logger.info('Updating README.md with package documentation', { icon: '📝' });
 
     let content = await fs.readFile(readmePath, 'utf8');
-    const section = generatePackagesSection(selectedPackages, appName);
+    const section = generatePackageSection(appName, pkg);
 
     content = await replaceReadmeSection(content, section);
     await fs.writeFile(readmePath, content, 'utf8');
@@ -587,31 +641,22 @@ function replaceReadmeSection(content: string, newSection: string): string {
 
 /**
  * Generates the markdown section that describes the installed packages.
- * @param selectedPackages - List of packages to document.
+ * @param pkg - Selected package to add to document.
  * @param appName - Application name for dynamic replacements.
  * @returns Markdown string.
  */
-function generatePackagesSection(selectedPackages: PackageConfig[], appName: string): string {
-    if (selectedPackages.length === 0) {
-        return '';
-    }
-
+function generatePackageSection(appName: string, pkg: PackageConfig): string {
     let section = '\n\n## Installed Packages\n\n';
     section += 'This project includes the following packages:\n\n';
+    section += `- **${pkg.displayName}**: ${pkg.description}\n`;
 
-    for (const pkg of selectedPackages) {
-        section += `- **${pkg.displayName}**: ${pkg.description}\n`;
-    }
+    if (pkg.readmeSection) {
+        const packageSection =
+            typeof pkg.readmeSection === 'function'
+                ? pkg.readmeSection(appName)
+                : pkg.readmeSection.replace(/{{appName}}/g, appName);
 
-    for (const pkg of selectedPackages) {
-        if (pkg.readmeSection) {
-            const packageSection =
-                typeof pkg.readmeSection === 'function'
-                    ? pkg.readmeSection(appName)
-                    : pkg.readmeSection.replace(/{{appName}}/g, appName);
-
-            section += `\n${packageSection}\n`;
-        }
+        section += `\n${packageSection}\n`;
     }
 
     return section;
