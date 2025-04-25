@@ -253,13 +253,17 @@ export async function generateSelectedPackagesFiles(
     includePackageJson?: boolean
 ) {
     if (pkg.configOptions?.resultForPrompt) {
-        if (pkg.selectedConfig) {
+        if (
+            pkg.selectedConfig &&
+            pkg.configOptions.resultForPrompt[pkg.selectedConfig] &&
+            pkg.configOptions.resultForPrompt[pkg.selectedConfig].contextPackageVars
+        ) {
             context.contextPackageVars =
                 pkg.configOptions.resultForPrompt[pkg.selectedConfig].contextPackageVars;
-        } else if (pkg.configOptions?.result) {
+        } else if (pkg.configOptions?.result?.contextPackageVars) {
             context.contextPackageVars = pkg.configOptions.result.contextPackageVars;
         }
-    } else if (pkg.configOptions?.result) {
+    } else if (pkg.configOptions?.result?.contextPackageVars) {
         context.contextPackageVars = pkg.configOptions.result.contextPackageVars;
     }
     await generatePackageFiles(appDir, pkg, context, includePackageJson);
