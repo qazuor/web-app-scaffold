@@ -31,10 +31,11 @@ export async function loadPortTracking(): Promise<PortTracking> {
                 lastAssignedPort: data.lastAssignedPort || DEFAULT_START_PORT
             };
         }
-    } catch (_error) {
+    } catch (error) {
         logger.warn('Failed to load port tracking data, using defaults', {
             subtitle: 'This will not affect the app generation process'
         });
+        logger.debug(error as Error);
     }
 
     return {
@@ -55,6 +56,7 @@ export async function savePortTracking(data: PortTracking): Promise<void> {
         logger.warn('Failed to save port tracking data', {
             subtitle: 'Port suggestions may not be accurate in future runs'
         });
+        logger.debug(error as Error);
     }
 }
 

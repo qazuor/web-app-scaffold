@@ -162,6 +162,7 @@ export async function processFile(
         logger.warn(`Could not process file: ${chalk.cyan(relativeFilePath)}`, {
             subtitle: 'This file will be copied as-is without processing'
         });
+        logger.debug(error as Error);
     }
 }
 
@@ -215,6 +216,7 @@ export async function updateBiomeConfig(appDir: string): Promise<void> {
             logger.warn('Failed to update Biome configuration', {
                 subtitle: 'You may need to manually update the extends path in biome.json'
             });
+            logger.debug(error as Error);
         }
     }
 }
@@ -254,6 +256,7 @@ export async function updatePortInConfigs(
         logger.warn('Failed to update port in configuration files', {
             subtitle: 'You may need to manually update the port in the configuration files'
         });
+        logger.debug(error as Error);
     }
 }
 
@@ -426,6 +429,6 @@ PORT=${port}
         logger.warn('Failed to create environment files', {
             subtitle: 'You may need to manually create the .env file'
         });
-        console.error(error);
+        logger.debug(error as Error);
     }
 }

@@ -37,8 +37,9 @@ async function loadPackageFiles(
         let readmeContent: string | undefined;
         try {
             readmeContent = await fs.readFile(path.join(packageDir, 'README.md'), 'utf-8');
-        } catch {
+        } catch (error) {
             logger.warn(`No README.md found for package ${packageName}`);
+            logger.debug(error as Error);
         }
 
         // Load environment variables if exists
@@ -76,8 +77,9 @@ async function loadPackageFiles(
                     try {
                         const content = await fs.readFile(absPath, 'utf-8');
                         extraFilesContent[relPath] = content;
-                    } catch (_error) {
+                    } catch (error) {
                         logger.warn(`Failed to read extra file: ${relPath}`);
+                        logger.debug(error as Error);
                     }
                 }
             }
