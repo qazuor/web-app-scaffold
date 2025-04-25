@@ -79,13 +79,22 @@ export async function runGenerator(options: GeneratorOptions): Promise<void> {
         });
         const metadata = await promptForMetadata();
 
+        if (framework !== 'hono') {
+            // TODO: this should be dynamic from app template configuration
+            // Load packages - if this fails, it will throw an error
+            logger.step('Selecting UI packages...', {
+                icon: '📦',
+                subtitle: 'UI library and icon library'
+            });
+        }
+        const uiLibrary = await promptForUILibrary(framework);
+        const iconLibrary = await promptForIconLibrary(framework);
+
         // Load packages - if this fails, it will throw an error
         logger.step('Selecting additional packages...', {
             icon: '📦',
-            subtitle: 'UI library, icon library, and other packages'
+            subtitle: 'Other packages for DB, auth, and several another things'
         });
-        const uiLibrary = await promptForUILibrary(framework);
-        const iconLibrary = await promptForIconLibrary(framework);
         const selectedPackages = await promptForPackages(framework);
 
         // Add UI and icon libraries to selected packages if chosen
@@ -96,6 +105,9 @@ export async function runGenerator(options: GeneratorOptions): Promise<void> {
             selectedPackages.push(iconLibrary);
         }
 
+        logger.step('Final steps...', {
+            icon: '📦'
+        });
         const shouldInstall = await promptForInstall(options);
 
         await inquirer.prompt<{ key: KeyDescriptor }>({
@@ -104,11 +116,13 @@ export async function runGenerator(options: GeneratorOptions): Promise<void> {
             pressToContinueMessage: 'We are ready to install. Press Enter to continue...',
             enter: true
         });
+        // biome-ignore lint/suspicious/noConsoleLog: <explanation>
+        console.log('\n');
 
         // Create the app
-        logger.step(`Creating ${framework} application: ${appName}`, {
+        logger.step(`Creating ${framework} application: ${appName} (Port: ${port})`, {
             icon: '🏗️',
-            subtitle: `Port: ${port}\nDescription: ${description}`
+            subtitle: `Description: ${description}`
         });
         await createApp(appName, framework, description, port, selectedPackages, metadata);
 
