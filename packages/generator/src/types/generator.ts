@@ -5,6 +5,12 @@ import type { PackageConfig } from './package.js';
  * Options for app generation
  */
 export interface GeneratorOptions {
+    /** Main templates path */
+    templatesPath: string;
+    /** Framework templates path */
+    frameworksTemplatesPath: string;
+    /** Packages templates path */
+    packagesTmplatesPath: string;
     /** Selected framework */
     framework: string;
     /** Application name */

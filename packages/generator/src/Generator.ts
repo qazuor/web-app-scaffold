@@ -1,7 +1,7 @@
-import path from 'node:path';
 import { logger } from '@repo/logger';
+import type { ConfigsManager } from './core/ConfigsManager.js';
+import { FrameworkManager } from './core/FrameworkManager.js';
 import { ProgressTracker } from './core/Progress.js';
-import type { GeneratorOptions } from './types/generator.js';
 import type { PackageConfig } from './types/package.js';
 import { withErrorHandling } from './utils/error-handler.js';
 
@@ -9,16 +9,13 @@ import { withErrorHandling } from './utils/error-handler.js';
  * Core generator class that orchestrates the app generation process
  */
 export class Generator {
-    private templatesDir: string;
-    private frameworkTemplatesDir: string;
-    private packageTemplatesDir: string;
+    private config: ConfigsManager;
+    private frameworkManager: FrameworkManager;
     private progress: ProgressTracker;
 
-    constructor(templatesDir: string) {
-        this.templatesDir = templatesDir;
-        this.frameworkTemplatesDir = path.join(templatesDir, 'frameworks');
-        this.packageTemplatesDir = path.join(templatesDir, 'packages');
-
+    constructor(config: ConfigsManager) {
+        this.config = config;
+        this.frameworkManager = new FrameworkManager(config);
         this.progress = new ProgressTracker([
             'Configure application settings',
             'Configure package metadata',
@@ -37,7 +34,7 @@ export class Generator {
      * Runs the app generation process
      * @param options - CLI options for app generation
      */
-    public async run(options: GeneratorOptions): Promise<void> {
+    public async run(): Promise<void> {
         await withErrorHandling(async () => {
             logger.title('Qazuor App Generator for Turborepo', {
                 icon: '🚀'
@@ -92,21 +89,21 @@ export class Generator {
             this.progress.completeStep(false);
 
             // End of the progress
-            this.showCompletionMessage(options, []);
+            this.showCompletionMessage([]);
         }, 'app generation');
     }
 
-    private showCompletionMessage(config: GeneratorOptions, packages: PackageConfig[]): void {
+    private showCompletionMessage(packages: PackageConfig[]): void {
         logger.log('\n\n-----------------------------------------------------\n\n');
         logger.success('Application generated successfully!', {
-            subtitle: `Created ${config.framework} application: ${config.name}`
+            subtitle: `Created ${this.config.getFramework()} application: ${this.config.getName()}`
         });
 
         logger.info('Next steps:', {
             subtitle: [
-                `1. cd apps/${config.name}`,
+                `1. cd apps/${this.config.getName()}`,
                 '2. pnpm dev',
-                `3. Open http://localhost:${config.port || 3000}`
+                `3. Open http://localhost:${this.config.getPort()}`
             ].join('\n')
         });
 
