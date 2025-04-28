@@ -4,46 +4,36 @@ import { fileURLToPath } from 'node:url';
 import { logger } from '@repo/logger';
 import { program } from 'commander';
 import fs from 'fs-extra';
+import { Generator } from './Generator.js';
 import { setupCLI } from './cli.js';
-import { runGenerator } from './generator.js';
-import { printBanner } from './utils/banner.js';
+import type { GeneratorOptions } from './types/generator.js';
 
-// Generator version
-const version = '0.1.0';
-
-// Get the current directory
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-// Determine if we're running from compiled code
 const isCompiledCode = __dirname.includes('dist');
-
-// Determine the templates directory
-const templatesDir = path.join(__dirname, isCompiledCode ? '..' : '..', 'templates/frameworks');
-
-// Global variable to store templates directory
-global.templatesDir = templatesDir;
+const templatesDir = path.join(__dirname, isCompiledCode ? '..' : '..', 'templates');
 
 async function main() {
     try {
-        // Print a simple banner instead of using figlet
-        printBanner('Qazuor App Generator', 'For Turborepo Monorepos');
+        // Print Initial Banner
+        console.clear();
+        logger.banner('Qazuor App Generator', 'For Turborepo Monorepos', 'ANSI Regular');
 
-        // Comprobar si el directorio de plantillas existe
-        const templatesExist = await fs.pathExists(templatesDir);
-        if (!templatesExist) {
+        // Validate templates directory
+        if (!(await fs.pathExists(templatesDir))) {
             logger.error('Templates directory not found. Cannot continue.', {
                 subtitle: 'Please make sure the templates directory exists.'
             });
             process.exit(1);
         }
 
-        // Set up the CLI
-        setupCLI(program, version);
+        // Set up CLI
+        setupCLI(program, '0.1.0');
         program.parse(process.argv);
         const options = program.opts();
 
-        // Run the generator
-        await runGenerator(options);
+        // Run generator
+        const generator = new Generator(templatesDir);
+        await generator.run(options as GeneratorOptions);
     } catch (err) {
         logger.error('Unexpected error:', { subtitle: String(err) });
         logger.debug(err as Error);
