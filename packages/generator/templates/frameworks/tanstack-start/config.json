@@ -1,0 +1,55 @@
+{
+    "$schema": "../../framework.schema.json",
+    "name": "tanstack-start",
+    "displayName": "TanStack Start",
+    "description": "TanStack Start framework",
+    "defaultAppName": "tanstack-start-app",
+    "defaultAppDescription": "A TanStack Start app",
+    "dependencies": [
+        {
+            "name": "@tanstack/react-query",
+            "version": "^4.0.0"
+        },
+        {
+            "name": "@tanstack/react-table",
+            "version": "^8.0.0"
+        },
+        {
+            "name": "@tanstack/react-location",
+            "version": "^3.0.0"
+        }
+    ],
+    "devDependencies": [
+        {
+            "name": "@tanstack/react-query-devtools",
+            "version": "^4.0.0"
+        },
+        {
+            "name": "@tanstack/react-table-devtools",
+            "version": "^8.0.0"
+        }
+    ],
+    "hasUI": true,
+    "addBiome": true,
+    "addTesting": true,
+    "testingDependencies": [
+        {
+            "name": "vitest",
+            "version": "^0.30.0"
+        },
+        {
+            "name": "@testing-library/react",
+            "version": "^13.0.0"
+        }
+    ],
+    "testingScripts": [
+        {
+            "name": "test",
+            "code": "vitest"
+        },
+        {
+            "name": "test:watch",
+            "code": "vitest --watch"
+        }
+    ]
+}

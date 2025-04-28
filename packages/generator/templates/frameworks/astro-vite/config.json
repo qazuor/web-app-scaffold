@@ -1,0 +1,65 @@
+{
+    "$schema": "../../framework.schema.json",
+    "name": "astro-vite",
+    "displayName": "Astro + Vite",
+    "description": "Astro + Vite framework",
+    "defaultAppName": "astro-vite-app",
+    "defaultAppDescription": "An Astro + Vite app",
+    "dependencies": [
+        {
+            "name": "astro",
+            "version": "^2.0.0"
+        },
+        {
+            "name": "@astrojs/tailwind",
+            "version": "^3.0.0"
+        }
+    ],
+    "devDependencies": [
+        {
+            "name": "@astrojs/partytown",
+            "version": "^2.0.0"
+        },
+        {
+            "name": "@astrojs/image",
+            "version": "^2.0.0"
+        }
+    ],
+    "scripts": [
+        {
+            "name": "astro:build",
+            "code": "astro build"
+        },
+        {
+            "name": "astro:dev",
+            "code": "astro dev"
+        },
+        {
+            "name": "astro:preview",
+            "code": "astro preview"
+        }
+    ],
+    "hasUI": true,
+    "addBiome": true,
+    "addTesting": true,
+    "testingDependencies": [
+        {
+            "name": "vitest",
+            "version": "^0.30.0"
+        },
+        {
+            "name": "@testing-library/react",
+            "version": "^13.0.0"
+        }
+    ],
+    "testingScripts": [
+        {
+            "name": "test",
+            "code": "vitest"
+        },
+        {
+            "name": "test:watch",
+            "code": "vitest --watch"
+        }
+    ]
+}

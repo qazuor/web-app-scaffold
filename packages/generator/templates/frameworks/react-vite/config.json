@@ -1,0 +1,69 @@
+{
+    "$schema": "../../framework.schema.json",
+    "name": "react-vite",
+    "displayName": "React + Vite",
+    "description": "React + Vite framework",
+    "defaultAppName": "react-vite-app",
+    "defaultAppDescription": "A React + Vite app",
+    "dependencies": [
+        {
+            "name": "react",
+            "version": "^18.0.0"
+        },
+        {
+            "name": "react-dom",
+            "version": "^18.0.0"
+        },
+        {
+            "name": "@vitejs/plugin-react",
+            "version": "^2.0.0"
+        }
+    ],
+    "devDependencies": [
+        {
+            "name": "vite",
+            "version": "^4.0.0"
+        },
+        {
+            "name": "@vitejs/plugin-legacy",
+            "version": "^2.0.0"
+        }
+    ],
+    "scripts": [
+        {
+            "name": "vite:build",
+            "code": "vite build"
+        },
+        {
+            "name": "vite:dev",
+            "code": "vite dev"
+        },
+        {
+            "name": "vite:preview",
+            "code": "vite preview"
+        }
+    ],
+    "hasUI": true,
+    "addBiome": true,
+    "addTesting": true,
+    "testingDependencies": [
+        {
+            "name": "vitest",
+            "version": "^0.30.0"
+        },
+        {
+            "name": "@testing-library/react",
+            "version": "^13.0.0"
+        }
+    ],
+    "testingScripts": [
+        {
+            "name": "test",
+            "code": "vitest"
+        },
+        {
+            "name": "test:watch",
+            "code": "vitest --watch"
+        }
+    ]
+}
