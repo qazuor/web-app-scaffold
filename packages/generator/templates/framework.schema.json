@@ -1,0 +1,117 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "FrameworkConfig",
+    "type": "object",
+    "properties": {
+        "$schema": {
+            "type": "string",
+            "description": "JSON Schema version or schema URL"
+        },
+        "name": {
+            "type": "string",
+            "description": "Framwork name (must be kebab-case)",
+            "pattern": "^[a-z]+(-[a-z]+)*$"
+        },
+        "displayName": {
+            "type": "string",
+            "description": "Display name for the framework in the selection prompt"
+        },
+        "description": {
+            "type": "string",
+            "description": "Short description of the framework"
+        },
+        "defaultAppName": {
+            "type": "string",
+            "description": "Default name for the app if none is provided (must be kebab-case)",
+            "pattern": "^[a-z]+(-[a-z]+)*$"
+        },
+        "defaultAppDescription": {
+            "type": "string",
+            "description": "Default description for the app if none is provided"
+        },
+        "dependencies": {
+            "type": "array",
+            "description": "Dependencies that should be installed with this framework",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "pattern": "^(@[a-z0-9-~][a-z0-9-._~]*\\/)?[a-z0-9-~][a-z0-9-._~]*$",
+                        "description": "NPM package name (valid format)"
+                    },
+                    "version": {
+                        "type": "string",
+                        "pattern": "^(?:\\^|~)?\\d+\\.\\d+\\.\\d+(?:-[\\w.-]+)?(?:\\+[\\w.-]+)?$",
+                        "description": "Semver version (valid format)"
+                    }
+                },
+                "required": ["name", "version"],
+                "additionalProperties": false
+            }
+        },
+        "devDependencies": {
+            "type": "array",
+            "description": "Dev dependencies that should be installed with this framework",
+            "items": {
+                "$ref": "#/properties/dependencies/items"
+            }
+        },
+        "scripts": {
+            "type": "array",
+            "description": "Scripts that should be added to app package.json",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "string"
+                    }
+                },
+                "required": ["name", "code"],
+                "additionalProperties": false
+            }
+        },
+        "hasUI": {
+            "type": "boolean",
+            "description": "Whether this framework has UI (for use UI or Icon Libraries)"
+        },
+        "addBiome": {
+            "type": "boolean",
+            "description": "Whether to add Biome configuration"
+        },
+        "addTesting": {
+            "type": "boolean",
+            "description": "Whether to add testing configuration"
+        },
+        "testingDependencies": {
+            "type": "array",
+            "description": "Dependencies related to testing",
+            "items": {
+                "$ref": "#/properties/dependencies/items"
+            }
+        },
+        "testingScripts": {
+            "type": "array",
+            "description": "Testing scripts to be added to package.json",
+            "items": {
+                "$ref": "#/properties/scripts/items"
+            }
+        }
+    },
+    "required": [
+        "name",
+        "displayName",
+        "description",
+        "dependencies",
+        "devDependencies",
+        "hasUI",
+        "defaultAppName",
+        "defaultAppDescription",
+        "addBiome",
+        "addTesting"
+    ],
+    "additionalProperties": false
+}
