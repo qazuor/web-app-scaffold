@@ -1,4 +1,7 @@
 import chalk from 'chalk';
+import figlet from 'figlet';
+import { summer } from 'gradient-string';
+import terminalLink from 'terminal-link';
 import type { LogOptions } from './types';
 
 // Color palette for different log types
@@ -106,8 +109,14 @@ export const logger = {
         subtitlePadLenght: number
     ): string {
         if (subtitle) {
-            return `${prefix + message}\n${' '.repeat(subtitlePadLenght)}${subtitle}`;
-            // return `${prefix + subtitle}\n${' '.repeat(prefix.length)}${message}`;
+            const subtitlePad = ' '.repeat(subtitlePadLenght);
+            let formatedSubtitle = subtitle.replace(/\n/g, `\n${subtitlePad}`);
+            const linkRegex = /(https?|ftp):\/\/[^\s/$.?#].[^\s]*/gm;
+            formatedSubtitle = formatedSubtitle.replace(linkRegex, (match) => {
+                return chalk.cyan(terminalLink(match, match));
+            });
+
+            return `${prefix + message}\n${' '.repeat(subtitlePadLenght)}${formatedSubtitle}`;
         }
         return prefix + message;
     },
@@ -230,5 +239,25 @@ export const logger = {
         } else {
             console.log(message);
         }
+    },
+
+    /**
+     * Prints a banner with the given title and subtitle
+     */
+    banner(bannerTitle: string, bannerSubtitle: string, font = 'Standard'): void {
+        const banner = figlet.textSync(bannerTitle, {
+            font: font as figlet.Fonts,
+            horizontalLayout: 'default',
+            verticalLayout: 'default',
+            width: 120,
+            whitespaceBreak: true
+        });
+        console.log(summer(banner));
+        console.log(chalk.bold.bgCyan(`${bannerSubtitle}\n`));
+    },
+
+    link(url: string, title?: string): void {
+        const link = terminalLink(title || url, url);
+        console.log(chalk.cyan(link));
     }
 };

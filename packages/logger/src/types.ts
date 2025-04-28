@@ -43,4 +43,6 @@ export type LogType =
     | 'file'
     | 'dir'
     | 'log'
-    | 'debug';
+    | 'debug'
+    | 'banner'
+    | 'link';
