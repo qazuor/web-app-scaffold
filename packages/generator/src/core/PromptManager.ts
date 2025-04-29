@@ -402,7 +402,8 @@ export class PromptManager {
                 if (instalationType === 'shared') {
                     sharedName = await this.promptForSharedPackageName(pkg);
                     logger.warn(
-                        `Revisar si no tenemos ya este package instalado como shared,
+                        chalk.bgYellow.bold(
+                            `Revisar si no tenemos ya este package instalado como shared,
 en cuyo caso hay que ofertar usar esa instancia en vez de crear una nueva.
 Para esto deberiamos al momento de instalar todo,
 updatear un json que lleve control de que packages se instalaron como shared
