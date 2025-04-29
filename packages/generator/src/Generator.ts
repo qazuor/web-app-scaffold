@@ -4,6 +4,7 @@ import { FrameworksManager } from './core/FrameworksManager.js';
 import { ProgressTracker } from './core/Progress.js';
 import { PromptManager } from './core/PromptManager.js';
 import type { PackageConfig } from './types/package.js';
+import { getPackageMetadataDefaults } from './utils/defaults.js';
 import { withErrorHandling } from './utils/error-handler.js';
 import { getNextAvailablePort } from './utils/port-manager.js';
 
@@ -46,6 +47,7 @@ export class Generator {
 
             await this.frameworksManager.initializeFrameworks();
             await this.promptManager.initializePrompts();
+            this.configsManager.setDefaultMetadata(await getPackageMetadataDefaults());
             this.configsManager.setNextAvailablePort(await getNextAvailablePort());
 
             // Step 1: Configure application settings

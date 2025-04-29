@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { logger } from '@repo/logger';
 import fs from 'fs-extra';
 import type { GeneratorOptions } from '../types/generator.js';
+import type { MetadataOptions } from '../types/metadata.js';
 import type { PromptManager } from './PromptManager.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -90,12 +91,72 @@ export class ConfigsManager {
         this.config.description = description;
     }
 
+    public getAuthor(): string {
+        return this.getMetadata().author || '';
+    }
+
+    public setAuthor(author: string): void {
+        this.getMetadata().author = author;
+    }
+
+    public getHomepage(): string {
+        return this.getMetadata().homepage || '';
+    }
+
+    public setHomepage(homepage: string): void {
+        this.getMetadata().homepage = homepage;
+    }
+
+    public getRepo(): string {
+        return this.getMetadata().repository || '';
+    }
+
+    public setRepo(repository: string): void {
+        this.getMetadata().repository = repository;
+    }
+
+    public getBugs(): string {
+        return this.getMetadata().bugs || '';
+    }
+
+    public setBugs(bugs: string): void {
+        this.getMetadata().bugs = bugs;
+    }
+
+    public getLicense(): string {
+        return this.getMetadata().license || '';
+    }
+    public setLicense(license: string): void {
+        this.getMetadata().license = license;
+    }
+    public getKeywords(): string[] {
+        return this.getMetadata().keywords || [];
+    }
+    public setKeywords(keywords: string[]): void {
+        this.getMetadata().keywords = keywords;
+    }
+
+    public getMetadata() {
+        if (!this.config.metadata) {
+            this.config.metadata = {};
+        }
+        return this.config.metadata;
+    }
+
     public getNextAvailablePort(): number {
         return this.nextAvailablePort;
     }
 
     public setNextAvailablePort(port: number): void {
         this.nextAvailablePort = port;
+    }
+
+    public setDefaultMetadata(metadata: MetadataOptions): void {
+        this.config.metadata = { ...this.getMetadata(), ...metadata };
+    }
+
+    public getDefaultMetadata(): MetadataOptions {
+        return this.getMetadata();
     }
 
     public async gatherConfiguration(
