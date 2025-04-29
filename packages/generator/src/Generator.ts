@@ -55,7 +55,7 @@ export class Generator {
                 'Configuring basic settings... (Name, Framework, description, port, etc.)'
             );
             const { framwork, name, description, port } =
-                await this.configsManager.gatherConfiguration(this.promptManager);
+                await this.promptManager.gatherConfiguration();
             this.progress.completeStep();
 
             // Step 2: Configure application settings
@@ -63,7 +63,7 @@ export class Generator {
                 'Configuring package metadata... (Autor, license, homepage, etc.)'
             );
             const { author, homepage, bugsUrl, repositoryUrl, license, keywords } =
-                await this.configsManager.gatherMetadata(this.promptManager);
+                await this.promptManager.gatherMetadata();
             this.progress.completeStep();
 
             // // Step 3: Configure application settings

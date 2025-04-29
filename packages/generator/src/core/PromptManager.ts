@@ -171,4 +171,42 @@ export class PromptManager {
         const { keywords } = await inquirer.prompt([this.keywordsPrompt.getPrompt()]);
         return keywords;
     }
+
+    public async gatherConfiguration(): Promise<Record<string, unknown>> {
+        const framwork = await this.promptForFramework();
+        this.configsManager.setFramework(framwork);
+
+        const name = await this.promptForAppName();
+        this.configsManager.setName(name);
+
+        const description = await this.promptForDescription();
+        this.configsManager.setDescription(description);
+
+        const port = await this.promptForAppPort();
+        this.configsManager.setPort(port);
+
+        return { framwork, name, description, port };
+    }
+
+    public async gatherMetadata(): Promise<Record<string, unknown>> {
+        const homepage = await this.promptForHomepage();
+        this.configsManager.setHomepage(homepage);
+
+        const license = await this.promptForLicense();
+        this.configsManager.setLicense(license);
+
+        const author = await this.promptForAuthor();
+        this.configsManager.setAuthor(author);
+
+        const repositoryUrl = await this.promptForRepositoryUrl();
+        this.configsManager.setRepo(repositoryUrl);
+
+        const bugsUrl = await this.promptForBugsUrl();
+        this.configsManager.setBugs(bugsUrl);
+
+        const keywords = await this.promptForKeywords();
+        this.configsManager.setKeywords(keywords.split(',').map((s) => s.trim()));
+
+        return { author, homepage, repositoryUrl, bugsUrl, license, keywords };
+    }
 }

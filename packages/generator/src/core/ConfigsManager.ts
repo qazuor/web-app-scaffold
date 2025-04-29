@@ -4,7 +4,6 @@ import { logger } from '@repo/logger';
 import fs from 'fs-extra';
 import type { GeneratorOptions } from '../types/generator.js';
 import type { MetadataOptions } from '../types/metadata.js';
-import type { PromptManager } from './PromptManager.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isCompiledCode = __dirname.includes('dist');
@@ -157,45 +156,5 @@ export class ConfigsManager {
 
     public getDefaultMetadata(): MetadataOptions {
         return this.getMetadata();
-    }
-
-    public async gatherConfiguration(
-        promptManager: PromptManager
-    ): Promise<Record<string, unknown>> {
-        const framwork = await promptManager.promptForFramework();
-        this.setFramework(framwork);
-
-        const name = await promptManager.promptForAppName();
-        this.setName(name);
-
-        const description = await promptManager.promptForDescription();
-        this.setDescription(description);
-
-        const port = await promptManager.promptForAppPort();
-        this.setPort(port);
-
-        return { framwork, name, description, port };
-    }
-
-    public async gatherMetadata(promptManager: PromptManager): Promise<Record<string, unknown>> {
-        const homepage = await promptManager.promptForHomepage();
-        this.setHomepage(homepage);
-
-        const license = await promptManager.promptForLicense();
-        this.setLicense(license);
-
-        const author = await promptManager.promptForAuthor();
-        this.setAuthor(author);
-
-        const repositoryUrl = await promptManager.promptForRepositoryUrl();
-        this.setRepo(repositoryUrl);
-
-        const bugsUrl = await promptManager.promptForBugsUrl();
-        this.setBugs(bugsUrl);
-
-        const keywords = await promptManager.promptForKeywords();
-        this.setKeywords(keywords.split(',').map((s) => s.trim()));
-
-        return { author, homepage, repositoryUrl, bugsUrl, license, keywords };
     }
 }
