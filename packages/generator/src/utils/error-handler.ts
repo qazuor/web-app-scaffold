@@ -37,21 +37,24 @@ export function handleError(error: unknown, context: string): void {
         });
     } else if (error instanceof GeneratorError) {
         logger.error(error.message, { subtitle: error.details });
-        logger.debug(error as Error);
+        // logger.debug(error as Error);
     } else {
         logger.error(`Error in ${context}:`, { subtitle: String(error) });
     }
-    throw error;
 }
 
 /**
  * Wraps an async function with consistent error handling
  */
-export async function withErrorHandling<T>(fn: () => Promise<T>, context: string): Promise<T> {
+export async function withErrorHandling<T>(
+    fn: () => Promise<T>,
+    context: string
+): Promise<T | null> {
     try {
         return await fn();
     } catch (error) {
         handleError(error, context);
-        throw error;
+        return null;
+        // throw error;
     }
 }

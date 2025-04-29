@@ -1,7 +1,8 @@
 import { logger } from '@repo/logger';
 import type { ConfigsManager } from './core/ConfigsManager.js';
-import { FrameworkManager } from './core/FrameworkManager.js';
+import { FrameworksManager } from './core/FrameworksManager.js';
 import { ProgressTracker } from './core/Progress.js';
+import { PromptManager } from './core/PromptManager.js';
 import type { PackageConfig } from './types/package.js';
 import { withErrorHandling } from './utils/error-handler.js';
 
@@ -9,13 +10,15 @@ import { withErrorHandling } from './utils/error-handler.js';
  * Core generator class that orchestrates the app generation process
  */
 export class Generator {
-    private config: ConfigsManager;
-    private frameworkManager: FrameworkManager;
+    private configsManager: ConfigsManager;
+    private frameworksManager: FrameworksManager;
     private progress: ProgressTracker;
+    private promptManager: PromptManager;
 
-    constructor(config: ConfigsManager) {
-        this.config = config;
-        this.frameworkManager = new FrameworkManager(config);
+    constructor(configsManager: ConfigsManager) {
+        this.configsManager = configsManager;
+        this.frameworksManager = new FrameworksManager(configsManager);
+        this.promptManager = new PromptManager(configsManager, this.frameworksManager);
         this.progress = new ProgressTracker([
             'Configure application settings',
             'Configure package metadata',
@@ -40,70 +43,80 @@ export class Generator {
                 icon: '🚀'
             });
 
+            await this.frameworksManager.initializeFrameworks();
+            await this.promptManager.initializePrompts();
+
             // Step 1: Configure application settings
             this.progress.nextStep(
                 'Configuring basic settings... (Name, Framework, description, port, etc.)'
             );
-            this.progress.completeStep(false);
+            const { framwork, name } = await this.configsManager.gatherConfiguration(
+                this.promptManager
+            );
+
+            console.log('Framework selected:', framwork);
+            console.log('Framework name:', name);
+
+            this.progress.completeStep();
 
             // Step 2: Configure application settings
-            this.progress.nextStep(
-                'Configuring package metadata... (Autor, license, homepage, etc.)'
-            );
-            this.progress.completeStep(false);
+            // this.progress.nextStep(
+            //     'Configuring package metadata... (Autor, license, homepage, etc.)'
+            // );
+            // this.progress.completeStep(false);
 
-            // Step 3: Configure application settings
-            this.progress.nextStep('Configuring UI Library package...');
-            this.progress.completeStep(false);
+            // // Step 3: Configure application settings
+            // this.progress.nextStep('Configuring UI Library package...');
+            // this.progress.completeStep(false);
 
-            // Step 4: Configure application settings
-            this.progress.nextStep('Configuring Icon Library package...');
-            this.progress.completeStep(false);
+            // // Step 4: Configure application settings
+            // this.progress.nextStep('Configuring Icon Library package...');
+            // this.progress.completeStep(false);
 
-            // Step 5: Configure application settings
-            this.progress.nextStep('Configuring additional packages..');
-            this.progress.completeStep(false);
+            // // Step 5: Configure application settings
+            // this.progress.nextStep('Configuring additional packages..');
+            // this.progress.completeStep(false);
 
-            // Step 6: Configure application settings
-            this.progress.nextStep(
-                'Configuring installation type... (Install dependencies or not)'
-            );
-            this.progress.completeStep(false);
+            // // Step 6: Configure application settings
+            // this.progress.nextStep(
+            //     'Configuring installation type... (Install dependencies or not)'
+            // );
+            // this.progress.completeStep(false);
 
-            // Step 7: Configure application settings
-            this.progress.nextStep('Creating application structure... (Copying files and folders)');
-            this.progress.completeStep(false);
+            // // Step 7: Configure application settings
+            // this.progress.nextStep('Creating application structure... (Copying files and folders)');
+            // this.progress.completeStep(false);
 
-            // Step 8: Configure application settings
-            this.progress.nextStep(
-                'Adding additional packages... (Added dependencies, scripts, configs, etc.)'
-            );
-            this.progress.completeStep(false);
+            // // Step 8: Configure application settings
+            // this.progress.nextStep(
+            //     'Adding additional packages... (Added dependencies, scripts, configs, etc.)'
+            // );
+            // this.progress.completeStep(false);
 
-            // Step 9: Configure application settings
-            this.progress.nextStep('Running package manager install');
-            this.progress.completeStep(false);
+            // // Step 9: Configure application settings
+            // this.progress.nextStep('Running package manager install');
+            // this.progress.completeStep(false);
 
-            // Step 10: Configure application settings
-            this.progress.nextStep('Installation end... (Finishing up)');
-            this.progress.completeStep(false);
+            // // Step 10: Configure application settings
+            // this.progress.nextStep('Installation end... (Finishing up)');
+            // this.progress.completeStep(false);
 
-            // End of the progress
-            this.showCompletionMessage([]);
+            // // End of the progress
+            // this.showCompletionMessage([]);
         }, 'app generation');
     }
 
     private showCompletionMessage(packages: PackageConfig[]): void {
         logger.log('\n\n-----------------------------------------------------\n\n');
         logger.success('Application generated successfully!', {
-            subtitle: `Created ${this.config.getFramework()} application: ${this.config.getName()}`
+            subtitle: `Created ${this.configsManager.getFramework()} application: ${this.configsManager.getName()}`
         });
 
         logger.info('Next steps:', {
             subtitle: [
-                `1. cd apps/${this.config.getName()}`,
+                `1. cd apps/${this.configsManager.getName()}`,
                 '2. pnpm dev',
-                `3. Open http://localhost:${this.config.getPort()}`
+                `3. Open http://localhost:${this.configsManager.getPort()}`
             ].join('\n')
         });
 

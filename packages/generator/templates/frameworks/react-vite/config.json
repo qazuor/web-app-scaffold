@@ -2,7 +2,7 @@
     "$schema": "../../framework.schema.json",
     "name": "react-vite",
     "displayName": "React + Vite",
-    "description": "React + Vite framework",
+    "description": "React + Vite is a modern frontend framework that combines the power of React with the speed of Vite. It provides a fast and efficient development experience, allowing developers to build high-performance web applications with ease.",
     "defaultAppName": "react-vite-app",
     "defaultAppDescription": "A React + Vite app",
     "dependencies": [

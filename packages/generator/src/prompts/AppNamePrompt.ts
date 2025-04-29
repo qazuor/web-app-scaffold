@@ -1,0 +1,53 @@
+import path from 'node:path';
+import fs from 'fs-extra';
+import type { ConfigsManager } from '../core/ConfigsManager.js';
+import type { FrameworksManager } from '../core/FrameworksManager.js';
+import { BasePrompt } from './BasePrompt.js';
+
+/**
+ * Handles application name prompts
+ */
+export class AppNamePrompt extends BasePrompt<string> {
+    constructor(configsManager: ConfigsManager, frameworksManager: FrameworksManager) {
+        const defaultName = configsManager.getFramework()
+            ? frameworksManager
+                  .getFrameworkByName(configsManager.getFramework())
+                  .getDefaultAppName()
+            : 'my-app';
+        super(configsManager, frameworksManager, {
+            type: 'input',
+            name: 'appName',
+            message: 'Application name:',
+            default: defaultName
+        });
+    }
+
+    /**
+     * Validates application name
+     */
+    public async validate(name: string): Promise<true | string> {
+        if (!name) {
+            return 'Application name is required';
+        }
+
+        if (!/^[a-z0-9-]+$/.test(name)) {
+            return 'Name must contain only lowercase letters, numbers, and hyphens';
+        }
+
+        if (name.length < 2) {
+            return 'Name must be at least 2 characters long';
+        }
+
+        if (name.length > 214) {
+            return 'Name must be less than 214 characters';
+        }
+
+        // Check if directory already exists
+        const appDir = path.join(process.cwd(), 'apps', name);
+        if (await fs.pathExists(appDir)) {
+            return `An application named "${name}" already exists`;
+        }
+
+        return true;
+    }
+}

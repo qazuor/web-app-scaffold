@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { logger } from '@repo/logger';
 import fs from 'fs-extra';
 import type { GeneratorOptions } from '../types/generator.js';
+import type { PromptManager } from './PromptManager.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isCompiledCode = __dirname.includes('dist');
@@ -65,5 +66,34 @@ export class ConfigsManager {
 
     public getPort(): number {
         return this.config.port;
+    }
+
+    public setName(name: string): void {
+        this.config.name = name;
+    }
+
+    public setFramework(framework: string): void {
+        this.config.framework = framework;
+    }
+
+    public setPort(port: number): void {
+        this.config.port = port;
+    }
+
+    public async gatherConfiguration(
+        promptManager: PromptManager
+    ): Promise<Record<string, unknown>> {
+        const framwork = await promptManager.promptForFramework();
+        this.setFramework(framwork);
+
+        // name
+        const name = await promptManager.promptForAppName();
+        this.setName(name);
+
+        // description
+
+        // port
+
+        return { framwork, name };
     }
 }

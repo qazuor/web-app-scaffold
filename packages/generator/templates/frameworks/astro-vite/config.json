@@ -1,8 +1,8 @@
 {
     "$schema": "../../framework.schema.json",
     "name": "astro-vite",
-    "displayName": "Astro + Vite",
-    "description": "Astro + Vite framework",
+    "displayName": "Astro static site",
+    "description": "Astro + Vite is a modern frontend framework that combines the power of Astro with the speed of Vite. It provides a fast and efficient development experience, allowing developers to build high-performance web applications with ease.",
     "defaultAppName": "astro-vite-app",
     "defaultAppDescription": "An Astro + Vite app",
     "dependencies": [

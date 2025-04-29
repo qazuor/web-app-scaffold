@@ -1,8 +1,8 @@
 {
     "$schema": "../../framework.schema.json",
     "name": "tanstack-start",
-    "displayName": "TanStack Start",
-    "description": "TanStack Start framework",
+    "displayName": "TanStack Start Fullstack Application",
+    "description": "TanStack Start is a modern framework for building web applications using TanStack libraries. It provides a powerful and flexible foundation for creating high-performance applications with ease.",
     "defaultAppName": "tanstack-start-app",
     "defaultAppDescription": "A TanStack Start app",
     "dependencies": [

@@ -1,8 +1,8 @@
 {
     "$schema": "../../framework.schema.json",
     "name": "hono",
-    "displayName": "Hono",
-    "description": "Hono framework",
+    "displayName": "Hono backend application",
+    "description": "Hono is a lightweight framework for building APIs and web applications. It provides a simple and intuitive API for creating fast and efficient applications with minimal overhead.",
     "defaultAppName": "hono-app",
     "defaultAppDescription": "A Hono app",
     "dependencies": [
@@ -25,7 +25,7 @@
             "version": "^2.0.0"
         }
     ],
-    "hasUI": true,
+    "hasUI": false,
     "addBiome": true,
     "addTesting": true,
     "testingDependencies": [
