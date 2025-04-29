@@ -1,3 +1,5 @@
+import type { Dependency, Script } from './index.js';
+
 /**
  * Configuration for a frameowrk in the generator
  */
@@ -13,20 +15,11 @@ export interface FrameworkConfig {
     /** Default description for the app if none is provided */
     defaultAppDescription: string;
     /** Dependencies that should be installed with this framework */
-    dependencies?: {
-        name: string;
-        version: string;
-    }[];
+    dependencies?: Dependency[];
     /** Dev dependencies that should be installed with this framework */
-    devDependencies?: {
-        name: string;
-        version: string;
-    }[];
+    devDependencies?: Dependency[];
     /** Script that should be added to app package.json */
-    scripts?: {
-        name: string;
-        code: string;
-    }[];
+    scripts?: Script[];
     /** Whether this framework has UI (for use UI or Icon Libraries) */
     hasUI?: boolean;
     /** Whether to add Biome config */

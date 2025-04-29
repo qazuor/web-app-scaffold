@@ -1,3 +1,4 @@
+import { logger } from '@repo/logger';
 import inquirer from 'inquirer';
 import type { Package } from '../entity/Package.js';
 import {
@@ -13,8 +14,12 @@ import {
     LicensePrompt,
     PortPrompt,
     RepositoryUrlPrompt,
+    SharedPackageDescriptionPrompt,
+    SharedPackageInstalationTypePrompt,
+    SharedPackageNamePrompt,
     UILibraryPrompt
 } from '../prompts/index.js';
+import type { SharedPackagesInfo } from '../types/index.js';
 import type { ConfigsManager } from './ConfigsManager.js';
 import type { FrameworksManager } from './FrameworksManager.js';
 import type { PackagesManager } from './PackagesManager.js';
@@ -42,6 +47,10 @@ export class PromptManager {
     private uiLibraryPrompt!: UILibraryPrompt;
     private iconLibraryPrompt!: IconLibraryPrompt;
     private additionalPackagesPrompt!: AdditionalPackagesPrompt;
+
+    private instalationTypePrompt!: SharedPackageInstalationTypePrompt;
+    private sharedPackageNamePrompt!: SharedPackageNamePrompt;
+    private sharedPackageDescriptionPrompt!: SharedPackageDescriptionPrompt;
 
     constructor(
         configsManager: ConfigsManager,
@@ -119,6 +128,21 @@ export class PromptManager {
             this.packagesManager
         );
         this.additionalPackagesPrompt = new AdditionalPackagesPrompt(
+            this.configsManager,
+            this.frameworksManager,
+            this.packagesManager
+        );
+        this.instalationTypePrompt = new SharedPackageInstalationTypePrompt(
+            this.configsManager,
+            this.frameworksManager,
+            this.packagesManager
+        );
+        this.sharedPackageNamePrompt = new SharedPackageNamePrompt(
+            this.configsManager,
+            this.frameworksManager,
+            this.packagesManager
+        );
+        this.sharedPackageDescriptionPrompt = new SharedPackageDescriptionPrompt(
             this.configsManager,
             this.frameworksManager,
             this.packagesManager
@@ -270,6 +294,42 @@ export class PromptManager {
         );
     }
 
+    /**
+     * Prompts for instalation type
+     * @param pkg - Package to prompt for
+     * @returns Instalation type info
+     */
+    public async promptForPackageInstalationType(pkg: Package): Promise<string> {
+        const { installationType } = await inquirer.prompt([
+            this.instalationTypePrompt.getSharedPrompt(pkg)
+        ]);
+        return installationType;
+    }
+
+    /**
+     * Prompts for shared package name
+     * @param pkg - Package to prompt for
+     * @returns Selected shared package name string
+     */
+    public async promptForSharedPackageName(pkg: Package): Promise<string> {
+        const { packageName } = await inquirer.prompt([
+            this.sharedPackageNamePrompt.getSharedPrompt(pkg)
+        ]);
+        return packageName;
+    }
+
+    /**
+     * Prompts for shared package description
+     * @param pkg - Package to prompt for
+     * @returns Selected shared package description string
+     */
+    public async promptForSharedPackageDescription(pkg: Package): Promise<string> {
+        const { packageDescription } = await inquirer.prompt([
+            this.sharedPackageDescriptionPrompt.getSharedPrompt(pkg)
+        ]);
+        return packageDescription;
+    }
+
     public async gatherConfiguration(): Promise<Record<string, unknown>> {
         const framwork = await this.promptForFramework();
         this.configsManager.setFramework(framwork);
@@ -328,5 +388,37 @@ export class PromptManager {
             this.configsManager.addSelectedPackage(pkg);
         }
         return selectedPackages;
+    }
+
+    public async gatherInstallationInfoForPackages(
+        selectedPackages: Package[]
+    ): Promise<SharedPackagesInfo[]> {
+        const sharedPackagesInfo: SharedPackagesInfo[] = [];
+        for (const pkg of selectedPackages) {
+            if (pkg.canBeShared()) {
+                const instalationType = await this.promptForPackageInstalationType(pkg);
+                let sharedName: string | undefined = undefined;
+                let sharedDescription: string | undefined = undefined;
+                if (instalationType === 'shared') {
+                    sharedName = await this.promptForSharedPackageName(pkg);
+                    logger.warn(
+                        `Revisar si no tenemos ya este package instalado como shared,
+en cuyo caso hay que ofertar usar esa instancia en vez de crear una nueva.
+Para esto deberiamos al momento de instalar todo,
+updatear un json que lleve control de que packages se instalaron como shared
+y que configuraciones incluyeron`
+                    );
+                    sharedDescription = await this.promptForSharedPackageDescription(pkg);
+                }
+                const sharedPackageInfo = {
+                    isShared: instalationType === 'shared',
+                    packageName: sharedName,
+                    packageDescription: sharedDescription
+                };
+                sharedPackagesInfo.push(sharedPackageInfo);
+                pkg.setInstalationInfo(sharedPackageInfo);
+            }
+        }
+        return sharedPackagesInfo;
     }
 }

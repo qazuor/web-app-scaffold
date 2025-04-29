@@ -71,4 +71,15 @@ export class PackagesManager {
             }) || []
         );
     }
+
+    public getPackagesThatCanBeShared(frameworkName: string): Package[] | [] {
+        return (
+            this.packages.filter((pkg) => {
+                return (
+                    pkg.canBeShared() &&
+                    (!frameworkName || pkg.getFrameworks().includes(frameworkName))
+                );
+            }) || []
+        );
+    }
 }

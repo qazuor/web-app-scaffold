@@ -1,3 +1,5 @@
+import type { ExtraOptionPrompt, PackageDependency, PackageScript } from './index.js';
+
 /**
  * Configuration for a package in the generator
  */
@@ -11,38 +13,33 @@ export interface PackageConfig {
     /** Version of the package to install */
     version: string;
     /** Frameworks this package is compatible with */
-    frameworks?: string[];
+    supportedFrameworks?: string[];
     /** Whether this is a dev dependency */
     isDev?: boolean;
     /** Additional dependencies that should be installed with this package */
-    dependencies?: string[];
+    additionalDependencies?: PackageDependency[];
     /** Additional dev dependencies that should be installed with this package */
-    devDependencies?: string[];
+    additionalDevDependencies?: PackageDependency[];
     /** Additional script that should be added to app package.json */
-    scripts?: string[];
-    /** Additional dependencies and script that should be installed with this package for selected framework */
-    PackageConfigForFramework?: PackageConfigForFramework[];
+    additionalScripts?: PackageScript[];
+    /** Additional dependencies that should be installed with this package  for a specific framework */
+    additionalDependenciesForFramework?: Record<string, PackageDependency[]>;
+    /** Additional dev dependencies that should be installed with this package for a specific framework */
+    additionalDevDependenciesForFramework?: Record<string, PackageDependency[]>;
+    /** Additional script that should be added to app package.json for a specific framework */
+    additionalScriptsForFramework?: Record<string, PackageScript[]>;
     /** Whether this package is a UI library */
     isUILibrary?: boolean;
     /** Whether this package is an icon library */
     isIconLibrary?: boolean;
     /** Whether this package can be installed as a shared package */
     canBeSharedPackage?: boolean;
-    /** Template directory for shared package if supported */
-    sharedPackageTemplate?: string;
     /** Default name for the shared package */
     sharedPackageDefaultName?: string;
-}
-
-export interface PackageConfigForFramework {
-    /** Frameworks this package is compatible with */
-    framework: string[];
-    /** Additional dependencies that should be installed with this package for the selected framework */
-    dependencies?: string[];
-    /** Additional dev dependencies that should be installed with this package for the selected framework */
-    devDependencies?: string[];
-    /** Additional script that should be added to app package.json for the selected framework */
-    scripts?: string[];
+    /** Default description for the shared package */
+    sharedPackageDefaultDescription?: string;
+    /** Prompts configs for additional options for this package */
+    extraOptionsPrompts?: ExtraOptionPrompt[];
 }
 
 export interface PackageOptions extends PackageConfig {
@@ -51,17 +48,27 @@ export interface PackageOptions extends PackageConfig {
     /** Selected configuration option */
     selectedConfig?: string;
     /** Installation type configuration */
-    installationType?: PackageInstallationType;
+    installationInfo?: PackageInstallationInfo;
 }
+
+export type PackageInstallationType = 'shared' | 'direct';
+
+export type SharedPackagesInfo = {
+    isShared: boolean;
+    packageName?: string;
+    packageDescription?: string;
+};
 
 /**
  * Installation type for a package
  */
-export interface PackageInstallationType {
+export interface PackageInstallationInfo {
     /** Whether the package should be installed as a shared package */
     isShared: boolean;
     /** Name of the shared package if isShared is true */
     packageName?: string;
+    /** Name of the shared package if isShared is true */
+    packageDescription?: string;
 }
 
 // /**

@@ -186,6 +186,6 @@ export class ConfigsManager {
         if (!this.config.selectedPackages) {
             this.config.selectedPackages = [];
         }
-        this.config.selectedPackages.push(pkg.getPackageConfig());
+        this.config.selectedPackages.push(pkg.getPackageOptions());
     }
 }

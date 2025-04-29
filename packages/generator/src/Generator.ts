@@ -5,7 +5,7 @@ import { PackagesManager } from './core/PackagesManager.js';
 import { ProgressTracker } from './core/Progress.js';
 import { PromptManager } from './core/PromptManager.js';
 import type { Package } from './entity/Package.js';
-import type { PackageConfig } from './types/package.js';
+import type { SharedPackagesInfo } from './types/index.js';
 import { getPackageMetadataDefaults } from './utils/defaults.js';
 import { withErrorHandling } from './utils/error-handler.js';
 import { getNextAvailablePort } from './utils/port-manager.js';
@@ -62,6 +62,7 @@ export class Generator {
             let iconLibraryPackage: Package | undefined = undefined;
             let uiLibraryPackage: Package | undefined = undefined;
             let selectedPackages: Package[] | undefined = undefined;
+            let sharedPackagesInfo: SharedPackagesInfo[] | [] = [];
 
             // Step 1: Configure application settings
             this.progress.nextStep(
@@ -71,7 +72,7 @@ export class Generator {
                 await this.promptManager.gatherConfiguration();
             this.progress.completeStep();
 
-            // Step 2: Configure application settings
+            // Step 2: Configure package metadata
             this.progress.nextStep(
                 'Configuring package metadata... (Autor, license, homepage, etc.)'
             );
@@ -79,20 +80,13 @@ export class Generator {
                 await this.promptManager.gatherMetadata();
             this.progress.completeStep();
 
+            // Step 3: UI Library package
             const frameworkHasUI = this.frameworksManager
                 .getFrameworkByName(this.configsManager.getFramework())
                 .hasUI();
             const frameworkHasUILibrary =
                 this.packagesManager.getUILibraryPackages(this.configsManager.getFramework())
                     .length > 0;
-            const frameworkHasIconLibrary =
-                this.packagesManager.getIconLibraryPackages(this.configsManager.getFramework())
-                    .length > 0;
-            const frameworkHasAdditionalPackages =
-                this.packagesManager.getPackagesForFrameowrk(this.configsManager.getFramework())
-                    .length > 0;
-
-            // Step 3: Configure application settings
             this.progress.nextStep('Configuring UI Library package...');
             if (frameworkHasUI && frameworkHasUILibrary) {
                 uiLibraryPackage = await this.promptManager.gatherUILibraryPackage();
@@ -106,7 +100,10 @@ export class Generator {
                       : undefined
             );
 
-            // Step 4: Configure application settings
+            // Step 4: Icon Library package
+            const frameworkHasIconLibrary =
+                this.packagesManager.getIconLibraryPackages(this.configsManager.getFramework())
+                    .length > 0;
             this.progress.nextStep('Configuring Icon Library package...');
             if (frameworkHasUI && frameworkHasIconLibrary) {
                 iconLibraryPackage = await this.promptManager.gatherIconLibraryPackage();
@@ -120,7 +117,10 @@ export class Generator {
                       : undefined
             );
 
-            // Step 5: Configure application settings
+            // Step 5: Additional packages
+            const frameworkHasAdditionalPackages =
+                this.packagesManager.getPackagesForFrameowrk(this.configsManager.getFramework())
+                    .length > 0;
             this.progress.nextStep('Configuring additional packages..');
             if (frameworkHasAdditionalPackages) {
                 selectedPackages = await this.promptManager.gatherAdditionalPackages();
@@ -132,27 +132,41 @@ export class Generator {
                     : undefined
             );
 
-            // // Step 6: Configure application settings
-            // this.progress.nextStep(
-            //     'Configuring installation type... (Install dependencies or not)'
-            // );
-            // this.progress.completeStep();
+            // Step 6: Installation type
+            this.progress.nextStep(
+                'Configuring installation type... (Install dependencies or as shared package)'
+            );
+            const somePackageCanBeInstalledAsShared =
+                this.packagesManager.getPackagesThatCanBeShared(this.configsManager.getFramework())
+                    .length > 0;
+            if (selectedPackages?.length && somePackageCanBeInstalledAsShared) {
+                sharedPackagesInfo =
+                    await this.promptManager.gatherInstallationInfoForPackages(selectedPackages);
+            }
+            this.progress.completeStep(
+                !selectedPackages?.length || !somePackageCanBeInstalledAsShared,
+                !selectedPackages?.length
+                    ? 'No additional package selected'
+                    : !somePackageCanBeInstalledAsShared
+                      ? 'None of the selected additional packages can be installed as a shared package'
+                      : undefined
+            );
 
-            // // Step 7: Configure application settings
+            // // Step 7: Create application structure
             // this.progress.nextStep('Creating application structure... (Copying files and folders)');
             // this.progress.completeStep();
 
-            // // Step 8: Configure application settings
+            // // Step 8: Add additional packages
             // this.progress.nextStep(
             //     'Adding additional packages... (Added dependencies, scripts, configs, etc.)'
             // );
             // this.progress.completeStep();
 
-            // // Step 9: Configure application settings
+            // // Step 9: Install dependencies
             // this.progress.nextStep('Running package manager install');
             // this.progress.completeStep();
 
-            // // Step 10: Configure application settings
+            // // Step 10: Installation end
             // this.progress.nextStep('Installation end... (Finishing up)');
             // this.progress.completeStep();
 
@@ -172,12 +186,13 @@ export class Generator {
             console.log('uiLibraryPackage:', uiLibraryPackage);
             console.log('iconLibraryPackage:', iconLibraryPackage);
             console.log('selectedPackages:', selectedPackages);
+            console.log('sharedPackagesInfo:', sharedPackagesInfo);
         }, 'app generation');
 
         console.log(this.configsManager);
     }
 
-    private showCompletionMessage(packages: PackageConfig[]): void {
+    private showCompletionMessage(packages: Package[]): void {
         logger.log('\n\n-----------------------------------------------------\n\n');
         logger.success('Application generated successfully!', {
             subtitle: `Created ${this.configsManager.getFramework()} application: ${this.configsManager.getName()}`
@@ -193,7 +208,7 @@ export class Generator {
 
         if (packages.length > 0) {
             logger.info('Installed packages:', {
-                subtitle: packages.map((p) => p.name).join(', ')
+                subtitle: packages.map((p) => p.getName()).join(', ')
             });
         }
     }

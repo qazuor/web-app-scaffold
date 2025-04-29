@@ -1,5 +1,5 @@
+import type { PackageOptions } from './index.js';
 import type { MetadataOptions } from './metadata.js';
-import type { PackageConfig } from './package.js';
 
 /**
  * Options for app generation
@@ -26,5 +26,5 @@ export interface GeneratorOptions {
     /** Package.json metadata info */
     metadata?: MetadataOptions;
     /** Selected packages to add */
-    selectedPackages?: PackageConfig[];
+    selectedPackages?: PackageOptions[];
 }

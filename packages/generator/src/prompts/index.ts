@@ -14,3 +14,7 @@ export * from './RepositoryUrlPrompt.js';
 export * from './UILibraryPrompt.js';
 export * from './IconLibraryPrompt.js';
 export * from './AdditionalPackagesPrompt.js';
+
+export * from './SharedPackageInstalationTypePrompt.js';
+export * from './SharedPackageNamePrompt.js';
+export * from './SharedPackageDescriptionPrompt.js';

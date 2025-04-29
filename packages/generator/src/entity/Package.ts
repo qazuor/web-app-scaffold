@@ -1,4 +1,4 @@
-import type { PackageConfig, PackageOptions } from '../types/package.js';
+import type { PackageInstallationInfo, PackageOptions } from '../types/package.js';
 
 export class Package {
     private data: PackageOptions;
@@ -10,7 +10,7 @@ export class Package {
         this.data = data;
     }
 
-    public getPackageConfig(): PackageConfig {
+    public getPackageOptions(): PackageOptions {
         return this.data;
     }
 
@@ -35,6 +35,39 @@ export class Package {
     }
 
     public getFrameworks(): string[] {
-        return this.data.frameworks || [];
+        return this.data.supportedFrameworks || [];
+    }
+
+    public canBeShared(): boolean {
+        return !!this.data.canBeSharedPackage;
+    }
+
+    // public getMetadata(): PackageOptions {
+    //     return {
+    //         author: metadata.author,
+    //         license: metadata.license,
+    //         repository: {
+    //             type: 'git',
+    //             url: metadata.repository
+    //         },
+    //         bugs: {
+    //             url: metadata.bugs,
+    //             email: metadata.author.match(/<(.+?)>/)?.[1] || ''
+    //         },
+    //         homepage: metadata.homepage,
+    //         keywords: metadata.keywords.split(',').map((keyword: string) => keyword.trim())
+    //     };
+    // }
+
+    public getSharedPackageDefaultName(): string | undefined {
+        return this.data.sharedPackageDefaultName;
+    }
+
+    public getSharedPackageDefaultDescription(): string | undefined {
+        return this.data.sharedPackageDefaultDescription;
+    }
+
+    public setInstalationInfo(instalationTypeInfo: PackageInstallationInfo): void {
+        this.data.installationInfo = instalationTypeInfo;
     }
 }

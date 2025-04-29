@@ -1,18 +1,15 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "Package Configuration Schema",
-    "description": "Schema for validating package configurations in the generator",
+    "title": "PackageConfig",
     "type": "object",
-    "required": ["name", "displayName", "description", "version"],
-    "additionalProperties": false,
     "properties": {
         "$schema": {
-            "description": "A field for the [JSON schema](https://json-schema.org/) specification"
+            "type": "string",
+            "description": "JSON Schema version or schema URL"
         },
         "name": {
             "type": "string",
-            "description": "Package name as it appears in package.json",
-            "pattern": "^(@[a-z0-9-]+/)?[a-z0-9-:]+$"
+            "description": "Package name as it appears in package.json"
         },
         "displayName": {
             "type": "string",
@@ -25,168 +22,167 @@
         "version": {
             "type": "string",
             "description": "Version of the package to install",
-            "pattern": "^(\\^|~)?\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9.]+)?$|^latest$|^built-in$"
+            "pattern": "^(?:\\^|~)?\\d+\\.\\d+\\.\\d+(?:-[\\w.-]+)?(?:\\+[\\w.-]+)?$"
+        },
+        "supportedFrameworks": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Frameworks this package is compatible with"
         },
         "isDev": {
             "type": "boolean",
-            "description": "Whether this is a dev dependency",
-            "default": false
+            "description": "Whether this is a dev dependency"
         },
-        "dependencies": {
+        "additionalDependencies": {
             "type": "array",
-            "description": "Additional dependencies that should be installed with this package",
-            "items": {
-                "type": "string",
-                "pattern": "^(@[a-z0-9-]+/)?[a-z0-9-]+@\\^?\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9.]+)?$"
+            "items": { "$ref": "#/definitions/PackageDependency" },
+            "description": "Additional dependencies that should be installed with this package"
+        },
+        "additionalDevDependencies": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/PackageDependency" },
+            "description": "Additional dev dependencies that should be installed with this package"
+        },
+        "additionalScripts": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/PackageScript" },
+            "description": "Additional scripts to be added to app package.json"
+        },
+        "additionalDependenciesForFramework": {
+            "type": "object",
+            "description": "Additional dependencies per framework",
+            "additionalProperties": {
+                "type": "array",
+                "items": { "$ref": "#/definitions/PackageDependency" }
             }
         },
-        "devDependencies": {
-            "type": "array",
-            "description": "Additional dev dependencies that should be installed with this package",
-            "items": {
-                "type": "string",
-                "pattern": "^(@[a-z0-9-]+/)?[a-z0-9-]+@\\^?\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9.]+)?$"
+        "additionalDevDependenciesForFramework": {
+            "type": "object",
+            "description": "Additional dev dependencies per framework",
+            "additionalProperties": {
+                "type": "array",
+                "items": { "$ref": "#/definitions/PackageDependency" }
             }
         },
-        "frameworks": {
-            "type": "array",
-            "description": "Frameworks this package is compatible with (empty means all)",
-            "items": {
-                "type": "string",
-                "enum": ["react-vite", "tanstack-start", "astro-vite", "hono"]
+        "additionalScriptsForFramework": {
+            "type": "object",
+            "description": "Additional scripts per framework",
+            "additionalProperties": {
+                "type": "array",
+                "items": { "$ref": "#/definitions/PackageScript" }
             }
         },
         "isUILibrary": {
             "type": "boolean",
-            "description": "Whether this package is a UI library",
-            "default": false
+            "description": "Whether this package is a UI library"
         },
         "isIconLibrary": {
             "type": "boolean",
-            "description": "Whether this package is an icon library",
-            "default": false
+            "description": "Whether this package is an icon library"
         },
         "canBeSharedPackage": {
             "type": "boolean",
-            "description": "Whether this package can be installed as a shared package",
-            "default": false
-        },
-        "sharedPackageTemplate": {
-            "type": "string",
-            "description": "Template directory for shared package if supported"
+            "description": "Whether this package can be installed as a shared package"
         },
         "sharedPackageDefaultName": {
             "type": "string",
-            "description": "Default name for the shared package",
-            "pattern": "^[a-z0-9-]+$"
+            "description": "Default name for the shared package"
         },
-        "configOptions": {
-            "type": "object",
-            "description": "Prompt configuration",
-            "additionalProperties": false,
-            "properties": {
-                "prompt": {
-                    "type": "object",
-                    "description": "Prompt configuration",
-                    "additionalProperties": false,
-                    "properties": {
-                        "type": {
-                            "type": "string",
-                            "enum": ["list", "checkbox", "input"],
-                            "description": "Type of prompt to display"
-                        },
-                        "message": {
-                            "type": "string"
-                        },
-                        "choices": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "required": ["name", "value"],
-                                "properties": {
-                                    "name": {
-                                        "type": "string"
-                                    },
-                                    "value": {
-                                        "type": "string"
-                                    }
-                                }
-                            }
-                        },
-                        "default": {
-                            "type": "string"
-                        }
-                    },
-                    "required": ["type", "message", "choices", "default"]
-                },
-                "resultForPrompt": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "description": "Result for the prompt",
-                    "patternProperties": {
-                        "^[a-z0-9-]+$": {
-                            "type": "object",
-                            "additionalProperties": false,
-                            "properties": {
-                                "dependencies": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "string"
-                                    }
-                                },
-                                "devDependencies": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "string"
-                                    }
-                                },
-                                "scripts": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
-                                },
-                                "contextPackageVars": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                        "type": "string"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "result": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "dependencies": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        },
-                        "devDependencies": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        },
-                        "scripts": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        },
-                        "contextPackageVars": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
+        "sharedPackageDefaultDescription": {
+            "type": "string",
+            "description": "Default description for the shared package"
+        },
+        "extraOptionsPrompts": {
+            "type": "array",
+            "description": "Prompts configs for additional options for this package",
+            "items": {
+                "$ref": "#/definitions/ExtraOptionPrompt"
             }
+        }
+    },
+    "required": ["name", "displayName", "description", "version"],
+    "additionalProperties": false,
+    "definitions": {
+        "PackageDependency": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "pattern": "^(@[a-z0-9-~][a-z0-9-._~]*\\/)?[a-z0-9-~][a-z0-9-._~]*$",
+                    "description": "NPM package name (valid format)"
+                },
+                "version": {
+                    "type": "string",
+                    "pattern": "^(?:\\^|~)?\\d+\\.\\d+\\.\\d+(?:-[\\w.-]+)?(?:\\+[\\w.-]+)?$",
+                    "description": "Semver version (valid format)"
+                },
+                "installInShared": {
+                    "type": "boolean",
+                    "description": "Whether this dependency should be installed in the shared package"
+                },
+                "installInApp": {
+                    "type": "boolean",
+                    "description": "Whether this dependency should be installed in the app package"
+                }
+            },
+            "required": ["name", "version"],
+            "additionalProperties": false
+        },
+        "PackageScript": {
+            "type": "object",
+            "properties": {
+                "name": { "type": "string" },
+                "command": { "type": "string" },
+                "addInShared": {
+                    "type": "boolean",
+                    "description": "Whether to add this script in shared package.json"
+                },
+                "addInApp": {
+                    "type": "boolean",
+                    "description": "Whether to add this script in app package.json"
+                }
+            },
+            "required": ["name", "command"],
+            "additionalProperties": false
+        },
+        "ExtraOptionPrompt": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": ["input", "confirm", "list", "checkbox"]
+                },
+                "message": { "type": "string" },
+                "choices": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": { "type": "string" },
+                            "value": { "type": "string" }
+                        },
+                        "required": ["name", "value"],
+                        "additionalProperties": false
+                    }
+                },
+                "default": {
+                    "oneOf": [
+                        { "type": "boolean" },
+                        { "type": "string" },
+                        {
+                            "type": "array",
+                            "items": { "type": "string" }
+                        },
+                        { "type": "number" },
+                        {
+                            "type": "array",
+                            "items": { "type": "number" }
+                        }
+                    ]
+                }
+            },
+            "required": ["type", "message"],
+            "additionalProperties": false
         }
     }
 }
