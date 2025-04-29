@@ -1,6 +1,9 @@
 import { logger } from '@repo/logger';
+import chalk from 'chalk';
 import inquirer from 'inquirer';
 import type { Package } from '../entity/Package.js';
+import { OverwriteAppFolderPrompt } from '../prompts/OverwriteAppFolderPrompt.js';
+import { SharedPackageOverwriteFolderPrompt } from '../prompts/SharedPackageOverwriteFolderPrompt.js';
 import {
     AdditionalPackagesPrompt,
     AppNamePrompt,
@@ -51,6 +54,9 @@ export class PromptManager {
     private instalationTypePrompt!: SharedPackageInstalationTypePrompt;
     private sharedPackageNamePrompt!: SharedPackageNamePrompt;
     private sharedPackageDescriptionPrompt!: SharedPackageDescriptionPrompt;
+
+    private overwriteAppFolderPrompt!: OverwriteAppFolderPrompt;
+    private sharedPackageOverwriteFolderPrompt!: SharedPackageOverwriteFolderPrompt;
 
     constructor(
         configsManager: ConfigsManager,
@@ -143,6 +149,16 @@ export class PromptManager {
             this.packagesManager
         );
         this.sharedPackageDescriptionPrompt = new SharedPackageDescriptionPrompt(
+            this.configsManager,
+            this.frameworksManager,
+            this.packagesManager
+        );
+        this.overwriteAppFolderPrompt = new OverwriteAppFolderPrompt(
+            this.configsManager,
+            this.frameworksManager,
+            this.packagesManager
+        );
+        this.sharedPackageOverwriteFolderPrompt = new SharedPackageOverwriteFolderPrompt(
             this.configsManager,
             this.frameworksManager,
             this.packagesManager
@@ -330,6 +346,27 @@ export class PromptManager {
         return packageDescription;
     }
 
+    /**
+     * Prompts for overwrite app folder
+     * @returns boolean indicating if the folder should be overwritten
+     */
+    public async promptForOverwriteAppFolder(): Promise<string> {
+        const { overwrite } = await inquirer.prompt([this.overwriteAppFolderPrompt.getPrompt()]);
+        return overwrite;
+    }
+
+    /**
+     * Prompts for overwrite shared package folder
+     * @param pkg - Package to prompt for
+     * @returns boolean indicating if the folder should be overwritten
+     */
+    public async promptForOverwriteSharedPackageFolder(pkg: Package): Promise<string> {
+        const { overwrite } = await inquirer.prompt([
+            this.sharedPackageOverwriteFolderPrompt.getSharedPrompt(pkg)
+        ]);
+        return overwrite;
+    }
+
     public async gatherConfiguration(): Promise<Record<string, unknown>> {
         const framwork = await this.promptForFramework();
         this.configsManager.setFramework(framwork);
@@ -408,6 +445,7 @@ en cuyo caso hay que ofertar usar esa instancia en vez de crear una nueva.
 Para esto deberiamos al momento de instalar todo,
 updatear un json que lleve control de que packages se instalaron como shared
 y que configuraciones incluyeron`
+                        )
                     );
                     sharedDescription = await this.promptForSharedPackageDescription(pkg);
                 }
