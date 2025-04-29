@@ -13,6 +13,7 @@ export const colors = {
     title: chalk.bold.hex('#FFA500'),
     subtitle: chalk.hex('#FFA500'),
     step: chalk.hex('#00CED1'),
+    skip: chalk.hex('#00CED1'),
     file: chalk.hex('#7B68EE'),
     dir: chalk.hex('#9370DB'),
     path: chalk.cyan
@@ -27,6 +28,7 @@ export const defaultIcons = {
     title: '🚀',
     subtitle: '📌',
     step: '🔹',
+    skip: '⏩',
     file: '📄',
     dir: '📁'
 };
@@ -40,6 +42,7 @@ export const defaultTitles = {
     warn: 'WARNING',
     error: 'ERROR',
     step: 'STEP',
+    skip: 'SKIPPED',
     file: 'FILE',
     dir: 'DIRECTORY',
     title: 'TITLE',
@@ -206,6 +209,15 @@ export const logger = {
         console.log('\n-----------------------------------------------------');
         console.log(this.formatLog('step', message, options));
         console.log('\n');
+    },
+
+    /**
+     * Log a skipped step in a process
+     * @param message Skip reason description
+     * @param options Formatting options
+     */
+    skip(message: string, options: LogOptions = {}): void {
+        console.log(this.formatLog('skip', message, options));
     },
 
     /**

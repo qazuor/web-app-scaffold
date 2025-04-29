@@ -29,7 +29,7 @@ export class ProgressTracker {
      */
     completeStep(isSkyped?: boolean, text?: string): void {
         if (isSkyped) {
-            logger.success(`Step skipped: ${text || this.steps[this.currentStep - 1]}`);
+            logger.skip(`${text || this.steps[this.currentStep - 1]}`);
             return;
         }
         logger.log('\n');

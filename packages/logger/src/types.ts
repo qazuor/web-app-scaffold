@@ -40,6 +40,7 @@ export type LogType =
     | 'title'
     | 'subtitle'
     | 'step'
+    | 'skip'
     | 'file'
     | 'dir'
     | 'log'
