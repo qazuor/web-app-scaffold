@@ -9,17 +9,19 @@ import { BasePrompt } from './BasePrompt.js';
  */
 export class AppNamePrompt extends BasePrompt<string> {
     constructor(configsManager: ConfigsManager, frameworksManager: FrameworksManager) {
-        const defaultName = configsManager.getFramework()
-            ? frameworksManager
-                  .getFrameworkByName(configsManager.getFramework())
-                  .getDefaultAppName()
-            : 'my-app';
         super(configsManager, frameworksManager, {
             type: 'input',
             name: 'appName',
-            message: 'Application name:',
-            default: defaultName
+            message: 'Application name:'
         });
+    }
+
+    getDefaultValue(): string {
+        return this.configsManager.getFramework()
+            ? this.frameworksManager
+                  .getFrameworkByName(this.configsManager.getFramework())
+                  .getDefaultAppName()
+            : 'my-app';
     }
 
     /**

@@ -5,6 +5,7 @@ import { ProgressTracker } from './core/Progress.js';
 import { PromptManager } from './core/PromptManager.js';
 import type { PackageConfig } from './types/package.js';
 import { withErrorHandling } from './utils/error-handler.js';
+import { getNextAvailablePort } from './utils/port-manager.js';
 
 /**
  * Core generator class that orchestrates the app generation process
@@ -45,17 +46,19 @@ export class Generator {
 
             await this.frameworksManager.initializeFrameworks();
             await this.promptManager.initializePrompts();
+            this.configsManager.setNextAvailablePort(await getNextAvailablePort());
 
             // Step 1: Configure application settings
             this.progress.nextStep(
                 'Configuring basic settings... (Name, Framework, description, port, etc.)'
             );
-            const { framwork, name } = await this.configsManager.gatherConfiguration(
-                this.promptManager
-            );
+            const { framwork, name, description, port } =
+                await this.configsManager.gatherConfiguration(this.promptManager);
 
-            console.log('Framework selected:', framwork);
-            console.log('Framework name:', name);
+            console.log('Framework:', framwork);
+            console.log('App name:', name);
+            console.log('Description:', description);
+            console.log('Port:', port);
 
             this.progress.completeStep();
 

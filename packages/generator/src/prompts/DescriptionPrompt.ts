@@ -1,23 +1,31 @@
-// import { getDefaultDescriptionForFramework } from '../../utils/core/defaults.js';
-// import { BasePrompt } from './BasePrompt.js';
+import type { ConfigsManager } from '../core/ConfigsManager.js';
+import type { FrameworksManager } from '../core/FrameworksManager.js';
+import { BasePrompt } from './BasePrompt.js';
 
-// /**
-//  * Handles application description prompts
-//  */
-// export class DescriptionPrompt extends BasePrompt<string> {
-//     constructor(framework: string, appName: string) {
-//         super({
-//             type: 'input',
-//             name: 'description',
-//             message: 'Application description:',
-//             default: getDefaultDescriptionForFramework(framework, appName)
-//         });
-//     }
+/**
+ * Handles application description prompts
+ */
+export class DescriptionPrompt extends BasePrompt<string> {
+    constructor(configsManager: ConfigsManager, frameworksManager: FrameworksManager) {
+        super(configsManager, frameworksManager, {
+            type: 'input',
+            name: 'description',
+            message: 'Application description:'
+        });
+    }
 
-//     /**
-//      * Validates description
-//      */
-//     public async validate(_description: string): Promise<true> {
-//         return true;
-//     }
-// }
+    getDefaultValue(): string {
+        return this.configsManager.getFramework()
+            ? this.frameworksManager
+                  .getFrameworkByName(this.configsManager.getFramework())
+                  .getDefaultAppDescription()
+            : 'My App description';
+    }
+
+    /**
+     * Validates description
+     */
+    public async validate(_description: string): Promise<true> {
+        return true;
+    }
+}

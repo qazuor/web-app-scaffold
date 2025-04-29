@@ -23,6 +23,10 @@ export class FrameworkPrompt extends BasePrompt<string> {
         });
     }
 
+    getDefaultValue(): string {
+        return '';
+    }
+
     /**
      * Validates framework selection
      * @throws {GeneratorError} If framework is invalid

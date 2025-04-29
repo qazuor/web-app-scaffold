@@ -11,9 +11,11 @@ const templatesDir = path.join(__dirname, isCompiledCode ? '..' : '..', 'templat
 
 export class ConfigsManager {
     private config: GeneratorOptions;
+    private nextAvailablePort: number;
 
     constructor(config: GeneratorOptions) {
         this.config = config;
+        this.nextAvailablePort = 4000; // Default starting port
 
         this.config.templatesPath = templatesDir;
         this.config.frameworksTemplatesPath = path.join(templatesDir, 'frameworks');
@@ -80,9 +82,26 @@ export class ConfigsManager {
         this.config.port = port;
     }
 
+    public getDescription(): string {
+        return this.config.description;
+    }
+
+    public setDescription(description: string): void {
+        this.config.description = description;
+    }
+
+    public getNextAvailablePort(): number {
+        return this.nextAvailablePort;
+    }
+
+    public setNextAvailablePort(port: number): void {
+        this.nextAvailablePort = port;
+    }
+
     public async gatherConfiguration(
         promptManager: PromptManager
     ): Promise<Record<string, unknown>> {
+        // framework
         const framwork = await promptManager.promptForFramework();
         this.setFramework(framwork);
 
@@ -91,9 +110,13 @@ export class ConfigsManager {
         this.setName(name);
 
         // description
+        const description = await promptManager.promptForDescription();
+        this.setDescription(description);
 
         // port
+        const port = await promptManager.promptForAppPort();
+        this.setPort(port);
 
-        return { framwork, name };
+        return { framwork, name, description, port };
     }
 }

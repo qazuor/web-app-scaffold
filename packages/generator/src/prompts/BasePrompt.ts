@@ -27,11 +27,17 @@ export abstract class BasePrompt<T> {
     abstract validate(value: T): Promise<true | string>;
 
     /**
+     * Gets the default value for the prompt
+     */
+    abstract getDefaultValue(): T;
+
+    /**
      * Gets the prompt configuration
      */
     public getPrompt(): QuestionCollection {
         return {
             ...this.question,
+            default: this.getDefaultValue(),
             validate: (input: T) => this.validate(input)
         };
     }
