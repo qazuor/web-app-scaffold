@@ -41,9 +41,25 @@ const validateUrl = async (url: string, isMandatory: boolean): Promise<string | 
     return true;
 };
 
+const validateAuthor = async (input: string, isMandatory: boolean): Promise<string | true> => {
+    if (!input) {
+        return isMandatory ? 'Author field is required' : true;
+    }
+
+    const authorRegex = /^([^<>]+)\s<([^<>@\s]+@[^<>@\s]+\.[^<>@\s]+)>\s\((https?:\/\/[^\s]+)\)$/;
+
+    if (!authorRegex.test(input)) {
+        return 'Invalid author format. Use: "Name <email> (url)"';
+    }
+
+    return true;
+};
+
 export const validate = {
     appName: async (input: string): Promise<string | true> => await validateName(false, input),
     packageName: async (input: string): Promise<string | true> => await validateName(true, input),
     url: async (input: string, isMandatory = true): Promise<string | true> =>
-        await validateUrl(input, isMandatory)
+        await validateUrl(input, isMandatory),
+    author: async (input: string, isMandatory = true): Promise<string | true> =>
+        await validateAuthor(input, isMandatory)
 };

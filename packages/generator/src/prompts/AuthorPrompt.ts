@@ -1,5 +1,6 @@
 import type { QuestionCollection } from 'inquirer';
 import { BasePrompt } from './BasePrompt.js';
+import { validate } from '../utils/validations.js';
 
 /**
  * Handles application Author prompts
@@ -19,7 +20,7 @@ export class AuthorPrompt extends BasePrompt {
     /**
      * Validates description
      */
-    public async validate(_description: string): Promise<true> {
-        return true;
+    public async validate(author: string): Promise<true | string> {
+        return await validate.author(author);
     }
 }
