@@ -27,6 +27,10 @@ export class ConfigsManager {
         this.config.packagesTmplatesPath = path.join(templatesDir, 'packages');
     }
 
+    public getConfigOptions(): GeneratorOptions {
+        return this.config;
+    }
+
     public async validatePaths(): Promise<void> {
         // Validate templates directory
         if (!(await fs.pathExists(this.getTemplatesPath()))) {

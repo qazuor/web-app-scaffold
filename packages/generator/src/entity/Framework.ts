@@ -7,6 +7,10 @@ export class Framework {
         this.data = data;
     }
 
+    public getFramworkOptions(): FrameworkOptions {
+        return this.data;
+    }
+
     public getName(): string {
         return this.data.name;
     }
