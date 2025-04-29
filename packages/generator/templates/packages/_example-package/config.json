@@ -1,0 +1,45 @@
+{
+    "$schema": "../../package.schema.json",
+    "name": "example-package",
+    "displayName": "Example Package",
+    "description": "Example Package description",
+    "version": "^1.0.0",
+    "additionalDependencies": [
+        {
+            "name": "@repo/example-package1",
+            "version": "^1.0.0"
+        }
+    ],
+    "additionalDevDependencies": [
+        {
+            "name": "@repo/example-package2",
+            "version": "^1.0.0"
+        }
+    ],
+    "additionalScripts": [
+        { "name": "build", "command": "tsc --noEmit" },
+        { "name": "test", "command": "vitest" },
+        { "name": "test:watch", "command": "vitest --watch" }
+    ],
+    "supportedFrameworks": ["react-vite", "tanstack-start"],
+    "isUILibrary": false,
+    "isIconLibrary": false,
+    "canBeSharedPackage": true,
+    "sharedPackageDefaultName": "example",
+    "sharedPackageDefaultDescription": "example shared package description",
+    "extraOptionsPrompts": [
+        {
+            "type": "checkbox",
+            "message": "Which authentication strategy would you like to use?",
+            "choices": [
+                {
+                    "name": "Email & Password - Traditional authentication",
+                    "value": "email-password"
+                },
+                { "name": "Google - Social sign-in with Google", "value": "google" },
+                { "name": "Facebook - Social sign-in with Facebook", "value": "facebook" }
+            ],
+            "default": "email-password"
+        }
+    ]
+}
