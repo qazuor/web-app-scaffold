@@ -1,4 +1,5 @@
 import type { QuestionCollection } from 'inquirer';
+import { validate } from '../utils/validations.js';
 import { BasePrompt } from './BasePrompt.js';
 
 /**
@@ -19,7 +20,7 @@ export class BugsUrlPrompt extends BasePrompt {
     /**
      * Validates description
      */
-    public async validate(_description: string): Promise<true> {
-        return true;
+    public async validate(url: string): Promise<true | string> {
+        return await validate.url(url, false);
     }
 }
