@@ -57,10 +57,21 @@ export class Generator {
             const { framwork, name, description, port } =
                 await this.configsManager.gatherConfiguration(this.promptManager);
 
+            const { author, homepage, bugsUrl, repositoryUrl, license, keywords } =
+                await this.configsManager.gatherMetadata(this.promptManager);
+
             console.log('Framework:', framwork);
             console.log('App name:', name);
             console.log('Description:', description);
             console.log('Port:', port);
+            console.log('author:', author);
+            console.log('homepage:', homepage);
+            console.log('bugs:', bugsUrl);
+            console.log('repo:', repositoryUrl);
+            console.log('license:', license);
+            console.log('keywords:', keywords);
+
+            console.log(this.configsManager);
 
             this.progress.completeStep();
 

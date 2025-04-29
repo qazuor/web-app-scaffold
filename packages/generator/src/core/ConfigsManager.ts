@@ -162,22 +162,40 @@ export class ConfigsManager {
     public async gatherConfiguration(
         promptManager: PromptManager
     ): Promise<Record<string, unknown>> {
-        // framework
         const framwork = await promptManager.promptForFramework();
         this.setFramework(framwork);
 
-        // name
         const name = await promptManager.promptForAppName();
         this.setName(name);
 
-        // description
         const description = await promptManager.promptForDescription();
         this.setDescription(description);
 
-        // port
         const port = await promptManager.promptForAppPort();
         this.setPort(port);
 
         return { framwork, name, description, port };
+    }
+
+    public async gatherMetadata(promptManager: PromptManager): Promise<Record<string, unknown>> {
+        const homepage = await promptManager.promptForHomepage();
+        this.setHomepage(homepage);
+
+        const license = await promptManager.promptForLicense();
+        this.setLicense(license);
+
+        const author = await promptManager.promptForAuthor();
+        this.setAuthor(author);
+
+        const repositoryUrl = await promptManager.promptForRepositoryUrl();
+        this.setRepo(repositoryUrl);
+
+        const bugsUrl = await promptManager.promptForBugsUrl();
+        this.setBugs(bugsUrl);
+
+        const keywords = await promptManager.promptForKeywords();
+        this.setKeywords(keywords.split(',').map((s) => s.trim()));
+
+        return { author, homepage, repositoryUrl, bugsUrl, license, keywords };
     }
 }
