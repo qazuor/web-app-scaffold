@@ -168,8 +168,8 @@ export class PromptManager {
      * Prompts for app name
      * @returns Selected name string
      */
-    public async promptForAppName(): Promise<string> {
-        if (this.configsManager.getName()) {
+    public async promptForAppName(force = false): Promise<string> {
+        if (!force && this.configsManager.getName()) {
             await this.appNamePrompt.validate(this.configsManager.getName());
             return this.configsManager.getName();
         }
