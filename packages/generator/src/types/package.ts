@@ -71,6 +71,16 @@ export interface PackageInstallationInfo {
     packageDescription?: string;
 }
 
+/**
+ * Context for package templates files
+ */
+export interface PackageTemplateContext {
+    /** selectedPackages */
+    selectedPackages?: string[];
+    /** Name for the shared package */
+    sharedPackageName?: string;
+}
+
 // /**
 //  * Result of package installation
 //  */

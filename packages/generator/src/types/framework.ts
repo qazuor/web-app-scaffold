@@ -45,3 +45,13 @@ export interface FrameworkOptions extends FrameworkConfig {
     /** Name for the shared package */
     sharedPackageName?: string;
 }
+
+/**
+ * Context for framework templates files
+ */
+export interface FrameworkTemplateContext {
+    /** selectedPackages */
+    selectedPackages?: string[];
+    /** Name for the shared package */
+    sharedPackageName?: string;
+}
