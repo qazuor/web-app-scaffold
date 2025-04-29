@@ -10,7 +10,7 @@ export class FrameworkPrompt extends BasePrompt {
     private availableFramworks!: Framework[];
 
     getPromptValues(): QuestionCollection {
-        this.availableFramworks = this.frameworksManager.getFrameworks();
+        this.availableFramworks = this.getAvailableFramworks();
         return {
             type: 'list',
             name: 'framework',
@@ -22,15 +22,26 @@ export class FrameworkPrompt extends BasePrompt {
         };
     }
 
+    getAvailableFramworks(): Framework[] {
+        if (!this.availableFramworks) {
+            this.availableFramworks = this.frameworksManager.getFrameworks();
+        }
+        return this.availableFramworks;
+    }
+
     /**
      * Validates framework selection
      * @throws {GeneratorError} If framework is invalid
      */
     public async validate(framework: string): Promise<true | string> {
-        if (!this.availableFramworks.map((f: Framework) => f.getName()).includes(framework)) {
+        if (
+            !this.getAvailableFramworks()
+                .map((f: Framework) => f.getName())
+                .includes(framework)
+        ) {
             throw new GeneratorError(
                 'Invalid framework',
-                `Framework must be one of: ${this.availableFramworks
+                `Framework must be one of: ${this.getAvailableFramworks()
                     .map((f: Framework) => f.getName())
                     .join(', ')}`
             );
