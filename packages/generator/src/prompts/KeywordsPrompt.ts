@@ -16,7 +16,7 @@ export class KeywordsPrompt extends BasePrompt {
     /**
      * Validates description
      */
-    public async validate(_description: string): Promise<true> {
+    public async validate(): Promise<true> {
         return true;
     }
 }

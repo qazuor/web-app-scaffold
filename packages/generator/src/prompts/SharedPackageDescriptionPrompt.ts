@@ -20,7 +20,7 @@ export class SharedPackageDescriptionPrompt extends SharedPackageBasePrompt {
     /**
      * Validates description
      */
-    public async validate(_description: string): Promise<true> {
+    public async validate(): Promise<true> {
         return true;
     }
 }
