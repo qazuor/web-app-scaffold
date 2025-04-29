@@ -1,18 +1,23 @@
 import inquirer from 'inquirer';
+import type { Package } from '../entity/Package.js';
 import {
+    AdditionalPackagesPrompt,
     AppNamePrompt,
     AuthorPrompt,
     BugsUrlPrompt,
     DescriptionPrompt,
     FrameworkPrompt,
     HomepagePrompt,
+    IconLibraryPrompt,
     KeywordsPrompt,
     LicensePrompt,
     PortPrompt,
-    RepositoryUrlPrompt
+    RepositoryUrlPrompt,
+    UILibraryPrompt
 } from '../prompts/index.js';
 import type { ConfigsManager } from './ConfigsManager.js';
 import type { FrameworksManager } from './FrameworksManager.js';
+import type { PackagesManager } from './PackagesManager.js';
 
 /**
  * Manages user prompts and input validation
@@ -20,6 +25,7 @@ import type { FrameworksManager } from './FrameworksManager.js';
 export class PromptManager {
     private configsManager: ConfigsManager;
     private frameworksManager: FrameworksManager;
+    private packagesManager: PackagesManager;
 
     private frameworkPrompt!: FrameworkPrompt;
     private appNamePrompt!: AppNamePrompt;
@@ -33,29 +39,90 @@ export class PromptManager {
     private homepagePrompt!: HomepagePrompt;
     private keywordsPrompt!: KeywordsPrompt;
 
-    constructor(configsManager: ConfigsManager, frameworksManager: FrameworksManager) {
+    private uiLibraryPrompt!: UILibraryPrompt;
+    private iconLibraryPrompt!: IconLibraryPrompt;
+    private additionalPackagesPrompt!: AdditionalPackagesPrompt;
+
+    constructor(
+        configsManager: ConfigsManager,
+        frameworksManager: FrameworksManager,
+        packagesManager: PackagesManager
+    ) {
         this.configsManager = configsManager;
         this.frameworksManager = frameworksManager;
+        this.packagesManager = packagesManager;
     }
 
     /**
      * Initializes the prompt manager
      */
     public async initializePrompts(): Promise<void> {
-        this.frameworkPrompt = new FrameworkPrompt(this.configsManager, this.frameworksManager);
-        this.appNamePrompt = new AppNamePrompt(this.configsManager, this.frameworksManager);
-        this.portPrompt = new PortPrompt(this.configsManager, this.frameworksManager);
-        this.descriptionPrompt = new DescriptionPrompt(this.configsManager, this.frameworksManager);
+        this.frameworkPrompt = new FrameworkPrompt(
+            this.configsManager,
+            this.frameworksManager,
+            this.packagesManager
+        );
+        this.appNamePrompt = new AppNamePrompt(
+            this.configsManager,
+            this.frameworksManager,
+            this.packagesManager
+        );
+        this.portPrompt = new PortPrompt(
+            this.configsManager,
+            this.frameworksManager,
+            this.packagesManager
+        );
+        this.descriptionPrompt = new DescriptionPrompt(
+            this.configsManager,
+            this.frameworksManager,
+            this.packagesManager
+        );
 
-        this.authorPrompt = new AuthorPrompt(this.configsManager, this.frameworksManager);
-        this.licensePrompt = new LicensePrompt(this.configsManager, this.frameworksManager);
+        this.authorPrompt = new AuthorPrompt(
+            this.configsManager,
+            this.frameworksManager,
+            this.packagesManager
+        );
+        this.licensePrompt = new LicensePrompt(
+            this.configsManager,
+            this.frameworksManager,
+            this.packagesManager
+        );
         this.repositoryUrlPrompt = new RepositoryUrlPrompt(
             this.configsManager,
-            this.frameworksManager
+            this.frameworksManager,
+            this.packagesManager
         );
-        this.bugsUrlPrompt = new BugsUrlPrompt(this.configsManager, this.frameworksManager);
-        this.homepagePrompt = new HomepagePrompt(this.configsManager, this.frameworksManager);
-        this.keywordsPrompt = new KeywordsPrompt(this.configsManager, this.frameworksManager);
+        this.bugsUrlPrompt = new BugsUrlPrompt(
+            this.configsManager,
+            this.frameworksManager,
+            this.packagesManager
+        );
+        this.homepagePrompt = new HomepagePrompt(
+            this.configsManager,
+            this.frameworksManager,
+            this.packagesManager
+        );
+        this.keywordsPrompt = new KeywordsPrompt(
+            this.configsManager,
+            this.frameworksManager,
+            this.packagesManager
+        );
+        this.uiLibraryPrompt = new UILibraryPrompt(
+            this.configsManager,
+            this.frameworksManager,
+            this.packagesManager
+        );
+        this.iconLibraryPrompt = new IconLibraryPrompt(
+            this.configsManager,
+            this.frameworksManager,
+            this.packagesManager
+        );
+        this.additionalPackagesPrompt = new AdditionalPackagesPrompt(
+            this.configsManager,
+            this.frameworksManager,
+            this.packagesManager
+        );
     }
 
     /**
@@ -172,6 +239,37 @@ export class PromptManager {
         return keywords;
     }
 
+    /**
+     * Prompts for UI Library package
+     * @returns Selected ui library package obj
+     */
+    public async promptForUILibrary(): Promise<Package> {
+        const { uiLibraryPkgName } = await inquirer.prompt([this.uiLibraryPrompt.getPrompt()]);
+        return this.packagesManager.getPackageByName(uiLibraryPkgName);
+    }
+
+    /**
+     * Prompts for Icon Library package
+     * @returns Selected Icon library package obj
+     */
+    public async promptForIconLibrary(): Promise<Package> {
+        const { iconLibraryPkgName } = await inquirer.prompt([this.iconLibraryPrompt.getPrompt()]);
+        return this.packagesManager.getPackageByName(iconLibraryPkgName);
+    }
+
+    /**
+     * Prompts for additional packages
+     * @returns Selected additional packages objs
+     */
+    public async promptForAdditionalPackages(): Promise<Package[]> {
+        const { selectedPackages } = await inquirer.prompt([
+            this.additionalPackagesPrompt.getPrompt()
+        ]);
+        return selectedPackages.map((pkgName: string) =>
+            this.packagesManager.getPackageByName(pkgName)
+        );
+    }
+
     public async gatherConfiguration(): Promise<Record<string, unknown>> {
         const framwork = await this.promptForFramework();
         this.configsManager.setFramework(framwork);
@@ -208,5 +306,27 @@ export class PromptManager {
         this.configsManager.setKeywords(keywords.split(',').map((s) => s.trim()));
 
         return { author, homepage, repositoryUrl, bugsUrl, license, keywords };
+    }
+
+    public async gatherUILibraryPackage(): Promise<Package> {
+        const UILibraryPackage = await this.promptForUILibrary();
+        this.configsManager.setUILIbrary(UILibraryPackage);
+
+        return UILibraryPackage;
+    }
+
+    public async gatherIconLibraryPackage(): Promise<Package> {
+        const iconLibraryPackage = await this.promptForIconLibrary();
+        this.configsManager.setIconLibrary(iconLibraryPackage);
+
+        return iconLibraryPackage;
+    }
+
+    public async gatherAdditionalPackages(): Promise<Package[]> {
+        const selectedPackages = await this.promptForAdditionalPackages();
+        for (const pkg of selectedPackages) {
+            this.configsManager.addSelectedPackage(pkg);
+        }
+        return selectedPackages;
     }
 }

@@ -1,21 +1,16 @@
-import type { ConfigsManager } from '../core/ConfigsManager.js';
-import type { FrameworksManager } from '../core/FrameworksManager.js';
+import type { QuestionCollection } from 'inquirer';
 import { BasePrompt } from './BasePrompt.js';
 
 /**
  * Handles application Keywaords prompts
  */
-export class KeywordsPrompt extends BasePrompt<string> {
-    constructor(configsManager: ConfigsManager, frameworksManager: FrameworksManager) {
-        super(configsManager, frameworksManager, {
+export class KeywordsPrompt extends BasePrompt {
+    getPromptValues(): QuestionCollection {
+        return {
             type: 'input',
             name: 'keywords',
             message: 'Keywords (comma-separated):'
-        });
-    }
-
-    getDefaultValue(): string {
-        return '';
+        };
     }
 
     /**

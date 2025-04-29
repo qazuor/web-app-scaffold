@@ -1,25 +1,21 @@
-import type { ConfigsManager } from '../core/ConfigsManager.js';
-import type { FrameworksManager } from '../core/FrameworksManager.js';
+import type { QuestionCollection } from 'inquirer';
 import { BasePrompt } from './BasePrompt.js';
 
 /**
  * Handles application description prompts
  */
-export class DescriptionPrompt extends BasePrompt<string> {
-    constructor(configsManager: ConfigsManager, frameworksManager: FrameworksManager) {
-        super(configsManager, frameworksManager, {
+export class DescriptionPrompt extends BasePrompt {
+    getPromptValues(): QuestionCollection {
+        return {
             type: 'input',
             name: 'description',
-            message: 'Application description:'
-        });
-    }
-
-    getDefaultValue(): string {
-        return this.configsManager.getFramework()
-            ? this.frameworksManager
-                  .getFrameworkByName(this.configsManager.getFramework())
-                  .getDefaultAppDescription()
-            : 'My App description';
+            message: 'Application description:',
+            default: this.configsManager.getFramework()
+                ? this.frameworksManager
+                      .getFrameworkByName(this.configsManager.getFramework())
+                      .getDefaultAppDescription()
+                : 'My App description'
+        };
     }
 
     /**

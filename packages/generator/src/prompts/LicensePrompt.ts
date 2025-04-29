@@ -1,21 +1,17 @@
-import type { ConfigsManager } from '../core/ConfigsManager.js';
-import type { FrameworksManager } from '../core/FrameworksManager.js';
+import type { QuestionCollection } from 'inquirer';
 import { BasePrompt } from './BasePrompt.js';
 
 /**
  * Handles application License prompts
  */
-export class LicensePrompt extends BasePrompt<string> {
-    constructor(configsManager: ConfigsManager, frameworksManager: FrameworksManager) {
-        super(configsManager, frameworksManager, {
+export class LicensePrompt extends BasePrompt {
+    getPromptValues(): QuestionCollection {
+        return {
             type: 'input',
             name: 'license',
-            message: 'License:'
-        });
-    }
-
-    getDefaultValue(): string {
-        return this.configsManager.getDefaultMetadata().license || 'MIT';
+            message: 'License:',
+            default: this.configsManager.getDefaultMetadata().license || 'MIT'
+        };
     }
 
     /**

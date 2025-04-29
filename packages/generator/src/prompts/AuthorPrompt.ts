@@ -1,24 +1,19 @@
-import type { ConfigsManager } from '../core/ConfigsManager.js';
-import type { FrameworksManager } from '../core/FrameworksManager.js';
+import type { QuestionCollection } from 'inquirer';
 import { BasePrompt } from './BasePrompt.js';
 
 /**
  * Handles application Author prompts
  */
-export class AuthorPrompt extends BasePrompt<string> {
-    constructor(configsManager: ConfigsManager, frameworksManager: FrameworksManager) {
-        super(configsManager, frameworksManager, {
+export class AuthorPrompt extends BasePrompt {
+    getPromptValues(): QuestionCollection {
+        return {
             type: 'input',
             name: 'author',
-            message: 'Author (format: Name <email> (url)):'
-        });
-    }
-
-    getDefaultValue(): string {
-        return (
-            this.configsManager.getDefaultMetadata().author ||
-            'John Doe <john@example.com> (https://github.com/johndoe)'
-        );
+            message: 'Author (format: Name <email> (url)):',
+            default:
+                this.configsManager.getDefaultMetadata().author ||
+                'John Doe <john@example.com> (https://github.com/johndoe)'
+        };
     }
 
     /**

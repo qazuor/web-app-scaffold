@@ -10,3 +10,7 @@ export * from './HomepagePrompt.js';
 export * from './KeywordsPrompt.js';
 export * from './LicensePrompt.js';
 export * from './RepositoryUrlPrompt.js';
+
+export * from './UILibraryPrompt.js';
+export * from './IconLibraryPrompt.js';
+export * from './AdditionalPackagesPrompt.js';

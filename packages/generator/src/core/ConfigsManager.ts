@@ -2,6 +2,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { logger } from '@repo/logger';
 import fs from 'fs-extra';
+import type { Package } from '../entity/Package.js';
 import type { GeneratorOptions } from '../types/generator.js';
 import type { MetadataOptions } from '../types/metadata.js';
 
@@ -12,6 +13,10 @@ const templatesDir = path.join(__dirname, isCompiledCode ? '..' : '..', 'templat
 export class ConfigsManager {
     private config: GeneratorOptions;
     private nextAvailablePort: number;
+
+    private uiLibrary!: Package;
+    private iconLibrary!: Package;
+    private selectedPackages: Package[] = [];
 
     constructor(config: GeneratorOptions) {
         this.config = config;
@@ -156,5 +161,31 @@ export class ConfigsManager {
 
     public getDefaultMetadata(): MetadataOptions {
         return this.getMetadata();
+    }
+
+    public setUILIbrary(pkg: Package) {
+        this.uiLibrary = pkg;
+        this.addSelectedPackage(pkg);
+    }
+
+    public getUILibrary() {
+        return this.uiLibrary;
+    }
+
+    public setIconLibrary(pkg: Package) {
+        this.iconLibrary = pkg;
+        this.addSelectedPackage(pkg);
+    }
+
+    public getIconLibrary() {
+        return this.iconLibrary;
+    }
+
+    public addSelectedPackage(pkg: Package) {
+        this.selectedPackages.push(pkg);
+        if (!this.config.selectedPackages) {
+            this.config.selectedPackages = [];
+        }
+        this.config.selectedPackages.push(pkg.getPackageConfig());
     }
 }

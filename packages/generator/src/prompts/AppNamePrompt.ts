@@ -1,27 +1,23 @@
 import path from 'node:path';
 import fs from 'fs-extra';
-import type { ConfigsManager } from '../core/ConfigsManager.js';
-import type { FrameworksManager } from '../core/FrameworksManager.js';
+import type { QuestionCollection } from 'inquirer';
 import { BasePrompt } from './BasePrompt.js';
 
 /**
  * Handles application name prompts
  */
-export class AppNamePrompt extends BasePrompt<string> {
-    constructor(configsManager: ConfigsManager, frameworksManager: FrameworksManager) {
-        super(configsManager, frameworksManager, {
+export class AppNamePrompt extends BasePrompt {
+    getPromptValues(): QuestionCollection {
+        return {
             type: 'input',
             name: 'appName',
-            message: 'Application name:'
-        });
-    }
-
-    getDefaultValue(): string {
-        return this.configsManager.getFramework()
-            ? this.frameworksManager
-                  .getFrameworkByName(this.configsManager.getFramework())
-                  .getDefaultAppName()
-            : 'my-app';
+            message: 'Application name:',
+            default: this.configsManager.getFramework()
+                ? this.frameworksManager
+                      .getFrameworkByName(this.configsManager.getFramework())
+                      .getDefaultAppName()
+                : 'my-app'
+        };
     }
 
     /**

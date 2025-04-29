@@ -1,8 +1,10 @@
 import { logger } from '@repo/logger';
 import type { ConfigsManager } from './core/ConfigsManager.js';
 import { FrameworksManager } from './core/FrameworksManager.js';
+import { PackagesManager } from './core/PackagesManager.js';
 import { ProgressTracker } from './core/Progress.js';
 import { PromptManager } from './core/PromptManager.js';
+import type { Package } from './entity/Package.js';
 import type { PackageConfig } from './types/package.js';
 import { getPackageMetadataDefaults } from './utils/defaults.js';
 import { withErrorHandling } from './utils/error-handler.js';
@@ -16,11 +18,17 @@ export class Generator {
     private frameworksManager: FrameworksManager;
     private progress: ProgressTracker;
     private promptManager: PromptManager;
+    private packagesManager: PackagesManager;
 
     constructor(configsManager: ConfigsManager) {
         this.configsManager = configsManager;
-        this.frameworksManager = new FrameworksManager(configsManager);
-        this.promptManager = new PromptManager(configsManager, this.frameworksManager);
+        this.frameworksManager = new FrameworksManager(this.configsManager);
+        this.packagesManager = new PackagesManager(this.configsManager);
+        this.promptManager = new PromptManager(
+            this.configsManager,
+            this.frameworksManager,
+            this.packagesManager
+        );
         this.progress = new ProgressTracker([
             'Configure application settings',
             'Configure package metadata',
@@ -46,9 +54,13 @@ export class Generator {
             });
 
             await this.frameworksManager.initializeFrameworks();
+            await this.packagesManager.initializePackages();
             await this.promptManager.initializePrompts();
             this.configsManager.setDefaultMetadata(await getPackageMetadataDefaults());
             this.configsManager.setNextAvailablePort(await getNextAvailablePort());
+
+            let iconLibraryPackage: Package | undefined = undefined;
+            let uiLibraryPackage: Package | undefined = undefined;
 
             // Step 1: Configure application settings
             this.progress.nextStep(
@@ -66,41 +78,65 @@ export class Generator {
                 await this.promptManager.gatherMetadata();
             this.progress.completeStep();
 
-            // // Step 3: Configure application settings
-            // this.progress.nextStep('Configuring UI Library package...');
-            // this.progress.completeStep(false);
+            const frameworkHasUI = this.frameworksManager
+                .getFrameworkByName(this.configsManager.getFramework())
+                .hasUI();
+            const frameworkHasUILibrary = this.packagesManager.getUILibraryPackages().length > 0;
+            const frameworkHasIconLibrary =
+                this.packagesManager.getIconLibraryPackages().length > 0;
 
-            // // Step 4: Configure application settings
-            // this.progress.nextStep('Configuring Icon Library package...');
-            // this.progress.completeStep(false);
+            // Step 3: Configure application settings
+            this.progress.nextStep('Configuring UI Library package...');
+            if (frameworkHasUI && frameworkHasUILibrary) {
+                uiLibraryPackage = await this.promptManager.gatherUILibraryPackage();
+            }
+            this.progress.completeStep(
+                !frameworkHasUI || !frameworkHasUILibrary,
+                !frameworkHasUI
+                    ? 'UI Library is not supported in this framework'
+                    : 'This frameowrk dont has any UI Library to add'
+            );
 
-            // // Step 5: Configure application settings
-            // this.progress.nextStep('Configuring additional packages..');
-            // this.progress.completeStep(false);
+            // Step 4: Configure application settings
+            this.progress.nextStep('Configuring Icon Library package...');
+            if (frameworkHasUI && frameworkHasIconLibrary) {
+                iconLibraryPackage = await this.promptManager.gatherIconLibraryPackage();
+            }
+            this.progress.completeStep(
+                !frameworkHasUI || !frameworkHasIconLibrary,
+                !frameworkHasUI
+                    ? 'Icon Library is not supported in this framework'
+                    : 'This frameowrk dont has any Icon Library to add'
+            );
+
+            // Step 5: Configure application settings
+            this.progress.nextStep('Configuring additional packages..');
+            const selectedPackages = await this.promptManager.gatherAdditionalPackages();
+            this.progress.completeStep();
 
             // // Step 6: Configure application settings
             // this.progress.nextStep(
             //     'Configuring installation type... (Install dependencies or not)'
             // );
-            // this.progress.completeStep(false);
+            // this.progress.completeStep();
 
             // // Step 7: Configure application settings
             // this.progress.nextStep('Creating application structure... (Copying files and folders)');
-            // this.progress.completeStep(false);
+            // this.progress.completeStep();
 
             // // Step 8: Configure application settings
             // this.progress.nextStep(
             //     'Adding additional packages... (Added dependencies, scripts, configs, etc.)'
             // );
-            // this.progress.completeStep(false);
+            // this.progress.completeStep();
 
             // // Step 9: Configure application settings
             // this.progress.nextStep('Running package manager install');
-            // this.progress.completeStep(false);
+            // this.progress.completeStep();
 
             // // Step 10: Configure application settings
             // this.progress.nextStep('Installation end... (Finishing up)');
-            // this.progress.completeStep(false);
+            // this.progress.completeStep();
 
             // // End of the progress
             // this.showCompletionMessage([]);
@@ -115,6 +151,9 @@ export class Generator {
             console.log('repo:', repositoryUrl);
             console.log('license:', license);
             console.log('keywords:', keywords);
+            console.log('uiLibraryPackage:', uiLibraryPackage);
+            console.log('iconLibraryPackage:', iconLibraryPackage);
+            console.log('selectedPackages:', selectedPackages);
         }, 'app generation');
 
         console.log(this.configsManager);

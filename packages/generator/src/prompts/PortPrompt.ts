@@ -1,22 +1,18 @@
-import type { ConfigsManager } from '../core/ConfigsManager.js';
-import type { FrameworksManager } from '../core/FrameworksManager.js';
+import type { QuestionCollection } from 'inquirer';
 import { isPortInUse } from '../utils/port-manager.js';
 import { BasePrompt } from './BasePrompt.js';
 
 /**
  * Handles port number prompts
  */
-export class PortPrompt extends BasePrompt<string> {
-    constructor(configsManager: ConfigsManager, frameworksManager: FrameworksManager) {
-        super(configsManager, frameworksManager, {
+export class PortPrompt extends BasePrompt {
+    getPromptValues(): QuestionCollection {
+        return {
             type: 'input',
             name: 'port',
-            message: 'Port number for the application:'
-        });
-    }
-
-    getDefaultValue(): string {
-        return `${this.configsManager.getNextAvailablePort()}`;
+            message: 'Port number for the application:',
+            default: `${this.configsManager.getNextAvailablePort()}`
+        };
     }
 
     /**

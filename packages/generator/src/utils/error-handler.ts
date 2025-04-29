@@ -37,10 +37,10 @@ export function handleError(error: unknown, context: string): void {
         });
     } else if (error instanceof GeneratorError) {
         logger.error(error.message, { subtitle: error.details });
-        // logger.debug(error as Error);
     } else {
         logger.error(`Error in ${context}:`, { subtitle: String(error) });
     }
+    console.error(error);
 }
 
 /**
