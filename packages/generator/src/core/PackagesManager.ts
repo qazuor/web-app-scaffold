@@ -38,7 +38,7 @@ export class PackagesManager {
         return pkg;
     }
 
-    public getUILibraryPackages(frameworkName: string): Package[] | [] {
+    public getUILibraryPackages(frameworkName?: string): Package[] | [] {
         return (
             this.packages.filter((pkg) => {
                 return (
@@ -49,7 +49,7 @@ export class PackagesManager {
         );
     }
 
-    public getIconLibraryPackages(frameworkName: string): Package[] | [] {
+    public getIconLibraryPackages(frameworkName?: string): Package[] | [] {
         return (
             this.packages.filter((pkg) => {
                 return (

@@ -61,6 +61,7 @@ export class Generator {
 
             let iconLibraryPackage: Package | undefined = undefined;
             let uiLibraryPackage: Package | undefined = undefined;
+            let selectedPackages: Package[] | undefined = undefined;
 
             // Step 1: Configure application settings
             this.progress.nextStep(
@@ -81,9 +82,15 @@ export class Generator {
             const frameworkHasUI = this.frameworksManager
                 .getFrameworkByName(this.configsManager.getFramework())
                 .hasUI();
-            const frameworkHasUILibrary = this.packagesManager.getUILibraryPackages().length > 0;
+            const frameworkHasUILibrary =
+                this.packagesManager.getUILibraryPackages(this.configsManager.getFramework())
+                    .length > 0;
             const frameworkHasIconLibrary =
-                this.packagesManager.getIconLibraryPackages().length > 0;
+                this.packagesManager.getIconLibraryPackages(this.configsManager.getFramework())
+                    .length > 0;
+            const frameworkHasAdditionalPackages =
+                this.packagesManager.getPackagesForFrameowrk(this.configsManager.getFramework())
+                    .length > 0;
 
             // Step 3: Configure application settings
             this.progress.nextStep('Configuring UI Library package...');
@@ -93,8 +100,10 @@ export class Generator {
             this.progress.completeStep(
                 !frameworkHasUI || !frameworkHasUILibrary,
                 !frameworkHasUI
-                    ? 'UI Library is not supported in this framework'
-                    : 'This frameowrk dont has any UI Library to add'
+                    ? `UI Library is not supported in this framework: '${framwork}'`
+                    : !frameworkHasUILibrary
+                      ? `'${framwork}' frameowrk dont has any UI Library to add`
+                      : undefined
             );
 
             // Step 4: Configure application settings
@@ -105,14 +114,23 @@ export class Generator {
             this.progress.completeStep(
                 !frameworkHasUI || !frameworkHasIconLibrary,
                 !frameworkHasUI
-                    ? 'Icon Library is not supported in this framework'
-                    : 'This frameowrk dont has any Icon Library to add'
+                    ? `Icon Library is not supported in this framework: '${framwork}'`
+                    : !frameworkHasIconLibrary
+                      ? `'${framwork}' frameowrk dont has any Icon Library to add`
+                      : undefined
             );
 
             // Step 5: Configure application settings
             this.progress.nextStep('Configuring additional packages..');
-            const selectedPackages = await this.promptManager.gatherAdditionalPackages();
-            this.progress.completeStep();
+            if (frameworkHasAdditionalPackages) {
+                selectedPackages = await this.promptManager.gatherAdditionalPackages();
+            }
+            this.progress.completeStep(
+                !frameworkHasAdditionalPackages,
+                !frameworkHasAdditionalPackages
+                    ? `Dont has Additional packages to install for '${framwork}' framework`
+                    : undefined
+            );
 
             // // Step 6: Configure application settings
             // this.progress.nextStep(
