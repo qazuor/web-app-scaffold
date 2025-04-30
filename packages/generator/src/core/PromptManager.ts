@@ -436,6 +436,7 @@ export class PromptManager {
                 let sharedDescription: string | undefined = undefined;
                 if (instalationType === 'shared') {
                     sharedName = await this.promptForSharedPackageName(pkg);
+                    // TODO: check previus installed shared packages
                     logger.warn(
                         chalk.bgYellow.bold(
                             `Revisar si no tenemos ya este package instalado como shared,
@@ -457,5 +458,17 @@ y que configuraciones incluyeron`
             }
         }
         return sharedPackagesInfo;
+    }
+
+    public async gatherExtraOptionsForPackages(selectedPackages: Package[]): Promise<undefined> {
+        for (const pkg of selectedPackages) {
+            if (pkg.hasExtraOptons()) {
+                const extraOptionsPrompts = pkg.getExtraOptionsPrompts();
+                for (const extraOptionsPrompt of extraOptionsPrompts) {
+                    const extraOptionsPromptResult = await inquirer.prompt([extraOptionsPrompt]);
+                    pkg.setExtraOptionsPromptResult(extraOptionsPromptResult);
+                }
+            }
+        }
     }
 }

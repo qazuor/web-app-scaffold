@@ -1,5 +1,4 @@
 import { logger } from '@repo/logger';
-import chalk from 'chalk';
 import { AppManager } from './core/AppManager.js';
 import type { ConfigsManager } from './core/ConfigsManager.js';
 import { FrameworksManager } from './core/FrameworksManager.js';
@@ -138,6 +137,10 @@ export class Generator {
             this.progress.nextStep('Configuring additional packages..');
             if (frameworkHasAdditionalPackages) {
                 selectedPackages = await this.promptManager.gatherAdditionalPackages();
+            }
+
+            if (selectedPackages?.length) {
+                await this.promptManager.gatherExtraOptionsForPackages(selectedPackages);
             }
             this.progress.completeStep(
                 !frameworkHasAdditionalPackages,
