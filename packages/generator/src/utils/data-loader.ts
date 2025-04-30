@@ -1,5 +1,4 @@
 import path from 'node:path';
-import { logger } from '@repo/logger';
 import type { PackageJson } from 'type-fest';
 import type { ConfigsManager } from '../core/ConfigsManager.js';
 import type { FrameworksManager } from '../core/FrameworksManager.js';
@@ -7,6 +6,7 @@ import type { PackagesManager } from '../core/PackagesManager.js';
 import type { TemplateManager } from '../core/TemplateManager.js';
 import type {
     PackageDependency,
+    PackageEnvVar,
     PackageOptions,
     PackageScript,
     ScopeFrom,
@@ -43,7 +43,6 @@ export const loadDependencies = async (
     executables: ScriptsObject,
     isDev = false
 ): Promise<PackageDependency[]> => {
-    logger.info(`Loading ${isDev ? 'dev ' : ''} dependencies for ${name}...`);
     const dependencies: PackageDependency[] = [];
 
     // dependencies from the config.json
@@ -86,4 +85,118 @@ export const loadDependencies = async (
         }
     }
     return dependencies;
+};
+
+export const loadScripts = async (
+    configsManager: ConfigsManager,
+    frameworksManager: FrameworksManager,
+    packagesManager: PackagesManager,
+    templateManager: TemplateManager,
+    templatePath: string,
+    name: string,
+    options: PackageOptions,
+    executables: ScriptsObject
+): Promise<PackageScript[]> => {
+    const scripts: PackageScript[] = [];
+
+    // scripts from the config.json
+    const scriptsFromConfigJson: PackageScript[] = options.additionalScripts || [];
+    for (const script of scriptsFromConfigJson) {
+        script.from = 'config' as ScopeFrom;
+        scripts.push(script);
+    }
+
+    // scripts from executable file
+    const executableFile = executables.scripts;
+    if (executableFile) {
+        const executableFileClass = await import(
+            path.join(templatePath, name, 'scripts', executableFile)
+        );
+        const scriptsFromExecutableFiles = await executableFileClass.getScripts(
+            configsManager,
+            frameworksManager,
+            packagesManager
+        );
+        for (const script of scriptsFromExecutableFiles) {
+            script.from = 'executable' as ScopeFrom;
+            scripts.push(script);
+        }
+    }
+
+    // scripts from package.json file
+    const packageJsonTemplateFile = path.join(templatePath, name, 'package.json.hbs');
+    if (await fileExist(packageJsonTemplateFile)) {
+        const templateContent = await templateManager.proccessTemplate(
+            packageJsonTemplateFile,
+            templateManager.createContextForPackage()
+        );
+        const packageJsonScripts = getDataFromPackageJsonContent(
+            JSON.parse(templateContent) as PackageJson,
+            'scripts'
+        );
+        for (const script of packageJsonScripts) {
+            script.from = 'template' as ScopeFrom;
+            scripts.push(script as PackageScript);
+        }
+    }
+    return scripts;
+};
+
+export const loadEnvVars = async (
+    configsManager: ConfigsManager,
+    frameworksManager: FrameworksManager,
+    packagesManager: PackagesManager,
+    templateManager: TemplateManager,
+    templatePath: string,
+    name: string,
+    options: PackageOptions,
+    executables: ScriptsObject
+): Promise<PackageEnvVar[]> => {
+    const envVars: PackageEnvVar[] = [];
+
+    // env vars from the config.json
+    const envVarsFromConfigJson: PackageEnvVar[] = options.additionalEnvVars || [];
+    for (const envVar of envVarsFromConfigJson) {
+        envVar.from = 'config' as ScopeFrom;
+        envVars.push(envVar);
+    }
+
+    // env vars from executable file
+    const executableFile = executables.envVars;
+    if (executableFile) {
+        const executableFileClass = await import(
+            path.join(templatePath, name, 'scripts', executableFile)
+        );
+        const envVarsFromExecutableFiles = await executableFileClass.getVars(
+            configsManager,
+            frameworksManager,
+            packagesManager
+        );
+        for (const envVar of envVarsFromExecutableFiles) {
+            envVar.from = 'executable' as ScopeFrom;
+            envVars.push(envVar);
+        }
+    }
+
+    // env vars from package.json file
+    const exampleEnvTemplateFile = path.join(templatePath, name, '.env.example.hbs');
+    if (await fileExist(exampleEnvTemplateFile)) {
+        const templateContent = await templateManager.proccessTemplate(
+            exampleEnvTemplateFile,
+            templateManager.createContextForPackage()
+        );
+        const lines = templateContent.split('\n');
+        for (const line of lines) {
+            const [key, value] = line.split('=');
+            if (key && value) {
+                const envVar = {
+                    name: key.trim(),
+                    value: value.trim(),
+                    from: 'template'
+                } as PackageEnvVar;
+                envVars.push(envVar);
+            }
+        }
+    }
+    return envVars;
 };
