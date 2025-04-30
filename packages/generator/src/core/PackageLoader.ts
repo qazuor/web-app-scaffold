@@ -9,6 +9,7 @@ import type {
     ScopeFrom,
     ScriptsObject
 } from '../types/index.js';
+import { getDataFromPackageJsonContent, loadDependencies } from '../utils/data-loader.js';
 import {
     type FolderItem,
     fileExist,
@@ -62,85 +63,34 @@ export class PackageLoader {
         pkg.setExecutableScripts(executableFiles);
     }
 
-    private getDataFromPackageJsonContent(
-        packageJsonContent: PackageJson,
-        scope: 'dependencies' | 'devDependencies' | 'scripts' = 'dependencies'
-    ): (PackageDependency | PackageScript)[] {
-        const data: (PackageDependency | PackageScript)[] = [];
-        const packageJsonData = packageJsonContent[scope];
-        if (packageJsonData) {
-            for (const entry of Object.entries(packageJsonData)) {
-                if (scope === 'dependencies' || scope === 'devDependencies') {
-                    data.push({ name: entry[0], version: entry[1] as string });
-                } else if (scope === 'scripts') {
-                    data.push({ name: entry[0], command: entry[1] as string });
-                }
-            }
-        }
-        return data;
-    }
-
-    private async _loadDependencies(pkg: Package, isDev = false): Promise<PackageDependency[]> {
-        logger.info(`Loading ${isDev ? 'dev ' : ''} dependencies for ${pkg.getName()}...`);
-        const dependencies: PackageDependency[] = [];
-
-        // dependencies from the config.json
-        const dependenciesFromConfigJson: PackageDependency[] =
-            pkg.getPackageOptions()[
-                isDev ? 'additionalDevDependencies' : 'additionalDependencies'
-            ] || [];
-        for (const dependency of dependenciesFromConfigJson) {
-            dependency.from = 'config' as ScopeFrom;
-            dependencies.push(dependency);
-        }
-
-        // dependencies from executable file
-        const executableFile = pkg.getExecutableScripts().dependencies;
-        if (executableFile) {
-            const executableFileClass = await import(
-                path.join(this.templatePackagesPath, pkg.getName(), 'scripts', executableFile)
-            );
-            const dependenciesFromExecutableFiles = await executableFileClass[
-                isDev ? 'getDevDependencies' : 'getDependencies'
-            ](this.configsManager, this.frameworksManager, this.packagesManager);
-            for (const dependency of dependenciesFromExecutableFiles) {
-                dependency.from = 'executable' as ScopeFrom;
-                dependencies.push(dependency);
-            }
-        }
-
-        // dependencies from package.json file
-        const packageJsonTemplateFile = path.join(
-            this.templatePackagesPath,
-            pkg.getName(),
-            'package.json.hbs'
-        );
-        if (await fileExist(packageJsonTemplateFile)) {
-            const templateContent = await this.templateManager.proccessTemplate(
-                packageJsonTemplateFile,
-                this.templateManager.createContextForPackage()
-            );
-            const packageJsonDependencies = this.getDataFromPackageJsonContent(
-                JSON.parse(templateContent) as PackageJson,
-                isDev ? 'devDependencies' : 'dependencies'
-            );
-            for (const dependency of packageJsonDependencies) {
-                dependency.from = 'template' as ScopeFrom;
-                dependencies.push(dependency as PackageDependency);
-            }
-        }
-        return dependencies;
-    }
-
     private async loadDependencies(pkg: Package): Promise<void> {
         logger.info(`Loading dev dependencies for ${pkg.getName()}...`);
-        const dependencies: PackageDependency[] = await this._loadDependencies(pkg);
+        const dependencies: PackageDependency[] = await loadDependencies(
+            this.configsManager,
+            this.frameworksManager,
+            this.packagesManager,
+            this.templateManager,
+            this.templatePackagesPath,
+            pkg.getName(),
+            pkg.getPackageOptions(),
+            pkg.getExecutableScripts()
+        );
         pkg.setDependencies(dependencies);
     }
 
     private async loadDevDependencies(pkg: Package): Promise<void> {
         logger.info(`Loading dev dependencies for ${pkg.getName()}...`);
-        const devDependencies: PackageDependency[] = await this._loadDependencies(pkg, true);
+        const devDependencies: PackageDependency[] = await loadDependencies(
+            this.configsManager,
+            this.frameworksManager,
+            this.packagesManager,
+            this.templateManager,
+            this.templatePackagesPath,
+            pkg.getName(),
+            pkg.getPackageOptions(),
+            pkg.getExecutableScripts(),
+            true
+        );
         pkg.setDevDependencies(devDependencies);
     }
 
@@ -184,7 +134,7 @@ export class PackageLoader {
                 packageJsonTemplateFile,
                 this.templateManager.createContextForPackage()
             );
-            const packageJsonScripts = this.getDataFromPackageJsonContent(
+            const packageJsonScripts = getDataFromPackageJsonContent(
                 JSON.parse(templateContent) as PackageJson,
                 'scripts'
             );
