@@ -407,22 +407,20 @@ export class PromptManager {
 
     public async gatherUILibraryPackage(): Promise<Package> {
         const UILibraryPackage = await this.promptForUILibrary();
-        this.configsManager.setUILIbrary(UILibraryPackage);
-
+        await this.configsManager.setUILIbrary(UILibraryPackage);
         return UILibraryPackage;
     }
 
     public async gatherIconLibraryPackage(): Promise<Package> {
         const iconLibraryPackage = await this.promptForIconLibrary();
-        this.configsManager.setIconLibrary(iconLibraryPackage);
-
+        await this.configsManager.setIconLibrary(iconLibraryPackage);
         return iconLibraryPackage;
     }
 
     public async gatherAdditionalPackages(): Promise<Package[]> {
         const selectedPackages = await this.promptForAdditionalPackages();
         for (const pkg of selectedPackages) {
-            this.configsManager.addSelectedPackage(pkg);
+            await this.configsManager.addSelectedPackage(pkg);
         }
         return selectedPackages;
     }

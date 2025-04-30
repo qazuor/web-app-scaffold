@@ -39,7 +39,7 @@ export class AdditionalPackagesPrompt extends BasePrompt {
                 return `Package ${packageName} not found`;
             }
             if (
-                pkg.getFrameworks() &&
+                pkg.getFrameworks().length > 0 &&
                 !pkg.getFrameworks().includes(this.configsManager.getFramework())
             ) {
                 return `Package ${packageName} is not compatible with ${this.configsManager.getFramework()}`;

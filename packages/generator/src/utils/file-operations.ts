@@ -3,6 +3,7 @@ import { logger } from '@repo/logger';
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import type { ConfigFile } from '../types/config.js';
+import type { ScriptsObject } from '../types/index.js';
 
 export interface FolderItem {
     fullPath: string;
@@ -15,7 +16,6 @@ export interface FolderItem {
     isPackageJsonFile?: boolean;
     isMainConfigFile?: boolean;
     isConfigFile?: boolean;
-    isExecutableFile?: boolean;
 }
 
 /**
@@ -111,8 +111,8 @@ export async function copyFile(sourcePath: string, destFolderPath: string): Prom
 /**
  * Reads the raw content of a file
  */
-export async function getFileContent(filePath: string): Promise<string> {
-    const exists = await fs.pathExists(filePath);
+export async function getFileContent(filePath: string): Promise<string | null> {
+    const exists = await fileExist(filePath);
     if (!exists) {
         throw new Error(`File not found: ${filePath}`);
     }
@@ -123,13 +123,20 @@ export async function getFileContent(filePath: string): Promise<string> {
 }
 
 /**
+ * Check if file exixts
+ */
+export async function fileExist(filePath: string): Promise<boolean> {
+    return await fs.pathExists(filePath);
+}
+
+/**
  * Reads and parses a JSON file
  */
 export async function getJsonContent<T = unknown>(filePath: string): Promise<T> {
     const content = await getFileContent(filePath);
 
     try {
-        return JSON.parse(content) as T;
+        return JSON.parse(content || '') as T;
     } catch (error) {
         throw new Error(`Failed to parse JSON in file: ${filePath}\n${(error as Error).message}`);
     }
@@ -148,15 +155,9 @@ export function getContainingFolder(fullPath: string): string {
 /**
  * Recursively gets all contents of a folder with metadata
  */
-export async function getFolderContent(
-    dirPath: string,
-    executableFilePaths: string[] = [
-        'template-context-vars.ts',
-        'pre-install.ts',
-        'post-install.ts'
-    ]
-): Promise<FolderItem[]> {
+export async function getFolderContent(dirPath: string): Promise<FolderItem[]> {
     const result: FolderItem[] = [];
+    const filterFiles = ['config.json'];
 
     async function traverse(currentPath: string) {
         const entries = await fs.readdir(currentPath, { withFileTypes: true });
@@ -165,13 +166,18 @@ export async function getFolderContent(
             const fullPath = path.join(currentPath, entry.name);
 
             if (entry.isDirectory()) {
-                result.push({
-                    fullPath,
-                    relativePath: getRelativePath(fullPath, dirPath),
-                    isFolder: true
-                });
-                await traverse(fullPath);
+                if (entry.name !== 'scripts') {
+                    result.push({
+                        fullPath,
+                        relativePath: getRelativePath(fullPath, dirPath),
+                        isFolder: true
+                    });
+                    await traverse(fullPath);
+                }
             } else {
+                if (filterFiles.includes(entry.name)) {
+                    continue;
+                }
                 const ext = path.extname(entry.name).slice(1);
                 const lowerName = entry.name.toLowerCase();
                 const baseName = path.basename(entry.name);
@@ -183,8 +189,7 @@ export async function getFolderContent(
                     isEnvFile: lowerName === '.env' || lowerName.startsWith('.env.'),
                     isPackageJsonFile: lowerName.startsWith('package.json'),
                     isMainConfigFile: baseName === 'config.json',
-                    isConfigFile: ext === 'json' || lowerName.includes('config'),
-                    isExecutableFile: executableFilePaths.includes(entry.name)
+                    isConfigFile: ext === 'json' || lowerName.includes('config')
                 };
 
                 const flags = Object.entries(metadata).reduce<Record<string, true>>(
@@ -206,6 +211,21 @@ export async function getFolderContent(
     }
 
     await traverse(dirPath);
+    return result;
+}
+
+/**
+ * Recursively gets all scripts files of a app/package folder
+ */
+export async function getFolderScripts(dirPath: string): Promise<ScriptsObject> {
+    const result: Record<string, string> = {};
+    const entries = await fs.readdir(path.join(dirPath, 'scripts'), { withFileTypes: true });
+
+    for (const entry of entries) {
+        result[
+            entry.name.replace('.ts', '').replace(/-([a-z])/g, (_, char) => char.toUpperCase())
+        ] = entry.name;
+    }
     return result;
 }
 

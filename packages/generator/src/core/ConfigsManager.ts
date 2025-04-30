@@ -167,25 +167,25 @@ export class ConfigsManager {
         return this.getMetadata();
     }
 
-    public setUILIbrary(pkg: Package) {
+    public async setUILIbrary(pkg: Package) {
         this.uiLibrary = pkg;
-        this.addSelectedPackage(pkg);
+        await this.addSelectedPackage(pkg);
     }
 
     public getUILibrary() {
         return this.uiLibrary;
     }
 
-    public setIconLibrary(pkg: Package) {
+    public async setIconLibrary(pkg: Package) {
         this.iconLibrary = pkg;
-        this.addSelectedPackage(pkg);
+        await this.addSelectedPackage(pkg);
     }
 
     public getIconLibrary() {
         return this.iconLibrary;
     }
 
-    public addSelectedPackage(pkg: Package) {
+    public async addSelectedPackage(pkg: Package) {
         this.selectedPackages.push(pkg);
         if (!this.config.selectedPackages) {
             this.config.selectedPackages = [];

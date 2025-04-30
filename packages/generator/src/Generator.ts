@@ -1,10 +1,13 @@
 import { logger } from '@repo/logger';
+import chalk from 'chalk';
 import { AppManager } from './core/AppManager.js';
 import type { ConfigsManager } from './core/ConfigsManager.js';
 import { FrameworksManager } from './core/FrameworksManager.js';
+import { PackageLoader } from './core/PackageLoader.js';
 import { PackagesManager } from './core/PackagesManager.js';
 import { ProgressTracker } from './core/Progress.js';
 import { PromptManager } from './core/PromptManager.js';
+import { TemplateManager } from './core/TemplateManager.js';
 import type { Package } from './entity/Package.js';
 import type { SharedPackagesInfo } from './types/index.js';
 import { getPackageMetadataDefaults } from './utils/defaults.js';
@@ -19,8 +22,10 @@ export class Generator {
     private frameworksManager: FrameworksManager;
     private progress: ProgressTracker;
     private promptManager: PromptManager;
+    private packageLoader: PackageLoader;
     private packagesManager: PackagesManager;
     private appManager!: AppManager;
+    private templateManager: TemplateManager;
 
     constructor(configsManager: ConfigsManager) {
         this.configsManager = configsManager;
@@ -30,6 +35,13 @@ export class Generator {
             this.configsManager,
             this.frameworksManager,
             this.packagesManager
+        );
+        this.templateManager = new TemplateManager();
+        this.packageLoader = new PackageLoader(
+            this.configsManager,
+            this.frameworksManager,
+            this.packagesManager,
+            this.templateManager
         );
         this.progress = new ProgressTracker([
             'Configure application settings',
@@ -154,13 +166,18 @@ export class Generator {
                       : undefined
             );
 
+            if (selectedPackages) {
+                await this.packageLoader.updatePackages(selectedPackages);
+            }
+
             // Step 7: Create application structure
             this.progress.nextStep('Creating application structure... (Copying files and folders)');
             this.appManager = new AppManager(
                 this.configsManager,
                 this.frameworksManager,
                 this.packagesManager,
-                this.promptManager
+                this.promptManager,
+                this.templateManager
             );
             await this.appManager.createNewAppFileStructure();
             this.progress.completeStep();

@@ -64,7 +64,8 @@ export class PackagesManager {
         return (
             this.packages.filter((pkg) => {
                 return (
-                    pkg.getFrameworks().includes(frameworkName) &&
+                    (pkg.getFrameworks().length === 0 ||
+                        pkg.getFrameworks().includes(frameworkName)) &&
                     !pkg.isUILibrary() &&
                     !pkg.isIconLibrary()
                 );
