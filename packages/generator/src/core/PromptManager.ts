@@ -72,97 +72,32 @@ export class PromptManager {
      * Initializes the prompt manager
      */
     public async initializePrompts(): Promise<void> {
-        this.frameworkPrompt = new FrameworkPrompt(
-            this.configsManager,
-            this.frameworksManager,
-            this.packagesManager
-        );
-        this.appNamePrompt = new AppNamePrompt(
-            this.configsManager,
-            this.frameworksManager,
-            this.packagesManager
-        );
-        this.portPrompt = new PortPrompt(
-            this.configsManager,
-            this.frameworksManager,
-            this.packagesManager
-        );
-        this.descriptionPrompt = new DescriptionPrompt(
-            this.configsManager,
-            this.frameworksManager,
-            this.packagesManager
-        );
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+        const init = (classRef: any) => {
+            return new classRef(this.configsManager, this.frameworksManager, this.packagesManager);
+        };
+        this.frameworkPrompt = init(FrameworkPrompt);
+        this.appNamePrompt = init(AppNamePrompt);
+        this.portPrompt = init(PortPrompt);
+        this.descriptionPrompt = init(DescriptionPrompt);
 
-        this.authorPrompt = new AuthorPrompt(
-            this.configsManager,
-            this.frameworksManager,
-            this.packagesManager
-        );
-        this.licensePrompt = new LicensePrompt(
-            this.configsManager,
-            this.frameworksManager,
-            this.packagesManager
-        );
-        this.repositoryUrlPrompt = new RepositoryUrlPrompt(
-            this.configsManager,
-            this.frameworksManager,
-            this.packagesManager
-        );
-        this.bugsUrlPrompt = new BugsUrlPrompt(
-            this.configsManager,
-            this.frameworksManager,
-            this.packagesManager
-        );
-        this.homepagePrompt = new HomepagePrompt(
-            this.configsManager,
-            this.frameworksManager,
-            this.packagesManager
-        );
-        this.keywordsPrompt = new KeywordsPrompt(
-            this.configsManager,
-            this.frameworksManager,
-            this.packagesManager
-        );
-        this.uiLibraryPrompt = new UILibraryPrompt(
-            this.configsManager,
-            this.frameworksManager,
-            this.packagesManager
-        );
-        this.iconLibraryPrompt = new IconLibraryPrompt(
-            this.configsManager,
-            this.frameworksManager,
-            this.packagesManager
-        );
-        this.additionalPackagesPrompt = new AdditionalPackagesPrompt(
-            this.configsManager,
-            this.frameworksManager,
-            this.packagesManager
-        );
-        this.instalationTypePrompt = new SharedPackageInstalationTypePrompt(
-            this.configsManager,
-            this.frameworksManager,
-            this.packagesManager
-        );
-        this.sharedPackageNamePrompt = new SharedPackageNamePrompt(
-            this.configsManager,
-            this.frameworksManager,
-            this.packagesManager
-        );
-        this.sharedPackageDescriptionPrompt = new SharedPackageDescriptionPrompt(
-            this.configsManager,
-            this.frameworksManager,
-            this.packagesManager
-        );
-        this.overwriteAppFolderPrompt = new OverwriteAppFolderPrompt(
-            this.configsManager,
-            this.frameworksManager,
-            this.packagesManager
-        );
-        this.sharedPackageOverwriteFolderPrompt = new SharedPackageOverwriteFolderPrompt(
-            this.configsManager,
-            this.frameworksManager,
-            this.packagesManager
-        );
+        this.authorPrompt = init(AuthorPrompt);
+        this.licensePrompt = init(LicensePrompt);
+        this.repositoryUrlPrompt = init(RepositoryUrlPrompt);
+        this.bugsUrlPrompt = init(BugsUrlPrompt);
+        this.homepagePrompt = init(HomepagePrompt);
+        this.keywordsPrompt = init(KeywordsPrompt);
+
+        this.uiLibraryPrompt = init(UILibraryPrompt);
+        this.iconLibraryPrompt = init(IconLibraryPrompt);
+        this.additionalPackagesPrompt = init(AdditionalPackagesPrompt);
+
+        this.instalationTypePrompt = init(SharedPackageInstalationTypePrompt);
+        this.sharedPackageNamePrompt = init(SharedPackageNamePrompt);
+        this.sharedPackageDescriptionPrompt = init(SharedPackageDescriptionPrompt);
+
+        this.overwriteAppFolderPrompt = init(OverwriteAppFolderPrompt);
+        this.sharedPackageOverwriteFolderPrompt = init(SharedPackageOverwriteFolderPrompt);
     }
 
     /**
