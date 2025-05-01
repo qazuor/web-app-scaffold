@@ -10,9 +10,9 @@ export class DescriptionPrompt extends BasePrompt {
             type: 'input',
             name: 'description',
             message: 'Application description:',
-            default: this.configsManager.getFramework()
+            default: this.configsManager.getFrameworkName()
                 ? this.frameworksManager
-                      .getFrameworkByName(this.configsManager.getFramework())
+                      .getFrameworkByName(this.configsManager.getFrameworkName())
                       .getDefaultAppDescription()
                 : 'My App description'
         };

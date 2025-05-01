@@ -95,10 +95,10 @@ export class Generator {
 
             // Step 3: UI Library package
             const frameworkHasUI = this.frameworksManager
-                .getFrameworkByName(this.configsManager.getFramework())
+                .getFrameworkByName(this.configsManager.getFrameworkName())
                 .hasUI();
             const frameworkHasUILibrary =
-                this.packagesManager.getUILibraryPackages(this.configsManager.getFramework())
+                this.packagesManager.getUILibraryPackages(this.configsManager.getFrameworkName())
                     .length > 0;
             this.progress.nextStep('Configuring UI Library package...');
             if (frameworkHasUI && frameworkHasUILibrary) {
@@ -115,7 +115,7 @@ export class Generator {
 
             // Step 4: Icon Library package
             const frameworkHasIconLibrary =
-                this.packagesManager.getIconLibraryPackages(this.configsManager.getFramework())
+                this.packagesManager.getIconLibraryPackages(this.configsManager.getFrameworkName())
                     .length > 0;
             this.progress.nextStep('Configuring Icon Library package...');
             if (frameworkHasUI && frameworkHasIconLibrary) {
@@ -132,7 +132,7 @@ export class Generator {
 
             // Step 5: Additional packages
             const frameworkHasAdditionalPackages =
-                this.packagesManager.getPackagesForFrameowrk(this.configsManager.getFramework())
+                this.packagesManager.getPackagesForFrameowrk(this.configsManager.getFrameworkName())
                     .length > 0;
             this.progress.nextStep('Configuring additional packages..');
             if (frameworkHasAdditionalPackages) {
@@ -154,8 +154,9 @@ export class Generator {
                 'Configuring installation type... (Install dependencies or as shared package)'
             );
             const somePackageCanBeInstalledAsShared =
-                this.packagesManager.getPackagesThatCanBeShared(this.configsManager.getFramework())
-                    .length > 0;
+                this.packagesManager.getPackagesThatCanBeShared(
+                    this.configsManager.getFrameworkName()
+                ).length > 0;
             if (selectedPackages?.length && somePackageCanBeInstalledAsShared) {
                 sharedPackagesInfo =
                     await this.promptManager.gatherInstallationInfoForPackages(selectedPackages);
@@ -224,7 +225,7 @@ export class Generator {
     private showCompletionMessage(packages: Package[]): void {
         logger.log('\n\n-----------------------------------------------------\n\n');
         logger.success('Application generated successfully!', {
-            subtitle: `Created ${this.configsManager.getFramework()} application: ${this.configsManager.getName()}`
+            subtitle: `Created ${this.configsManager.getFrameworkName()} application: ${this.configsManager.getName()}`
         });
 
         logger.info('Next steps:', {

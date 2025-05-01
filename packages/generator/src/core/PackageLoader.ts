@@ -61,7 +61,8 @@ export class PackageLoader {
             this.templatePackagesPath,
             pkg.getName(),
             pkg.getPackageOptions(),
-            pkg.getExecutableScripts()
+            pkg.getExecutableScripts(),
+            'package'
         );
         pkg.setDependencies(dependencies);
     }
@@ -77,6 +78,7 @@ export class PackageLoader {
             pkg.getName(),
             pkg.getPackageOptions(),
             pkg.getExecutableScripts(),
+            'package',
             true
         );
         pkg.setDevDependencies(devDependencies);
@@ -92,7 +94,8 @@ export class PackageLoader {
             this.templatePackagesPath,
             pkg.getName(),
             pkg.getPackageOptions(),
-            pkg.getExecutableScripts()
+            pkg.getExecutableScripts(),
+            'package'
         );
         pkg.setScripts(scripts);
     }
@@ -107,7 +110,8 @@ export class PackageLoader {
             this.templatePackagesPath,
             pkg.getName(),
             pkg.getPackageOptions(),
-            pkg.getExecutableScripts()
+            pkg.getExecutableScripts(),
+            'package'
         );
         pkg.setEnvVars(envVars);
     }

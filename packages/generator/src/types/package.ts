@@ -1,4 +1,9 @@
-import type { ExtraOptionPrompt, PackageDependency, PackageScript } from './index.js';
+import type {
+    ExtraOptionPrompt,
+    PackageDependency,
+    PackageEnvVar,
+    PackageScript
+} from './index.js';
 
 /**
  * Configuration for a package in the generator
@@ -16,18 +21,14 @@ export interface PackageConfig {
     supportedFrameworks?: string[];
     /** Whether this is a dev dependency */
     isDev?: boolean;
-    /** Additional dependencies that should be installed with this package */
-    additionalDependencies?: PackageDependency[];
-    /** Additional dev dependencies that should be installed with this package */
-    additionalDevDependencies?: PackageDependency[];
-    /** Additional script that should be added to app package.json */
-    additionalScripts?: PackageScript[];
-    /** Additional dependencies that should be installed with this package  for a specific framework */
-    additionalDependenciesForFramework?: Record<string, PackageDependency[]>;
-    /** Additional dev dependencies that should be installed with this package for a specific framework */
-    additionalDevDependenciesForFramework?: Record<string, PackageDependency[]>;
-    /** Additional script that should be added to app package.json for a specific framework */
-    additionalScriptsForFramework?: Record<string, PackageScript[]>;
+    /** Dependencies that should be installed with this package */
+    dependencies?: PackageDependency[];
+    /** Dev dependencies that should be installed with this package */
+    devDependencies?: PackageDependency[];
+    /** Script that should be added to app package.json */
+    scripts?: PackageScript[];
+    /** Env vars that should be added to app/shared package */
+    envVars?: PackageEnvVar[];
     /** Whether this package is a UI library */
     isUILibrary?: boolean;
     /** Whether this package is an icon library */

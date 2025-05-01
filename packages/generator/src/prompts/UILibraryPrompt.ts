@@ -36,9 +36,9 @@ export class UILibraryPrompt extends BasePrompt {
         }
         if (
             pkg.getFrameworks() &&
-            !pkg.getFrameworks().includes(this.configsManager.getFramework())
+            !pkg.getFrameworks().includes(this.configsManager.getFrameworkName())
         ) {
-            return `UI Library '${packageName}' is not compatible with ${this.configsManager.getFramework()}`;
+            return `UI Library '${packageName}' is not compatible with ${this.configsManager.getFrameworkName()}`;
         }
         return true;
     }

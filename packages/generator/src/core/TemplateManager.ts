@@ -46,7 +46,7 @@ export class TemplateManager {
             appName: configsManager.getName(),
             appFramework: configsManager.getFramework(),
             appFrameworkDescription: frameworksManager
-                .getFrameworkByName(configsManager.getFramework())
+                .getFrameworkByName(configsManager.getFrameworkName())
                 ?.getDescription(),
             contextVars: contextVars
         } as FrameworkTemplateContext;

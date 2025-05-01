@@ -1,7 +1,16 @@
 import path from 'node:path';
 import { logger } from '@repo/logger';
 import chalk from 'chalk';
+import type { Framework } from '../entity/Framework.js';
 import type { FrameworkTemplateContext } from '../types/framework.js';
+import type {
+    PackageDependency,
+    PackageEnvVar,
+    PackageScript,
+    ScopeFrom,
+    ScriptsObject
+} from '../types/index.js';
+import { loadDependencies, loadEnvVars, loadScripts } from '../utils/data-loader.js';
 import {
     type FolderItem,
     copyFile,
@@ -11,13 +20,14 @@ import {
     folderExists,
     getContainingFolder,
     getFolderContent,
+    getFolderScripts,
     getRelativePath
 } from '../utils/file-operations.js';
 import type { ConfigsManager } from './ConfigsManager.js';
 import type { FrameworksManager } from './FrameworksManager.js';
 import type { PackagesManager } from './PackagesManager.js';
 import type { PromptManager } from './PromptManager.js';
-import { TemplateManager } from './TemplateManager.js';
+import type { TemplateManager } from './TemplateManager.js';
 
 export class AppManager {
     private configsManager: ConfigsManager;
@@ -28,13 +38,20 @@ export class AppManager {
     private appName: string;
     private appPath: string;
     private templateAppPath: string;
-    private appFramework: string;
+    private appFramework: Framework;
+
+    private executableFiles: ScriptsObject = {};
+    private appDependencies: PackageDependency[] = [];
+    private appDevDependencies: PackageDependency[] = [];
+    private appScripts: PackageScript[] = [];
+    private appEnvVars: PackageEnvVar[] = [];
 
     constructor(
         configsManager: ConfigsManager,
         frameworksManager: FrameworksManager,
         packagesManager: PackagesManager,
-        promptManager: PromptManager
+        promptManager: PromptManager,
+        templateManager: TemplateManager
     ) {
         this.configsManager = configsManager;
         this.frameworksManager = frameworksManager;
@@ -45,44 +62,30 @@ export class AppManager {
         this.appPath = path.join(process.cwd(), 'apps', this.appName);
         this.templateAppPath = path.join(
             this.configsManager.getFrameworksTemplatesPath(),
-            this.appFramework
+            this.appFramework.getName()
         );
-        this.templateManager = new TemplateManager();
+        this.templateManager = templateManager;
+    }
+
+    async collectData() {
+        this.executableFiles = await getFolderScripts(this.templateAppPath);
+        this.appDependencies = await this.loadDependencies();
+        this.appDevDependencies = await this.loadDevDependencies();
+        this.appScripts = await this.loadScripts();
+        this.appEnvVars = await this.loadEnvVars();
     }
 
     async createNewAppFileStructure() {
         if (await folderExists(this.appPath)) {
             await this.handledFolderExist();
         }
+        await this.collectData();
         createDirectory(this.appPath);
         const folderContent: FolderItem[] = await getFolderContent(this.templateAppPath);
-        const executableFiles = await this.getExecutableFiles(folderContent);
-        this.executeFileFromTemplate(executableFiles?.preinstall);
-        await this.processFolderContent(
-            folderContent.filter((item) => !item.isExecutableFile),
-            executableFiles?.contextVars
-        );
-        this.executeFileFromTemplate(executableFiles?.postinstall);
-    }
 
-    async getExecutableFiles(folderContent: FolderItem[]): Promise<{
-        preinstall: string | undefined;
-        postinstall: string | undefined;
-        contextVars: string | undefined;
-    } | null> {
-        const executableFiles = folderContent.filter((item) => item.isExecutableFile);
-        if (executableFiles.length) {
-            return {
-                preinstall: executableFiles.find((item) => item.relativePath === 'pre-install.ts')
-                    ?.fullPath,
-                postinstall: executableFiles.find((item) => item.relativePath === 'post-install.ts')
-                    ?.fullPath,
-                contextVars: executableFiles.find(
-                    (item) => item.relativePath === 'template-context-vars.ts'
-                )?.fullPath
-            };
-        }
-        return null;
+        this.executeFileFromTemplate(this.executableFiles.preInstall);
+        await this.processFolderContent(folderContent);
+        this.executeFileFromTemplate(this.executableFiles.postInstall);
     }
 
     async handledFolderExist() {
@@ -105,12 +108,17 @@ export class AppManager {
     }
 
     async executeFileFromTemplate(
-        executableFile: string | undefined
+        executableFile: string | undefined,
+        loggerMsg: string | undefined = undefined
     ): Promise<boolean | undefined> {
         if (executableFile) {
-            const executableFileClass = await import(executableFile);
+            const executableFileClass = await import(
+                path.join(this.templateAppPath, 'scripts', executableFile)
+            );
             logger.warn(
-                chalk.bgRed.bold(`execute ${getRelativePath(executableFile)} install script`)
+                chalk.bgRed.bold(
+                    loggerMsg ? loggerMsg : `Execute ${getRelativePath(executableFile)} app script`
+                )
             );
             return await executableFileClass.exec(
                 this.configsManager,
@@ -120,11 +128,11 @@ export class AppManager {
         }
     }
 
-    async getContextVars(
-        contextVarsGetterFile: string | undefined
-    ): Promise<Record<string, unknown> | undefined> {
-        if (contextVarsGetterFile) {
-            const contextVarClass = await import(contextVarsGetterFile);
+    async getContextVars(): Promise<Record<string, unknown> | undefined> {
+        if (this.executableFiles.templateContextVars) {
+            const contextVarClass = await import(
+                path.join(this.templateAppPath, 'scripts', this.executableFiles.templateContextVars)
+            );
             return await contextVarClass.getContextVars(
                 this.configsManager,
                 this.frameworksManager,
@@ -133,11 +141,8 @@ export class AppManager {
         }
     }
 
-    async processFolderContent(
-        folderContent: FolderItem[],
-        contextVarsGetterFile: string | undefined
-    ): Promise<void> {
-        const contextVars = await this.getContextVars(contextVarsGetterFile);
+    async processFolderContent(folderContent: FolderItem[]): Promise<void> {
+        const contextVars = await this.getContextVars();
         const context = this.templateManager.createContextForFramework(
             this.configsManager,
             this.frameworksManager,
@@ -153,8 +158,6 @@ export class AppManager {
                 await this.processEnvFile(item, context);
             } else if (item.isTemplate) {
                 await this.processTemplateFile(item, context);
-            } else if (!item.isExecutableFile) {
-                await this.processNormalFile(item);
             } else {
                 logger.error(`File type not supported: ${item.relativePath}`);
             }
@@ -179,6 +182,7 @@ export class AppManager {
         fileInfo: FolderItem,
         context: FrameworkTemplateContext
     ): Promise<void> {
+        // TODO: improve package.json file
         logger.warn(
             chalk.bgYellow.bold(`para los package.json files debemos armar las dependencias y scripts que tenemos
 en los configs files, ademas debemos recorrer los packages seleccionados,
@@ -195,6 +199,7 @@ para recolectar las dependencias y scripts de esos packages`)
     }
 
     async processEnvFile(fileInfo: FolderItem, context: FrameworkTemplateContext): Promise<void> {
+        // TODO: improve env files
         logger.warn(
             chalk.bgYellow.bold(`para los env files vamos a aagregar envVars en el config.json que deben ser
 agregadas al env file creado si es que existe uno en el framework template y
@@ -215,5 +220,112 @@ packages seleccionados, para recolectar los env vars de esos packages`)
             fileInfo.fullPath,
             path.join(this.appPath, getContainingFolder(fileInfo.relativePath))
         );
+    }
+
+    async loadDependencies(): Promise<PackageDependency[]> {
+        logger.info(`Loading dependencies for ${this.appFramework.getName()}...`);
+        // dependencies from app
+        const dependencies: PackageDependency[] = await loadDependencies(
+            this.configsManager,
+            this.frameworksManager,
+            this.packagesManager,
+            this.templateManager,
+            this.configsManager.getFrameworksTemplatesPath(),
+            this.appFramework.getName(),
+            this.appFramework.getFrameworkOptions(),
+            this.executableFiles,
+            'app'
+        );
+
+        // dependencies from selected packages
+        for (const pkg of this.configsManager.getSelectedPackage()) {
+            dependencies.push(...pkg.getDependencies());
+        }
+
+        this.appFramework.setDependencies(dependencies);
+        return dependencies;
+    }
+
+    async loadDevDependencies(): Promise<PackageDependency[]> {
+        logger.info(`Loading dev dependencies for ${this.appFramework.getName()}...`);
+        // dev dependencies from app
+        const devDependencies: PackageDependency[] = await loadDependencies(
+            this.configsManager,
+            this.frameworksManager,
+            this.packagesManager,
+            this.templateManager,
+            this.configsManager.getFrameworksTemplatesPath(),
+            this.appFramework.getName(),
+            this.appFramework.getFrameworkOptions(),
+            this.executableFiles,
+            'app',
+            true
+        );
+
+        // dev dependencies from selected packages
+        for (const pkg of this.configsManager.getSelectedPackage()) {
+            devDependencies.push(...pkg.getDevDependencies());
+        }
+
+        // dev dependencies from app testing dependencies
+        for (const dependency of this.appFramework.getTestingDependencies()) {
+            dependency.from = { scope: 'app', type: 'testing' } as ScopeFrom;
+            devDependencies.push(dependency);
+        }
+
+        this.appFramework.setDevDependencies(devDependencies);
+        return devDependencies;
+    }
+
+    async loadScripts(): Promise<PackageScript[]> {
+        logger.info(`Loading scripts for ${this.appFramework.getName()}...`);
+        const scripts: PackageScript[] = await loadScripts(
+            this.configsManager,
+            this.frameworksManager,
+            this.packagesManager,
+            this.templateManager,
+            this.configsManager.getFrameworksTemplatesPath(),
+            this.appFramework.getName(),
+            this.appFramework.getFrameworkOptions(),
+            this.executableFiles,
+            'app'
+        );
+
+        // scripts from the packages selected
+        for (const pkg of this.configsManager.getSelectedPackage()) {
+            scripts.push(...pkg.getScripts());
+        }
+
+        // scripts from app testing scripts
+        for (const script of this.appFramework.getTestingScripts()) {
+            script.from = { scope: 'app', type: 'testing' } as ScopeFrom;
+            scripts.push(script);
+        }
+
+        this.appFramework.setScripts(scripts);
+        return scripts;
+    }
+
+    async loadEnvVars(): Promise<PackageEnvVar[]> {
+        logger.info(`Loading env vars for ${this.appFramework.getName()}...`);
+        const envVars: PackageEnvVar[] = await loadEnvVars(
+            this.configsManager,
+            this.frameworksManager,
+            this.packagesManager,
+            this.templateManager,
+            this.configsManager.getFrameworksTemplatesPath(),
+            this.appFramework.getName(),
+            this.appFramework.getFrameworkOptions(),
+            this.executableFiles,
+            'app'
+        );
+
+        // env vars from selected packages
+        for (const pkg of this.configsManager.getSelectedPackage()) {
+            envVars.push(...pkg.getEnvVars());
+        }
+
+        this.appFramework.setEnvVars(envVars);
+        return envVars;
     }
 }

@@ -2,6 +2,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { logger } from '@repo/logger';
 import fs from 'fs-extra';
+import type { Framework } from '../entity/Framework.js';
 import type { Package } from '../entity/Package.js';
 import type { GeneratorOptions } from '../types/generator.js';
 import type { MetadataOptions } from '../types/metadata.js';
@@ -17,6 +18,7 @@ export class ConfigsManager {
     private uiLibrary!: Package;
     private iconLibrary!: Package;
     private selectedPackages: Package[] = [];
+    private framework!: Framework;
 
     constructor(config: GeneratorOptions) {
         this.config = config;
@@ -71,8 +73,12 @@ export class ConfigsManager {
         return this.config.name;
     }
 
-    public getFramework(): string {
-        return this.config.framework;
+    public getFramework(): Framework {
+        return this.framework;
+    }
+
+    public getFrameworkName(): string {
+        return this.framework?.getName() || this.config.framework;
     }
 
     public getPort(): number {
@@ -83,8 +89,9 @@ export class ConfigsManager {
         this.config.name = name;
     }
 
-    public setFramework(framework: string): void {
-        this.config.framework = framework;
+    public setFramework(framework: Framework): void {
+        this.framework = framework;
+        this.config.framework = this.framework.getName();
     }
 
     public setPort(port: number): void {
@@ -183,6 +190,10 @@ export class ConfigsManager {
 
     public getIconLibrary() {
         return this.iconLibrary;
+    }
+
+    public getSelectedPackage(): Package[] {
+        return this.selectedPackages;
     }
 
     public async addSelectedPackage(pkg: Package) {

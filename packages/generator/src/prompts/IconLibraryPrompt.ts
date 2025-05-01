@@ -36,9 +36,9 @@ export class IconLibraryPrompt extends BasePrompt {
         }
         if (
             pkg.getFrameworks() &&
-            !pkg.getFrameworks().includes(this.configsManager.getFramework())
+            !pkg.getFrameworks().includes(this.configsManager.getFrameworkName())
         ) {
-            return `Icon library '${packageName}' is not compatible with ${this.configsManager.getFramework()}`;
+            return `Icon library '${packageName}' is not compatible with ${this.configsManager.getFrameworkName()}`;
         }
         return true;
     }

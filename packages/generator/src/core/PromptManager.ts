@@ -170,9 +170,11 @@ export class PromptManager {
      * @returns Selected framework
      */
     public async promptForFramework(): Promise<string> {
-        if (this.configsManager.getFramework()) {
-            await this.frameworkPrompt.validate(this.configsManager.getFramework());
-            return this.configsManager.getFramework();
+        // first check if we have a framework already selected from cli param
+        // in this case the framework is only  the name string, not the entire object
+        if (this.configsManager.getFrameworkName()) {
+            await this.frameworkPrompt.validate(this.configsManager.getFrameworkName());
+            return this.configsManager.getFrameworkName();
         }
 
         const { framework } = await inquirer.prompt([this.frameworkPrompt.getPrompt()]);
@@ -369,7 +371,7 @@ export class PromptManager {
 
     public async gatherConfiguration(): Promise<Record<string, unknown>> {
         const framwork = await this.promptForFramework();
-        this.configsManager.setFramework(framwork);
+        this.configsManager.setFramework(this.frameworksManager.getFrameworkByName(framwork));
 
         const name = await this.promptForAppName();
         this.configsManager.setName(name);

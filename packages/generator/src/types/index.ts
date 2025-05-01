@@ -13,13 +13,10 @@ export type EnvVars = {
     value: string | number | boolean;
 };
 
-export type ScopeFrom =
-    | 'config'
-    | 'template'
-    | 'executable'
-    | 'config-package'
-    | 'template-package'
-    | 'executable-package';
+export type ScopeFrom = {
+    scope: 'package' | 'app';
+    type: 'config' | 'template' | 'executable' | 'testing' | 'other';
+};
 
 export type DependencyScope = {
     addInShared?: boolean;

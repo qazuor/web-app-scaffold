@@ -4,6 +4,7 @@ import type { ConfigsManager } from '../core/ConfigsManager.js';
 import type { FrameworksManager } from '../core/FrameworksManager.js';
 import type { PackagesManager } from '../core/PackagesManager.js';
 import type { TemplateManager } from '../core/TemplateManager.js';
+import type { FrameworkOptions } from '../types/framework.js';
 import type {
     PackageDependency,
     PackageEnvVar,
@@ -39,17 +40,18 @@ export const loadDependencies = async (
     templateManager: TemplateManager,
     templatePath: string,
     name: string,
-    options: PackageOptions,
+    options: PackageOptions | FrameworkOptions,
     executables: ScriptsObject,
+    scope: 'app' | 'package' = 'app',
     isDev = false
 ): Promise<PackageDependency[]> => {
     const dependencies: PackageDependency[] = [];
 
     // dependencies from the config.json
     const dependenciesFromConfigJson: PackageDependency[] =
-        options[isDev ? 'additionalDevDependencies' : 'additionalDependencies'] || [];
+        options[isDev ? 'devDependencies' : 'dependencies'] || [];
     for (const dependency of dependenciesFromConfigJson) {
-        dependency.from = 'config' as ScopeFrom;
+        dependency.from = { scope: scope, type: 'config' } as ScopeFrom;
         dependencies.push(dependency);
     }
 
@@ -63,7 +65,7 @@ export const loadDependencies = async (
             isDev ? 'getDevDependencies' : 'getDependencies'
         ](configsManager, frameworksManager, packagesManager);
         for (const dependency of dependenciesFromExecutableFiles) {
-            dependency.from = 'executable' as ScopeFrom;
+            dependency.from = { scope: scope, type: 'executable' } as ScopeFrom;
             dependencies.push(dependency);
         }
     }
@@ -80,7 +82,7 @@ export const loadDependencies = async (
             isDev ? 'devDependencies' : 'dependencies'
         );
         for (const dependency of packageJsonDependencies) {
-            dependency.from = 'template' as ScopeFrom;
+            dependency.from = { scope: scope, type: 'template' } as ScopeFrom;
             dependencies.push(dependency as PackageDependency);
         }
     }
@@ -94,15 +96,16 @@ export const loadScripts = async (
     templateManager: TemplateManager,
     templatePath: string,
     name: string,
-    options: PackageOptions,
-    executables: ScriptsObject
+    options: PackageOptions | FrameworkOptions,
+    executables: ScriptsObject,
+    scope: 'app' | 'package' = 'app'
 ): Promise<PackageScript[]> => {
     const scripts: PackageScript[] = [];
 
     // scripts from the config.json
-    const scriptsFromConfigJson: PackageScript[] = options.additionalScripts || [];
+    const scriptsFromConfigJson: PackageScript[] = options.scripts || [];
     for (const script of scriptsFromConfigJson) {
-        script.from = 'config' as ScopeFrom;
+        script.from = { scope: scope, type: 'config' } as ScopeFrom;
         scripts.push(script);
     }
 
@@ -118,7 +121,7 @@ export const loadScripts = async (
             packagesManager
         );
         for (const script of scriptsFromExecutableFiles) {
-            script.from = 'executable' as ScopeFrom;
+            script.from = { scope: scope, type: 'executable' } as ScopeFrom;
             scripts.push(script);
         }
     }
@@ -135,7 +138,7 @@ export const loadScripts = async (
             'scripts'
         );
         for (const script of packageJsonScripts) {
-            script.from = 'template' as ScopeFrom;
+            script.from = { scope: scope, type: 'template' } as ScopeFrom;
             scripts.push(script as PackageScript);
         }
     }
@@ -149,15 +152,16 @@ export const loadEnvVars = async (
     templateManager: TemplateManager,
     templatePath: string,
     name: string,
-    options: PackageOptions,
-    executables: ScriptsObject
+    options: PackageOptions | FrameworkOptions,
+    executables: ScriptsObject,
+    scope: 'app' | 'package' = 'app'
 ): Promise<PackageEnvVar[]> => {
     const envVars: PackageEnvVar[] = [];
 
     // env vars from the config.json
-    const envVarsFromConfigJson: PackageEnvVar[] = options.additionalEnvVars || [];
+    const envVarsFromConfigJson: PackageEnvVar[] = options.envVars || [];
     for (const envVar of envVarsFromConfigJson) {
-        envVar.from = 'config' as ScopeFrom;
+        envVar.from = { scope: scope, type: 'config' } as ScopeFrom;
         envVars.push(envVar);
     }
 
@@ -173,7 +177,7 @@ export const loadEnvVars = async (
             packagesManager
         );
         for (const envVar of envVarsFromExecutableFiles) {
-            envVar.from = 'executable' as ScopeFrom;
+            envVar.from = { scope: scope, type: 'executable' } as ScopeFrom;
             envVars.push(envVar);
         }
     }
@@ -192,7 +196,10 @@ export const loadEnvVars = async (
                 const envVar = {
                     name: key.trim(),
                     value: value.trim(),
-                    from: 'template'
+                    from: {
+                        scope: scope,
+                        type: 'template'
+                    } as ScopeFrom
                 } as PackageEnvVar;
                 envVars.push(envVar);
             }

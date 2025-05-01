@@ -1,13 +1,18 @@
 import type { FrameworkOptions } from '../types/framework.js';
+import type { PackageDependency, PackageEnvVar, PackageScript } from '../types/index.js';
 
 export class Framework {
     private data: FrameworkOptions;
+    private dependencies: PackageDependency[] = [];
+    private devDependencies: PackageDependency[] = [];
+    private scripts: PackageScript[] = [];
+    private envVars: PackageEnvVar[] = [];
 
     constructor(data: FrameworkOptions) {
         this.data = data;
     }
 
-    public getFramworkOptions(): FrameworkOptions {
+    public getFrameworkOptions(): FrameworkOptions {
         return this.data;
     }
 
@@ -27,23 +32,43 @@ export class Framework {
         return this.data.hasUI ?? false;
     }
 
-    public getDependencies(): { name: string; version: string }[] {
-        return this.data.dependencies ?? [];
+    public getDependencies(): PackageDependency[] {
+        return this.dependencies;
     }
 
-    public getDevDependencies(): { name: string; version: string }[] {
-        return this.data.devDependencies ?? [];
+    public setDependencies(dependencies: PackageDependency[]): void {
+        this.dependencies = dependencies;
     }
 
-    public getScripts(): { name: string; code: string }[] {
-        return this.data.scripts ?? [];
+    public getDevDependencies(): PackageDependency[] {
+        return this.devDependencies;
     }
 
-    public getTestingDependencies(): { name: string; version: string }[] {
+    public setDevDependencies(devDependencies: PackageDependency[]): void {
+        this.devDependencies = devDependencies;
+    }
+
+    public getScripts(): PackageScript[] {
+        return this.scripts;
+    }
+
+    public setScripts(scripts: PackageScript[]): void {
+        this.scripts = scripts;
+    }
+
+    public getEnvVars(): PackageEnvVar[] {
+        return this.envVars;
+    }
+
+    public setEnvVars(envVars: PackageEnvVar[]): void {
+        this.envVars = envVars;
+    }
+
+    public getTestingDependencies(): PackageDependency[] {
         return this.data.testingDependencies ?? [];
     }
 
-    public getTestingScripts(): { name: string; code: string }[] {
+    public getTestingScripts(): PackageScript[] {
         return this.data.testingScripts ?? [];
     }
 

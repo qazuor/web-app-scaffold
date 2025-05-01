@@ -11,9 +11,9 @@ export class AppNamePrompt extends BasePrompt {
             type: 'input',
             name: 'appName',
             message: 'Application name:',
-            default: this.configsManager.getFramework()
+            default: this.configsManager.getFrameworkName()
                 ? this.frameworksManager
-                      .getFrameworkByName(this.configsManager.getFramework())
+                      .getFrameworkByName(this.configsManager.getFrameworkName())
                       .getDefaultAppName()
                 : 'my-app'
         };

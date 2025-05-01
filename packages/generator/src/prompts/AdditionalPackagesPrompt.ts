@@ -10,7 +10,7 @@ export class AdditionalPackagesPrompt extends BasePrompt {
 
     getPromptValues(): QuestionCollection {
         this.availablePackages = this.packagesManager.getPackagesForFrameowrk(
-            this.configsManager.getFramework()
+            this.configsManager.getFrameworkName()
         );
         return {
             type: 'checkbox',
@@ -40,9 +40,9 @@ export class AdditionalPackagesPrompt extends BasePrompt {
             }
             if (
                 pkg.getFrameworks().length > 0 &&
-                !pkg.getFrameworks().includes(this.configsManager.getFramework())
+                !pkg.getFrameworks().includes(this.configsManager.getFrameworkName())
             ) {
-                return `Package ${packageName} is not compatible with ${this.configsManager.getFramework()}`;
+                return `Package ${packageName} is not compatible with ${this.configsManager.getFrameworkName()}`;
             }
         }
         return true;
