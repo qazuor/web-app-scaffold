@@ -19,7 +19,6 @@ import {
     deleteFolder,
     folderExists,
     getContainingFolder,
-    getFolderContent,
     getFolderScripts,
     getRelativePath
 } from '../utils/file-operations.js';
@@ -29,7 +28,7 @@ import type { PackagesManager } from './PackagesManager.js';
 import type { PromptManager } from './PromptManager.js';
 import type { TemplateManager } from './TemplateManager.js';
 
-export class AppManager {
+export class AppCreator {
     private configsManager: ConfigsManager;
     private frameworksManager: FrameworksManager;
     private packagesManager: PackagesManager;
@@ -81,10 +80,11 @@ export class AppManager {
         }
         await this.collectData();
         createDirectory(this.appPath);
-        const folderContent: FolderItem[] = await getFolderContent(this.templateAppPath);
+        // const folderContent: FolderItem[] = await getFolderContent(this.templateAppPath);
 
         this.executeFileFromTemplate(this.executableFiles.preInstall);
-        await this.processFolderContent(folderContent);
+        await this.addSharedPackages();
+        // await this.processFolderContent(folderContent);
         this.executeFileFromTemplate(this.executableFiles.postInstall);
     }
 
@@ -138,6 +138,17 @@ export class AppManager {
                 this.frameworksManager,
                 this.packagesManager
             );
+        }
+    }
+
+    async addSharedPackages(): Promise<void> {
+        const sharedPackages = this.configsManager.getSharedPackages();
+        if (sharedPackages.length > 0) {
+            logger.info('Adding shared packages...');
+            for (const pkg of sharedPackages) {
+                logger.info(`Adding shared package: ${pkg.getName()}`);
+                // await pkg.addToApp(this.appPath);
+            }
         }
     }
 

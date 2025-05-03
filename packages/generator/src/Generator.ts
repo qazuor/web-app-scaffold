@@ -1,5 +1,5 @@
 import { logger } from '@repo/logger';
-import { AppManager } from './core/AppManager.js';
+import { AppCreator } from './core/AppCreator.js';
 import type { ConfigsManager } from './core/ConfigsManager.js';
 import { FrameworksManager } from './core/FrameworksManager.js';
 import { PackageLoader } from './core/PackageLoader.js';
@@ -23,7 +23,7 @@ export class Generator {
     private promptManager: PromptManager;
     private packageLoader: PackageLoader;
     private packagesManager: PackagesManager;
-    private appManager!: AppManager;
+    private AppCreator!: AppCreator;
     private templateManager: TemplateManager;
 
     constructor(configsManager: ConfigsManager) {
@@ -176,14 +176,14 @@ export class Generator {
 
             // Step 7: Create application structure
             this.progress.nextStep('Creating application structure... (Copying files and folders)');
-            this.appManager = new AppManager(
+            this.AppCreator = new AppCreator(
                 this.configsManager,
                 this.frameworksManager,
                 this.packagesManager,
                 this.promptManager,
                 this.templateManager
             );
-            await this.appManager.createNewAppFileStructure();
+            await this.AppCreator.createNewAppFileStructure();
             this.progress.completeStep();
 
             // // Step 8: Add additional packages
