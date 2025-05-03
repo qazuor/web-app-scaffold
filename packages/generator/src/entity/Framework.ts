@@ -50,12 +50,6 @@ export class Framework {
         );
     }
 
-    public getDependenciesFromTemplates(): PackageDependency[] {
-        return this.dependencies.filter(
-            (dependency) => dependency.from?.type === 'template' && dependency.from?.scope === 'app'
-        );
-    }
-
     public getDynamicDependencies(): PackageDependency[] {
         return this.dependencies.filter(
             (dependency) =>
@@ -67,15 +61,6 @@ export class Framework {
         return this.dependencies.filter(
             (dependency) =>
                 dependency.from?.type === 'config' &&
-                dependency.from?.scope === 'package' &&
-                dependency.addInApp
-        );
-    }
-
-    public getPackageDependenciesFromTemplates(): PackageDependency[] {
-        return this.dependencies.filter(
-            (dependency) =>
-                dependency.from?.type === 'template' &&
                 dependency.from?.scope === 'package' &&
                 dependency.addInApp
         );
@@ -105,13 +90,6 @@ export class Framework {
         );
     }
 
-    public getDevDependenciesFromTemplates(): PackageDependency[] {
-        return this.devDependencies.filter(
-            (devDependency) =>
-                devDependency.from?.type === 'template' && devDependency.from?.scope === 'app'
-        );
-    }
-
     public getDynamicDevDependencies(): PackageDependency[] {
         return this.devDependencies.filter(
             (devDependency) =>
@@ -123,15 +101,6 @@ export class Framework {
         return this.devDependencies.filter(
             (devDependency) =>
                 devDependency.from?.type === 'config' &&
-                devDependency.from?.scope === 'package' &&
-                devDependency.addInApp
-        );
-    }
-
-    public getPackageDevDependenciesFromTemplates(): PackageDependency[] {
-        return this.devDependencies.filter(
-            (devDependency) =>
-                devDependency.from?.type === 'template' &&
                 devDependency.from?.scope === 'package' &&
                 devDependency.addInApp
         );
@@ -160,12 +129,6 @@ export class Framework {
         );
     }
 
-    public getScriptsFromTemplates(): PackageScript[] {
-        return this.scripts.filter(
-            (script) => script.from?.type === 'template' && script.from?.scope === 'app'
-        );
-    }
-
     public getDynamicScripts(): PackageScript[] {
         return this.scripts.filter(
             (script) => script.from?.type === 'executable' && script.from?.scope === 'app'
@@ -176,15 +139,6 @@ export class Framework {
         return this.scripts.filter(
             (script) =>
                 script.from?.type === 'config' &&
-                script.from?.scope === 'package' &&
-                script.addInApp
-        );
-    }
-
-    public getPackageScriptsFromTemplates(): PackageScript[] {
-        return this.scripts.filter(
-            (script) =>
-                script.from?.type === 'template' &&
                 script.from?.scope === 'package' &&
                 script.addInApp
         );
@@ -213,12 +167,6 @@ export class Framework {
         );
     }
 
-    public getEnvVarsFromTemplates(): PackageEnvVar[] {
-        return this.envVars.filter(
-            (envVar) => envVar.from?.type === 'template' && envVar.from?.scope === 'app'
-        );
-    }
-
     public getDynamicEnvVars(): PackageEnvVar[] {
         return this.envVars.filter(
             (envVar) => envVar.from?.type === 'executable' && envVar.from?.scope === 'app'
@@ -229,15 +177,6 @@ export class Framework {
         return this.envVars.filter(
             (envVar) =>
                 envVar.from?.type === 'config' &&
-                envVar.from?.scope === 'package' &&
-                envVar.addInApp
-        );
-    }
-
-    public getPackagesEnvVarsFromTemplates(): PackageEnvVar[] {
-        return this.envVars.filter(
-            (envVar) =>
-                envVar.from?.type === 'template' &&
                 envVar.from?.scope === 'package' &&
                 envVar.addInApp
         );

@@ -95,15 +95,11 @@ export interface FrameworkTemplateContextVars {
 export interface DependenciesTemplateContextVars {
     configAppDependencies: PackageDependency[];
     configAppDevDependencies: PackageDependency[];
-    templateAppDependencies: PackageDependency[];
-    templateAppDevDependencies: PackageDependency[];
     dynamicAppDependencies: PackageDependency[];
     dynamicAppDevDependencies: PackageDependency[];
 
     configPackagesDependencies: PackageDependency[];
     configPackagesDevDependencies: PackageDependency[];
-    templatePackagesDependencies: PackageDependency[];
-    templatePackagesDevDependencies: PackageDependency[];
     dynamicPackagesDependencies: PackageDependency[];
     dynamicPackagesDevDependencies: PackageDependency[];
 }
@@ -113,11 +109,8 @@ export interface DependenciesTemplateContextVars {
  */
 export interface ScriptsTemplateContextVars {
     configAppScripts: PackageScript[];
-    templateAppScripts: PackageScript[];
     dynamicAppScripts: PackageScript[];
-
     configPackagesScripts: PackageScript[];
-    templatePackagesScripts: PackageScript[];
     dynamicPackagesScripts: PackageScript[];
 }
 
@@ -126,11 +119,8 @@ export interface ScriptsTemplateContextVars {
  */
 export interface AppEnvVarsTemplateContextVars {
     configAppEnvVars: PackageEnvVar[];
-    templateAppEnvVars: PackageEnvVar[];
     dynamicAppEnvVars: PackageEnvVar[];
-
     configPackagesEnvVars: PackageEnvVar[];
-    templatePackagesEnvVars: PackageEnvVar[];
     dynamicPackagesEnvVars: PackageEnvVar[];
 }
 

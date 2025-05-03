@@ -54,10 +54,8 @@ export class TemplateManager {
             (dependencies: DependenciesTemplateContextVars): Handlebars.SafeString | null => {
                 const allDependencies = [
                     ...this.getDependenciesString(dependencies?.configAppDependencies),
-                    ...this.getDependenciesString(dependencies?.templateAppDependencies),
                     ...this.getDependenciesString(dependencies?.dynamicAppDependencies),
                     ...this.getDependenciesString(dependencies?.configPackagesDependencies),
-                    ...this.getDependenciesString(dependencies?.templatePackagesDependencies),
                     ...this.getDependenciesString(dependencies?.dynamicPackagesDependencies)
                 ];
                 return new Handlebars.SafeString(allDependencies.join(',\n        '));
@@ -68,10 +66,8 @@ export class TemplateManager {
             (dependencies: DependenciesTemplateContextVars): Handlebars.SafeString | null => {
                 const allDependencies = [
                     ...this.getDependenciesString(dependencies?.configAppDevDependencies),
-                    ...this.getDependenciesString(dependencies?.templateAppDevDependencies),
                     ...this.getDependenciesString(dependencies?.dynamicAppDevDependencies),
                     ...this.getDependenciesString(dependencies?.configPackagesDevDependencies),
-                    ...this.getDependenciesString(dependencies?.templatePackagesDevDependencies),
                     ...this.getDependenciesString(dependencies?.dynamicPackagesDevDependencies)
                 ];
                 return new Handlebars.SafeString(allDependencies.join(',\n        '));
@@ -82,10 +78,8 @@ export class TemplateManager {
             (scripts: ScriptsTemplateContextVars): Handlebars.SafeString | null => {
                 const allScripts = [
                     ...this.getScriptsString(scripts?.configAppScripts),
-                    ...this.getScriptsString(scripts?.templateAppScripts),
                     ...this.getScriptsString(scripts?.dynamicAppScripts),
                     ...this.getScriptsString(scripts?.configPackagesScripts),
-                    ...this.getScriptsString(scripts?.templatePackagesScripts),
                     ...this.getScriptsString(scripts?.dynamicPackagesScripts)
                 ];
                 return new Handlebars.SafeString(allScripts.join(',\n        '));
@@ -146,14 +140,10 @@ export class TemplateManager {
         return {
             configAppDependencies: framework.getDependenciesFromConfigs(),
             configAppDevDependencies: framework.getDevDependenciesFromConfigs(),
-            templateAppDependencies: framework.getDependenciesFromTemplates(),
-            templateAppDevDependencies: framework.getDevDependenciesFromTemplates(),
             dynamicAppDependencies: framework.getDynamicDependencies(),
             dynamicAppDevDependencies: framework.getDynamicDevDependencies(),
             configPackagesDependencies: framework.getPackageDependenciesFromConfigs(),
             configPackagesDevDependencies: framework.getPackageDevDependenciesFromConfigs(),
-            templatePackagesDependencies: framework.getPackageDependenciesFromTemplates(),
-            templatePackagesDevDependencies: framework.getPackageDevDependenciesFromTemplates(),
             dynamicPackagesDependencies: framework.getPackageDynamicDependencies(),
             dynamicPackagesDevDependencies: framework.getPackageDynamicDevDependencies()
         } as DependenciesTemplateContextVars;
@@ -163,10 +153,8 @@ export class TemplateManager {
         const framework = configsManager.getFramework();
         return {
             configAppScripts: framework.getScriptsFromConfigs(),
-            templateAppScripts: framework.getScriptsFromTemplates(),
             dynamicAppScripts: framework.getDynamicScripts(),
             configPackagesScripts: framework.getPackageScriptsFromConfigs(),
-            templatePackagesScripts: framework.getPackageScriptsFromTemplates(),
             dynamicPackagesScripts: framework.getPackageDynamicScripts()
         } as ScriptsTemplateContextVars;
     }
@@ -177,10 +165,8 @@ export class TemplateManager {
         const framework = configsManager.getFramework();
         return {
             configAppEnvVars: framework.getEnvVarsFromConfigs(),
-            templateAppEnvVars: framework.getEnvVarsFromTemplates(),
             dynamicAppEnvVars: framework.getDynamicEnvVars(),
             configPackagesEnvVars: framework.getPackagesDynamicEnvVars(),
-            templatePackagesEnvVars: framework.getPackagesEnvVarsFromTemplates(),
             dynamicPackagesEnvVars: framework.getPackagesDynamicEnvVars()
         } as AppEnvVarsTemplateContextVars;
     }

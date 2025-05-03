@@ -3,7 +3,6 @@ import type { PackageJson } from 'type-fest';
 import type { ConfigsManager } from '../core/ConfigsManager.js';
 import type { FrameworksManager } from '../core/FrameworksManager.js';
 import type { PackagesManager } from '../core/PackagesManager.js';
-import type { TemplateManager } from '../core/TemplateManager.js';
 import type { FrameworkOptions } from '../types/framework.js';
 import type {
     PackageDependency,
@@ -13,7 +12,6 @@ import type {
     ScopeFrom,
     ScriptsObject
 } from '../types/index.js';
-import { fileExist } from './file-operations.js';
 
 export const getDataFromPackageJsonContent = (
     packageJsonContent: PackageJson,
@@ -37,7 +35,6 @@ export const loadDependencies = async (
     configsManager: ConfigsManager,
     frameworksManager: FrameworksManager,
     packagesManager: PackagesManager,
-    templateManager: TemplateManager,
     templatePath: string,
     name: string,
     options: PackageOptions | FrameworkOptions,
@@ -70,22 +67,6 @@ export const loadDependencies = async (
         }
     }
 
-    // dependencies from package.json file
-    const packageJsonTemplateFile = path.join(templatePath, name, 'package.json.hbs');
-    if (await fileExist(packageJsonTemplateFile)) {
-        const templateContent = await templateManager.proccessTemplate(
-            packageJsonTemplateFile,
-            templateManager.createContextForPackage()
-        );
-        const packageJsonDependencies = getDataFromPackageJsonContent(
-            JSON.parse(templateContent) as PackageJson,
-            isDev ? 'devDependencies' : 'dependencies'
-        );
-        for (const dependency of packageJsonDependencies) {
-            dependency.from = { scope: scope, type: 'template' } as ScopeFrom;
-            dependencies.push(dependency as PackageDependency);
-        }
-    }
     return dependencies;
 };
 
@@ -93,7 +74,6 @@ export const loadScripts = async (
     configsManager: ConfigsManager,
     frameworksManager: FrameworksManager,
     packagesManager: PackagesManager,
-    templateManager: TemplateManager,
     templatePath: string,
     name: string,
     options: PackageOptions | FrameworkOptions,
@@ -126,22 +106,6 @@ export const loadScripts = async (
         }
     }
 
-    // scripts from package.json file
-    const packageJsonTemplateFile = path.join(templatePath, name, 'package.json.hbs');
-    if (await fileExist(packageJsonTemplateFile)) {
-        const templateContent = await templateManager.proccessTemplate(
-            packageJsonTemplateFile,
-            templateManager.createContextForPackage()
-        );
-        const packageJsonScripts = getDataFromPackageJsonContent(
-            JSON.parse(templateContent) as PackageJson,
-            'scripts'
-        );
-        for (const script of packageJsonScripts) {
-            script.from = { scope: scope, type: 'template' } as ScopeFrom;
-            scripts.push(script as PackageScript);
-        }
-    }
     return scripts;
 };
 
@@ -149,7 +113,6 @@ export const loadEnvVars = async (
     configsManager: ConfigsManager,
     frameworksManager: FrameworksManager,
     packagesManager: PackagesManager,
-    templateManager: TemplateManager,
     templatePath: string,
     name: string,
     options: PackageOptions | FrameworkOptions,
@@ -182,28 +145,5 @@ export const loadEnvVars = async (
         }
     }
 
-    // env vars from package.json file
-    const exampleEnvTemplateFile = path.join(templatePath, name, '.env.example.hbs');
-    if (await fileExist(exampleEnvTemplateFile)) {
-        const templateContent = await templateManager.proccessTemplate(
-            exampleEnvTemplateFile,
-            templateManager.createContextForPackage()
-        );
-        const lines = templateContent.split('\n');
-        for (const line of lines) {
-            const [key, value] = line.split('=');
-            if (key && value) {
-                const envVar = {
-                    name: key.trim(),
-                    value: value.trim(),
-                    from: {
-                        scope: scope,
-                        type: 'template'
-                    } as ScopeFrom
-                } as PackageEnvVar;
-                envVars.push(envVar);
-            }
-        }
-    }
     return envVars;
 };

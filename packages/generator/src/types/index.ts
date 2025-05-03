@@ -15,7 +15,7 @@ export type EnvVars = {
 
 export type ScopeFrom = {
     scope: 'package' | 'app';
-    type: 'config' | 'template' | 'executable' | 'testing' | 'other';
+    type: 'config' | 'executable' | 'testing' | 'other';
 };
 
 export type DependencyScope = {

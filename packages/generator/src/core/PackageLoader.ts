@@ -7,25 +7,21 @@ import { type FolderItem, getFolderContent, getFolderScripts } from '../utils/fi
 import type { ConfigsManager } from './ConfigsManager.js';
 import type { FrameworksManager } from './FrameworksManager.js';
 import type { PackagesManager } from './PackagesManager.js';
-import type { TemplateManager } from './TemplateManager.js';
 
 export class PackageLoader {
     private configsManager: ConfigsManager;
     private frameworksManager: FrameworksManager;
     private packagesManager: PackagesManager;
-    private templateManager: TemplateManager;
     private templatePackagesPath: string;
 
     constructor(
         configsManager: ConfigsManager,
         frameworksManager: FrameworksManager,
-        packagesManager: PackagesManager,
-        templateManager: TemplateManager
+        packagesManager: PackagesManager
     ) {
         this.configsManager = configsManager;
         this.frameworksManager = frameworksManager;
         this.packagesManager = packagesManager;
-        this.templateManager = templateManager;
         this.templatePackagesPath = this.configsManager.getPackagesTemplatesPath();
     }
 
@@ -57,7 +53,6 @@ export class PackageLoader {
             this.configsManager,
             this.frameworksManager,
             this.packagesManager,
-            this.templateManager,
             this.templatePackagesPath,
             pkg.getName(),
             pkg.getPackageOptions(),
@@ -73,7 +68,6 @@ export class PackageLoader {
             this.configsManager,
             this.frameworksManager,
             this.packagesManager,
-            this.templateManager,
             this.templatePackagesPath,
             pkg.getName(),
             pkg.getPackageOptions(),
@@ -90,7 +84,6 @@ export class PackageLoader {
             this.configsManager,
             this.frameworksManager,
             this.packagesManager,
-            this.templateManager,
             this.templatePackagesPath,
             pkg.getName(),
             pkg.getPackageOptions(),
@@ -106,7 +99,6 @@ export class PackageLoader {
             this.configsManager,
             this.frameworksManager,
             this.packagesManager,
-            this.templateManager,
             this.templatePackagesPath,
             pkg.getName(),
             pkg.getPackageOptions(),
