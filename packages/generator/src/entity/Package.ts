@@ -172,4 +172,8 @@ export class Package {
     public setInstalationInfo(instalationTypeInfo: PackageInstallationInfo): void {
         this.data.installationInfo = instalationTypeInfo;
     }
+
+    public instalallAsSharedPackage(): boolean {
+        return !!this.data.installationInfo?.isShared;
+    }
 }

@@ -207,4 +207,8 @@ export class ConfigsManager {
         }
         this.config.selectedPackages.push(pkg.getPackageOptions());
     }
+
+    getSharedPackages(): Package[] {
+        return this.selectedPackages.filter((pkg) => pkg.instalallAsSharedPackage());
+    }
 }

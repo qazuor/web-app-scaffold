@@ -78,7 +78,9 @@ export class PackagesManager {
             this.packages.filter((pkg) => {
                 return (
                     pkg.canBeShared() &&
-                    (!frameworkName || pkg.getFrameworks().includes(frameworkName))
+                    (!frameworkName ||
+                        pkg.getFrameworks().length === 0 ||
+                        pkg.getFrameworks().includes(frameworkName))
                 );
             }) || []
         );
