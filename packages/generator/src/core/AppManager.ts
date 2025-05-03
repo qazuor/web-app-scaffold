@@ -156,10 +156,14 @@ export class AppManager {
                 await this.processPackageJsonFile(item, context);
             } else if (item.isEnvFile) {
                 await this.processEnvFile(item, context);
-            } else if (item.isTemplate) {
+            } else if (item.isTemplate || item.isConfigFile) {
                 await this.processTemplateFile(item, context);
             } else {
-                logger.error(`File type not supported: ${item.relativePath}`);
+                await createDirectory(path.dirname(path.join(this.appPath, item.relativePath)));
+                await copyFile(
+                    path.join(this.templateAppPath, item.relativePath),
+                    path.dirname(path.join(this.appPath, item.relativePath))
+                );
             }
         }
     }
@@ -182,12 +186,6 @@ export class AppManager {
         fileInfo: FolderItem,
         context: FrameworkTemplateContext
     ): Promise<void> {
-        // TODO: improve package.json file
-        logger.warn(
-            chalk.bgYellow.bold(`para los package.json files debemos armar las dependencias y scripts que tenemos
-en los configs files, ademas debemos recorrer los packages seleccionados,
-para recolectar las dependencias y scripts de esos packages`)
-        );
         const proccessedTemplate = await this.templateManager.proccessTemplate(
             fileInfo.fullPath,
             context
@@ -199,13 +197,6 @@ para recolectar las dependencias y scripts de esos packages`)
     }
 
     async processEnvFile(fileInfo: FolderItem, context: FrameworkTemplateContext): Promise<void> {
-        // TODO: improve env files
-        logger.warn(
-            chalk.bgYellow.bold(`para los env files vamos a aagregar envVars en el config.json que deben ser
-agregadas al env file creado si es que existe uno en el framework template y
-si no existe se creara uno con esas env vars. ademas debemos recorrer los
-packages seleccionados, para recolectar los env vars de esos packages`)
-        );
         const proccessedTemplate = await this.templateManager.proccessTemplate(
             fileInfo.fullPath,
             context

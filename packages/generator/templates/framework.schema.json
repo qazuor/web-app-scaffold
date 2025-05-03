@@ -31,48 +31,23 @@
         },
         "dependencies": {
             "type": "array",
-            "description": "Dependencies that should be installed with this framework",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "name": {
-                        "type": "string",
-                        "pattern": "^(@[a-z0-9-~][a-z0-9-._~]*\\/)?[a-z0-9-~][a-z0-9-._~]*$",
-                        "description": "NPM package name (valid format)"
-                    },
-                    "version": {
-                        "type": "string",
-                        "pattern": "^(?:\\^|~)?\\d+\\.\\d+\\.\\d+(?:-[\\w.-]+)?(?:\\+[\\w.-]+)?$",
-                        "description": "Semver version (valid format)"
-                    }
-                },
-                "required": ["name", "version"],
-                "additionalProperties": false
-            }
+            "items": { "$ref": "#/definitions/PackageDependency" },
+            "description": "Dependencies that should be installed in this app"
         },
         "devDependencies": {
             "type": "array",
-            "description": "Dev dependencies that should be installed with this framework",
-            "items": {
-                "$ref": "#/properties/dependencies/items"
-            }
+            "items": { "$ref": "#/definitions/PackageDependency" },
+            "description": "Dev dependencies that should be installed in this app"
         },
         "scripts": {
             "type": "array",
-            "description": "Scripts that should be added to app package.json",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "name": {
-                        "type": "string"
-                    },
-                    "code": {
-                        "type": "string"
-                    }
-                },
-                "required": ["name", "code"],
-                "additionalProperties": false
-            }
+            "items": { "$ref": "#/definitions/PackageScript" },
+            "description": "scripts to be added to app package.json"
+        },
+        "envVars": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/PackageEnvVar" },
+            "description": "env vars to be added to this app"
         },
         "hasUI": {
             "type": "boolean",
@@ -113,5 +88,123 @@
         "addBiome",
         "addTesting"
     ],
-    "additionalProperties": false
+    "additionalProperties": false,
+    "definitions": {
+        "PackageDependency": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "pattern": "^(@[a-z0-9-~][a-z0-9-._~]*\\/)?[a-z0-9-~][a-z0-9-._~]*$",
+                    "description": "NPM package name (valid format)"
+                },
+                "version": {
+                    "type": "string",
+                    "pattern": "^(?:\\^|~)?\\d+\\.\\d+\\.\\d+(?:-[\\w.-]+)?(?:\\+[\\w.-]+)?$",
+                    "description": "Semver version (valid format)"
+                },
+                "addInShared": {
+                    "type": "boolean",
+                    "description": "Whether this dependency should be installed in the shared package"
+                },
+                "addInApp": {
+                    "type": "boolean",
+                    "description": "Whether this dependency should be installed in the app package"
+                }
+            },
+            "required": ["name", "version"],
+            "additionalProperties": false
+        },
+        "PackageScript": {
+            "type": "object",
+            "properties": {
+                "name": { "type": "string" },
+                "command": { "type": "string" },
+                "addInShared": {
+                    "type": "boolean",
+                    "description": "Whether to add this script in shared package.json"
+                },
+                "addInApp": {
+                    "type": "boolean",
+                    "description": "Whether to add this script in app package.json"
+                }
+            },
+            "required": ["name", "command"],
+            "additionalProperties": false
+        },
+        "PackageEnvVar": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "pattern": "^[A-Z0-9_]+$"
+                },
+                "value": {
+                    "oneOf": [
+                        { "type": "boolean" },
+                        { "type": "string" },
+                        {
+                            "type": "array",
+                            "items": { "type": "string" }
+                        },
+                        { "type": "number" },
+                        {
+                            "type": "array",
+                            "items": { "type": "number" }
+                        }
+                    ]
+                },
+                "addInShared": {
+                    "type": "boolean",
+                    "description": "Whether to add this script in shared package.json"
+                },
+                "addInApp": {
+                    "type": "boolean",
+                    "description": "Whether to add this script in app package.json"
+                }
+            },
+            "required": ["name", "value"],
+            "additionalProperties": false
+        },
+        "ExtraOptionPrompt": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": ["input", "confirm", "list", "checkbox"]
+                },
+                "name": { "type": "string" },
+                "message": { "type": "string" },
+                "choices": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": { "type": "string" },
+                            "value": { "type": "string" }
+                        },
+                        "required": ["name", "value"],
+                        "additionalProperties": false
+                    }
+                },
+                "default": {
+                    "oneOf": [
+                        { "type": "boolean" },
+                        { "type": "string" },
+                        {
+                            "type": "array",
+                            "items": { "type": "string" }
+                        },
+                        { "type": "number" },
+                        {
+                            "type": "array",
+                            "items": { "type": "number" }
+                        }
+                    ]
+                }
+            },
+            "required": ["type", "name", "message"],
+            "additionalProperties": false
+        }
+    }
 }

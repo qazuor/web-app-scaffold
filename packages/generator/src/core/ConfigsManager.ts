@@ -130,8 +130,12 @@ export class ConfigsManager {
         this.getMetadata().repository = repository;
     }
 
-    public getBugs(): string {
+    public getBugsUrl(): string {
         return this.getMetadata().bugs || '';
+    }
+
+    public getBugsEmail(): string {
+        return this.getMetadata().author?.match(/<(.+?)>/)?.[1] || '';
     }
 
     public setBugs(bugs: string): void {

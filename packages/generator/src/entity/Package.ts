@@ -161,23 +161,6 @@ export class Package {
         this.templateFiles = templateFiles;
     }
 
-    // public getMetadata(): PackageOptions {
-    //     return {
-    //         author: metadata.author,
-    //         license: metadata.license,
-    //         repository: {
-    //             type: 'git',
-    //             url: metadata.repository
-    //         },
-    //         bugs: {
-    //             url: metadata.bugs,
-    //             email: metadata.author.match(/<(.+?)>/)?.[1] || ''
-    //         },
-    //         homepage: metadata.homepage,
-    //         keywords: metadata.keywords.split(',').map((keyword: string) => keyword.trim())
-    //     };
-    // }
-
     public getSharedPackageDefaultName(): string | undefined {
         return this.data.sharedPackageDefaultName;
     }

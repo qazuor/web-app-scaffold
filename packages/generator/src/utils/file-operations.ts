@@ -34,6 +34,7 @@ export async function createDirectory(dirPath: string): Promise<void> {
     await fs.ensureDir(dirPath);
 }
 
+
 /**
  * Copies a folder to a new location
  */
