@@ -10,6 +10,13 @@ import type {
     ScopeFrom,
     ScriptsObject
 } from '../types/index.js';
+import {
+    type CreatedApp,
+    type SharedPackage,
+    registerApp,
+    registerPort,
+    registerSharedPackage
+} from '../utils/creation-tracking.js';
 import { loadDependencies, loadEnvVars, loadScripts } from '../utils/data-loader.js';
 import {
     type FolderItem,
@@ -88,6 +95,15 @@ export class AppCreator {
         await this.addSharedPackages();
         await this.processFolderContent(folderContent);
         await this.executeFileFromTemplate(this.executableFiles.postInstall);
+        await registerApp({
+            name: this.appName,
+            port: this.configsManager.getPort(),
+            framework: this.appFramework.getName(),
+            sharedPackages: this.configsManager
+                .getSharedPackages()
+                .map((pkg) => pkg.getSharedPackageName())
+        } as CreatedApp);
+        await registerPort(this.appName, this.configsManager.getPort());
     }
 
     async handledFolderExist() {
@@ -170,6 +186,10 @@ export class AppCreator {
                 };
 
                 this.appFramework.addDependency(sharedPackageDependency);
+                await registerSharedPackage(this.appName, {
+                    name: pkg.getSharedPackageName(),
+                    basePackage: pkg.getName()
+                } as SharedPackage);
             }
         }
     }

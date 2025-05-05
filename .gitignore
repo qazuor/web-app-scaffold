@@ -45,4 +45,5 @@ routeTree.gen.ts
 .output
 
 # app generator
-packages/.ports.json
+.app-generator/apps.json
+

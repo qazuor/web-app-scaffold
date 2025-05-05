@@ -9,9 +9,9 @@ import { PromptManager } from './core/PromptManager.js';
 import { TemplateManager } from './core/TemplateManager.js';
 import type { Package } from './entity/Package.js';
 import type { SharedPackagesInfo } from './types/index.js';
+import { getNextAvailablePort } from './utils/creation-tracking.js';
 import { getPackageMetadataDefaults } from './utils/defaults.js';
 import { withErrorHandling } from './utils/error-handler.js';
-import { getNextAvailablePort } from './utils/port-tracking.js';
 
 /**
  * Core generator class that orchestrates the app generation process
