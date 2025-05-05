@@ -4,24 +4,20 @@
     "displayName": "Example Package",
     "description": "Example Package description",
     "version": "^1.0.0",
-    "additionalDependencies": [
+    "dependencies": [
         {
-            "name": "@repo/example-package1",
+            "name": "example-dependency-from-config-file1",
             "version": "^1.0.0"
         }
     ],
-    "additionalDevDependencies": [
+    "devDependencies": [
         {
-            "name": "@repo/example-package2",
+            "name": "example-dev-dependency-from-config-file",
             "version": "^1.0.0"
         }
     ],
-    "additionalScripts": [
-        { "name": "build", "command": "tsc --noEmit" },
-        { "name": "test", "command": "vitest" },
-        { "name": "test:watch", "command": "vitest --watch" }
-    ],
-    "supportedFrameworks": ["react-vite", "tanstack-start"],
+    "scripts": [{ "name": "example-script-from-config-file1", "command": "tsc --noEmit" }],
+    "envVars": [{ "name": "EXAMPLE_ENV_VAR_FROM_CONFIG_FILE_1", "value": "pepe" }],
     "isUILibrary": false,
     "isIconLibrary": false,
     "canBeSharedPackage": true,
@@ -30,6 +26,7 @@
     "extraOptionsPrompts": [
         {
             "type": "checkbox",
+            "name": "authentication-strategies",
             "message": "Which authentication strategy would you like to use?",
             "choices": [
                 {

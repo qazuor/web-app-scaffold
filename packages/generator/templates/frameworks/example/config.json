@@ -1,10 +1,10 @@
 {
     "$schema": "../../framework.schema.json",
-    "name": "astro-vite",
-    "displayName": "Astro static site",
-    "description": "Astro + Vite is a modern frontend framework that combines the power of Astro with the speed of Vite. It provides a fast and efficient development experience, allowing developers to build high-performance web applications with ease.",
-    "defaultAppName": "astro-vite-app",
-    "defaultAppDescription": "An Astro + Vite app",
+    "name": "example",
+    "displayName": "Example web app",
+    "description": "Example qweb app",
+    "defaultAppName": "example-web-app",
+    "defaultAppDescription": "An Example web app",
     "dependencies": [
         {
             "name": "astro",
@@ -28,15 +28,28 @@
     "scripts": [
         {
             "name": "astro:build",
-            "code": "astro build"
+            "command": "astro build"
         },
         {
             "name": "astro:dev",
-            "code": "astro dev"
+            "command": "astro dev"
         },
         {
             "name": "astro:preview",
-            "code": "astro preview"
+            "command": "astro preview"
+        },
+        { "name": "lint", "command": "biome check ." },
+        { "name": "format", "command": "biome format --write ." },
+        { "name": "typecheck", "command": "tsc --noEmit" }
+    ],
+    "envVars": [
+        {
+            "name": "ASTRO_API_URL",
+            "value": "The URL of the API to use in the app"
+        },
+        {
+            "name": "ASTRO_API_KEY",
+            "value": "The API key to use in the app"
         }
     ],
     "hasUI": true,
@@ -55,11 +68,11 @@
     "testingScripts": [
         {
             "name": "test",
-            "code": "vitest"
+            "command": "vitest"
         },
         {
             "name": "test:watch",
-            "code": "vitest --watch"
+            "command": "vitest --watch"
         }
     ]
 }

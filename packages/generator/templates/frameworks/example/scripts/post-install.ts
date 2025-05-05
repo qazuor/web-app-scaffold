@@ -1,3 +1,3 @@
-export const postInstall = () => {
+export const exec = () => {
     console.log('Post-install script included');
 };
