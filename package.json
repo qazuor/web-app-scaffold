@@ -22,7 +22,7 @@
         "test:file": "vitest run",
         "clean": "turbo run clean",
         "check-types": "turbo run check-types",
-        "create:app": "node packages/generator/dist/index.js"
+        "create:app": "node --enable-source-maps packages/generator/dist/index.js"
     },
     "devDependencies": {
         "@biomejs/biome": "^1.9.4",
