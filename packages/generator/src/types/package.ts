@@ -1,4 +1,9 @@
 import type {
+    AppTemplateContextVars,
+    FrameworkTemplateContextVars,
+    SelectedPackagesTemplateContextVars
+} from './framework.js';
+import type {
     ExtraOptionPrompt,
     PackageDependency,
     PackageEnvVar,
@@ -72,14 +77,58 @@ export interface PackageInstallationInfo {
     packageDescription?: string;
 }
 
+export interface PackageDependenciesTemplateContextVars {
+    configDependencies: PackageDependency[];
+    configDevDependencies: PackageDependency[];
+    dynamicDependencies: PackageDependency[];
+    dynamicDevDependencies: PackageDependency[];
+}
+
+/**
+ * Scripts Context vars for framework templates files
+ */
+export interface PackageScriptsTemplateContextVars {
+    configScripts: PackageScript[];
+    dynamicScripts: PackageScript[];
+}
+
+/**
+ * Env vars Context vars for framework templates files
+ */
+export interface PackageEnvVarsTemplateContextVars {
+    configEnvVars: PackageEnvVar[];
+    dynamicEnvVars: PackageEnvVar[];
+}
+/**
+ * Package Context vars for framework/shared packages templates files
+ */
+export interface PackageTemplateContextVars {
+    /** Package name */
+    name: string;
+    /** Package Display name */
+    displayName: string;
+    /** Package description */
+    description: string;
+    /** Selected Shared package name */
+    sharedName: string;
+    /** Selected Shared package description */
+    sharedDescription: string;
+    /** Selected Shared package version */
+    version: string;
+}
 /**
  * Context for package templates files
  */
 export interface PackageTemplateContext {
-    /** selectedPackages */
-    selectedPackages?: string[];
-    /** Name for the shared package */
-    sharedPackageName?: string;
+    app: AppTemplateContextVars;
+    framework: FrameworkTemplateContextVars;
+    pkg: PackageTemplateContextVars;
+    dependencies: PackageDependenciesTemplateContextVars;
+    scripts: PackageScriptsTemplateContextVars;
+    envVars: PackageEnvVarsTemplateContextVars;
+    selectedPackages: SelectedPackagesTemplateContextVars;
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    contextVars: Record<string, any>;
 }
 
 // /**

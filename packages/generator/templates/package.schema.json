@@ -33,22 +33,22 @@
             "type": "boolean",
             "description": "Whether this is a dev dependency"
         },
-        "additionalDependencies": {
+        "dependencies": {
             "type": "array",
             "items": { "$ref": "#/definitions/PackageDependency" },
             "description": "Additional dependencies that should be installed with this package"
         },
-        "additionalDevDependencies": {
+        "devDependencies": {
             "type": "array",
             "items": { "$ref": "#/definitions/PackageDependency" },
             "description": "Additional dev dependencies that should be installed with this package"
         },
-        "additionalScripts": {
+        "scripts": {
             "type": "array",
             "items": { "$ref": "#/definitions/PackageScript" },
             "description": "Additional scripts to be added to app package.json"
         },
-        "additionalEnvVars": {
+        "envVars": {
             "type": "array",
             "items": { "$ref": "#/definitions/PackageEnvVar" },
             "description": "Additional env vars to be added to app"

@@ -1,4 +1,5 @@
 import Handlebars from 'handlebars';
+import type { Package } from '../entity/Package.js';
 import type {
     AppEnvVarsTemplateContextVars,
     AppTemplateContextVars,
@@ -9,7 +10,13 @@ import type {
     SelectedPackagesTemplateContextVars
 } from '../types/framework.js';
 import type { PackageDependency, PackageEnvVar, PackageScript } from '../types/index.js';
-import type { PackageTemplateContext } from '../types/package.js';
+import type {
+    PackageDependenciesTemplateContextVars,
+    PackageEnvVarsTemplateContextVars,
+    PackageScriptsTemplateContextVars,
+    PackageTemplateContext,
+    PackageTemplateContextVars
+} from '../types/package.js';
 import { getFileContent } from '../utils/file-operations.js';
 import type { ConfigsManager } from './ConfigsManager.js';
 import type { FrameworksManager } from './FrameworksManager.js';
@@ -74,6 +81,30 @@ export class TemplateManager {
             }
         );
         Handlebars.registerHelper(
+            'getSharedPackageDependencies',
+            (
+                dependencies: PackageDependenciesTemplateContextVars
+            ): Handlebars.SafeString | null => {
+                const allDependencies = [
+                    ...this.getDependenciesString(dependencies?.configDependencies),
+                    ...this.getDependenciesString(dependencies?.dynamicDependencies)
+                ];
+                return new Handlebars.SafeString(allDependencies.join(',\n        '));
+            }
+        );
+        Handlebars.registerHelper(
+            'getSharedPackageDevDependencies',
+            (
+                dependencies: PackageDependenciesTemplateContextVars
+            ): Handlebars.SafeString | null => {
+                const allDependencies = [
+                    ...this.getDependenciesString(dependencies?.configDevDependencies),
+                    ...this.getDependenciesString(dependencies?.dynamicDevDependencies)
+                ];
+                return new Handlebars.SafeString(allDependencies.join(',\n        '));
+            }
+        );
+        Handlebars.registerHelper(
             'getScripts',
             (scripts: ScriptsTemplateContextVars): Handlebars.SafeString | null => {
                 const allScripts = [
@@ -81,6 +112,16 @@ export class TemplateManager {
                     ...this.getScriptsString(scripts?.dynamicAppScripts),
                     ...this.getScriptsString(scripts?.configPackagesScripts),
                     ...this.getScriptsString(scripts?.dynamicPackagesScripts)
+                ];
+                return new Handlebars.SafeString(allScripts.join(',\n        '));
+            }
+        );
+        Handlebars.registerHelper(
+            'getSharedPackageScripts',
+            (scripts: PackageScriptsTemplateContextVars): Handlebars.SafeString | null => {
+                const allScripts = [
+                    ...this.getScriptsString(scripts?.configScripts),
+                    ...this.getScriptsString(scripts?.dynamicScripts)
                 ];
                 return new Handlebars.SafeString(allScripts.join(',\n        '));
             }
@@ -119,6 +160,21 @@ export class TemplateManager {
             bugsUrl: new Handlebars.SafeString(configsManager.getBugsUrl()) as unknown as string,
             bugsEmail: new Handlebars.SafeString(configsManager.getBugsEmail()) as unknown as string
         } as AppTemplateContextVars;
+    }
+
+    private getPackageContextVars(pkg: Package): PackageTemplateContextVars {
+        return {
+            name: pkg.getName(),
+            displayName: pkg.getDisplayName(),
+            sharedName: new Handlebars.SafeString(
+                pkg.getSharedPackageName() || ''
+            ) as unknown as string,
+            description: new Handlebars.SafeString(pkg.getDescription()) as unknown as string,
+            sharedDescription: new Handlebars.SafeString(
+                pkg.getSharedPackageDescription() || ''
+            ) as unknown as string,
+            version: pkg.getVersion()
+        } as PackageTemplateContextVars;
     }
 
     private getFrameworkContextVars(configsManager: ConfigsManager): FrameworkTemplateContextVars {
@@ -171,6 +227,31 @@ export class TemplateManager {
         } as AppEnvVarsTemplateContextVars;
     }
 
+    private getPackageDependenciesContextVars(
+        pkg: Package
+    ): PackageDependenciesTemplateContextVars {
+        return {
+            configDependencies: pkg.getDependenciesFromConfigs(),
+            configDevDependencies: pkg.getDevDependenciesFromConfigs(),
+            dynamicDependencies: pkg.getDynamicDependencies(),
+            dynamicDevDependencies: pkg.getDynamicDevDependencies()
+        } as PackageDependenciesTemplateContextVars;
+    }
+
+    private getPackageScriptsContextVars(pkg: Package): PackageScriptsTemplateContextVars {
+        return {
+            configScripts: pkg.getScriptsFromConfigs(),
+            dynamicScripts: pkg.getDynamicScripts()
+        } as PackageScriptsTemplateContextVars;
+    }
+
+    private getPackageEnvVarsContextVars(pkg: Package): PackageEnvVarsTemplateContextVars {
+        return {
+            configEnvVars: pkg.getEnvVarsFromConfigs(),
+            dynamicEnvVars: pkg.getDynamicEnvVars()
+        } as PackageEnvVarsTemplateContextVars;
+    }
+
     private getSelectedPackagesContextVars(
         configsManager: ConfigsManager
     ): SelectedPackagesTemplateContextVars {
@@ -198,8 +279,23 @@ export class TemplateManager {
         } as FrameworkTemplateContext;
     }
 
-    createContextForPackage(): PackageTemplateContext {
-        return {} as PackageTemplateContext;
+    createContextForPackage(
+        pkg: Package,
+        configsManager: ConfigsManager,
+        _frameworksManager: FrameworksManager,
+        _packagesManager: PackagesManager,
+        contextVars: Record<string, unknown> = {}
+    ): PackageTemplateContext {
+        return {
+            app: this.getAppContextVars(configsManager),
+            framework: this.getFrameworkContextVars(configsManager),
+            pkg: this.getPackageContextVars(pkg),
+            dependencies: this.getPackageDependenciesContextVars(pkg),
+            scripts: this.getPackageScriptsContextVars(pkg),
+            envVars: this.getPackageEnvVarsContextVars(pkg),
+            // generated by scripts context vars
+            contextVars
+        } as PackageTemplateContext;
     }
 
     async proccessTemplate(

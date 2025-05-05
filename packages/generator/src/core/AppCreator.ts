@@ -19,6 +19,7 @@ import {
     deleteFolder,
     folderExists,
     getContainingFolder,
+    getFolderContent,
     getFolderScripts,
     getRelativePath
 } from '../utils/file-operations.js';
@@ -26,6 +27,7 @@ import type { ConfigsManager } from './ConfigsManager.js';
 import type { FrameworksManager } from './FrameworksManager.js';
 import type { PackagesManager } from './PackagesManager.js';
 import type { PromptManager } from './PromptManager.js';
+import { SharedPackageCreator } from './SharedPackageCreator.js';
 import type { TemplateManager } from './TemplateManager.js';
 
 export class AppCreator {
@@ -79,13 +81,13 @@ export class AppCreator {
             await this.handledFolderExist();
         }
         await this.collectData();
-        createDirectory(this.appPath);
-        // const folderContent: FolderItem[] = await getFolderContent(this.templateAppPath);
+        await createDirectory(this.appPath);
+        const folderContent: FolderItem[] = await getFolderContent(this.templateAppPath);
 
-        this.executeFileFromTemplate(this.executableFiles.preInstall);
+        await this.executeFileFromTemplate(this.executableFiles.preInstall);
         await this.addSharedPackages();
-        // await this.processFolderContent(folderContent);
-        this.executeFileFromTemplate(this.executableFiles.postInstall);
+        await this.processFolderContent(folderContent);
+        await this.executeFileFromTemplate(this.executableFiles.postInstall);
     }
 
     async handledFolderExist() {
@@ -147,7 +149,27 @@ export class AppCreator {
             logger.info('Adding shared packages...');
             for (const pkg of sharedPackages) {
                 logger.info(`Adding shared package: ${pkg.getName()}`);
-                // await pkg.addToApp(this.appPath);
+                const sharedPackageCreator = new SharedPackageCreator(
+                    this.configsManager,
+                    this.frameworksManager,
+                    this.packagesManager,
+                    this.promptManager,
+                    this.templateManager,
+                    pkg
+                );
+                await sharedPackageCreator.createNewPackageFileStructure();
+                const sharedPackageDependency: PackageDependency = {
+                    name: `@repo/${pkg.getSharedPackageName()}`,
+                    version: pkg.getVersion(),
+                    addInApp: true,
+                    addInShared: false,
+                    from: {
+                        type: 'sharedPackage',
+                        scope: 'app'
+                    }
+                };
+
+                this.appFramework.addDependency(sharedPackageDependency);
             }
         }
     }
@@ -239,7 +261,10 @@ export class AppCreator {
         );
 
         // dependencies from selected packages
-        for (const pkg of this.configsManager.getSelectedPackage()) {
+        const selectedPackages = this.configsManager
+            .getSelectedPackage()
+            .filter((pkg) => !pkg.instalallAsSharedPackage());
+        for (const pkg of selectedPackages) {
             dependencies.push(...pkg.getDependencies());
         }
 

@@ -53,7 +53,9 @@ export class Framework {
     public getDynamicDependencies(): PackageDependency[] {
         return this.dependencies.filter(
             (dependency) =>
-                dependency.from?.type === 'executable' && dependency.from?.scope === 'app'
+                (dependency.from?.type === 'executable' ||
+                    dependency.from?.type === 'sharedPackage') &&
+                dependency.from?.scope === 'app'
         );
     }
 
@@ -77,6 +79,10 @@ export class Framework {
 
     public setDependencies(dependencies: PackageDependency[]): void {
         this.dependencies = dependencies;
+    }
+
+    public addDependency(dependency: PackageDependency): void {
+        this.dependencies.push(dependency);
     }
 
     public getDevDependencies(): PackageDependency[] {

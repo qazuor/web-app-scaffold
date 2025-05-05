@@ -45,6 +45,10 @@ export class Package {
         return this.data.description;
     }
 
+    public getVersion(): string {
+        return this.data.version;
+    }
+
     public isUILibrary(): boolean {
         return !!this.data.isUILibrary;
     }
@@ -175,5 +179,54 @@ export class Package {
 
     public instalallAsSharedPackage(): boolean {
         return !!this.data.installationInfo?.isShared;
+    }
+
+    public getSharedPackageName(): string | undefined {
+        return this.data.installationInfo?.packageName;
+    }
+
+    public getSharedPackageDescription(): string | undefined {
+        return this.data.installationInfo?.packageDescription;
+    }
+
+    public setSharedPackageName(packageName: string): void {
+        if (!this.data.installationInfo) {
+            this.data.installationInfo = {
+                isShared: true
+            };
+        }
+        this.data.installationInfo.packageName = packageName;
+    }
+
+    public getDependenciesFromConfigs(): PackageDependency[] {
+        return this.dependencies.filter((dependency) => dependency.from?.type === 'config');
+    }
+
+    public getDevDependenciesFromConfigs(): PackageDependency[] {
+        return this.devDependencies.filter((dependency) => dependency.from?.type === 'config');
+    }
+
+    public getDynamicDependencies(): PackageDependency[] {
+        return this.dependencies.filter((dependency) => dependency.from?.type === 'executable');
+    }
+
+    public getDynamicDevDependencies(): PackageDependency[] {
+        return this.devDependencies.filter((dependency) => dependency.from?.type === 'executable');
+    }
+
+    public getScriptsFromConfigs(): PackageScript[] {
+        return this.scripts.filter((script) => script.from?.type === 'config');
+    }
+
+    public getDynamicScripts(): PackageScript[] {
+        return this.scripts.filter((script) => script.from?.type === 'executable');
+    }
+
+    public getEnvVarsFromConfigs(): PackageEnvVar[] {
+        return this.envVars.filter((envVar) => envVar.from?.type === 'config');
+    }
+
+    public getDynamicEnvVars(): PackageEnvVar[] {
+        return this.envVars.filter((envVar) => envVar.from?.type === 'executable');
     }
 }

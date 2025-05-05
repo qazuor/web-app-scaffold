@@ -16,6 +16,7 @@ export interface FolderItem {
     isPackageJsonFile?: boolean;
     isMainConfigFile?: boolean;
     isConfigFile?: boolean;
+    isSharedPackageFile?: boolean;
 }
 
 /**
@@ -33,7 +34,6 @@ export async function createDirectory(dirPath: string): Promise<void> {
     logger.directory('Creating folder:', relativePath);
     await fs.ensureDir(dirPath);
 }
-
 
 /**
  * Copies a folder to a new location
@@ -184,13 +184,14 @@ export async function getFolderContent(dirPath: string): Promise<FolderItem[]> {
                 const baseName = path.basename(entry.name);
 
                 const metadata: Record<string, boolean> = {
-                    isFolder: false, // esto ahora se filtra también
+                    isFolder: false,
                     isTemplate: ext === 'hbs',
                     isReadmeFile: lowerName.startsWith('readme.md'),
                     isEnvFile: lowerName === '.env' || lowerName.startsWith('.env.'),
                     isPackageJsonFile: lowerName.startsWith('package.json'),
                     isMainConfigFile: baseName === 'config.json',
-                    isConfigFile: ext === 'json' || lowerName.includes('config')
+                    isConfigFile: ext === 'json' || lowerName.includes('config'),
+                    isSharedPackageFile: entry.parentPath.endsWith('sharedPackagesFiles')
                 };
 
                 const flags = Object.entries(metadata).reduce<Record<string, true>>(
@@ -206,7 +207,7 @@ export async function getFolderContent(dirPath: string): Promise<FolderItem[]> {
                     relativePath: getRelativePath(fullPath, dirPath),
                     fileType: ext || undefined,
                     ...flags
-                });
+                } as FolderItem);
             }
         }
     }
