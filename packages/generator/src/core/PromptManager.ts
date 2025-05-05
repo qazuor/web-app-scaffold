@@ -108,8 +108,14 @@ export class PromptManager {
         // first check if we have a framework already selected from cli param
         // in this case the framework is only  the name string, not the entire object
         if (this.configsManager.getFrameworkName()) {
-            await this.frameworkPrompt.validate(this.configsManager.getFrameworkName());
-            return this.configsManager.getFrameworkName();
+            const isValid = await this.frameworkPrompt.validate(
+                this.configsManager.getFrameworkName()
+            );
+            if (typeof isValid === 'string') {
+                logger.log(`${chalk.red('>>')} ${isValid}`);
+            } else {
+                return this.configsManager.getFrameworkName();
+            }
         }
 
         const { framework } = await inquirer.prompt([this.frameworkPrompt.getPrompt()]);
@@ -123,8 +129,12 @@ export class PromptManager {
      */
     public async promptForAppName(force = false): Promise<string> {
         if (!force && this.configsManager.getName()) {
-            await this.appNamePrompt.validate(this.configsManager.getName());
-            return this.configsManager.getName();
+            const isValid = await this.appNamePrompt.validate(this.configsManager.getName());
+            if (typeof isValid === 'string') {
+                logger.log(`${chalk.red('>>')} ${isValid}`);
+            } else {
+                return this.configsManager.getName();
+            }
         }
 
         const { appName } = await inquirer.prompt([this.appNamePrompt.getPrompt()]);
@@ -138,8 +148,14 @@ export class PromptManager {
      */
     public async promptForDescription(): Promise<string> {
         if (this.configsManager.getDescription()) {
-            await this.descriptionPrompt.validate(this.configsManager.getDescription());
-            return this.configsManager.getDescription();
+            const isValid = await this.descriptionPrompt.validate(
+                this.configsManager.getDescription()
+            );
+            if (typeof isValid === 'string') {
+                logger.log(`${chalk.red('>>')} ${isValid}`);
+            } else {
+                return this.configsManager.getDescription();
+            }
         }
 
         const { description } = await inquirer.prompt([this.descriptionPrompt.getPrompt()]);
@@ -153,8 +169,12 @@ export class PromptManager {
      */
     public async promptForAppPort(): Promise<number> {
         if (this.configsManager.getPort()) {
-            await this.portPrompt.validate(`${this.configsManager.getPort()}`);
-            return this.configsManager.getPort();
+            const isValid = await this.portPrompt.validate(`${this.configsManager.getPort()}`);
+            if (typeof isValid === 'string') {
+                logger.log(`${chalk.red('>>')} ${isValid}`);
+            } else {
+                return this.configsManager.getPort();
+            }
         }
 
         const { port } = await inquirer.prompt([this.portPrompt.getPrompt()]);
@@ -314,8 +334,11 @@ export class PromptManager {
         const description = await this.promptForDescription();
         this.configsManager.setDescription(description);
 
+        console.log('0000');
         const port = await this.promptForAppPort();
         this.configsManager.setPort(port);
+
+        console.log('44444');
 
         return { framwork, name, description, port };
     }
