@@ -11,7 +11,7 @@ import type { Package } from './entity/Package.js';
 import type { SharedPackagesInfo } from './types/index.js';
 import { getPackageMetadataDefaults } from './utils/defaults.js';
 import { withErrorHandling } from './utils/error-handler.js';
-import { getNextAvailablePort } from './utils/port-manager.js';
+import { getNextAvailablePort } from './utils/port-tracking.js';
 
 /**
  * Core generator class that orchestrates the app generation process

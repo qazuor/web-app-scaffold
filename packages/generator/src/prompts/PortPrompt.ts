@@ -1,5 +1,5 @@
 import type { QuestionCollection } from 'inquirer';
-import { isPortInUse } from '../utils/port-manager.js';
+import { isPortInUse } from '../utils/port-tracking.js';
 import { BasePrompt } from './BasePrompt.js';
 
 /**
