@@ -7,7 +7,7 @@ export default defineConfig({
     splitting: false,
     dts: false,
     clean: true,
-    sourcemap: false,
+    sourcemap: true,
     target: 'node18',
     outDir: 'dist',
     async onSuccess() {
@@ -19,5 +19,6 @@ export default defineConfig({
         options.platform = 'node';
         options.format = 'esm';
         options.external = [];
-    },
+        options.sourcemap = true;
+    }
 });
