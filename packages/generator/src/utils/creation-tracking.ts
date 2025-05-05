@@ -143,6 +143,18 @@ export async function sharedPackageExists(basePackage: string): Promise<boolean>
 }
 
 /**
+ * get shared package by base package
+ */
+export async function getSharedPackageByBasePackage(
+    basePackage: string
+): Promise<SharedPackage | undefined> {
+    const trackingData = await loadTrackingData();
+    return trackingData.sharedPackages?.find(
+        (sharedPackage) => sharedPackage.basePackage === basePackage
+    );
+}
+
+/**
  * Write trakking data to file
  */
 export async function writeTrackingDSataToFile(newData: DataTracking): Promise<void> {

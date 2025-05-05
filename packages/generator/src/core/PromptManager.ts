@@ -2,8 +2,6 @@ import { logger } from '@repo/logger';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import type { Package } from '../entity/Package.js';
-import { OverwriteAppFolderPrompt } from '../prompts/OverwriteAppFolderPrompt.js';
-import { SharedPackageOverwriteFolderPrompt } from '../prompts/SharedPackageOverwriteFolderPrompt.js';
 import {
     AdditionalPackagesPrompt,
     AppNamePrompt,
@@ -15,14 +13,18 @@ import {
     IconLibraryPrompt,
     KeywordsPrompt,
     LicensePrompt,
+    OverwriteAppFolderPrompt,
     PortPrompt,
     RepositoryUrlPrompt,
     SharedPackageDescriptionPrompt,
     SharedPackageInstalationTypePrompt,
     SharedPackageNamePrompt,
-    UILibraryPrompt
+    SharedPackageOverwriteFolderPrompt,
+    UILibraryPrompt,
+    UseAlreadyExistSharedPackagePrompt
 } from '../prompts/index.js';
 import type { SharedPackagesInfo } from '../types/index.js';
+import { getSharedPackageByBasePackage, sharedPackageExists } from '../utils/creation-tracking.js';
 import type { ConfigsManager } from './ConfigsManager.js';
 import type { FrameworksManager } from './FrameworksManager.js';
 import type { PackagesManager } from './PackagesManager.js';
@@ -50,6 +52,7 @@ export class PromptManager {
     private uiLibraryPrompt!: UILibraryPrompt;
     private iconLibraryPrompt!: IconLibraryPrompt;
     private additionalPackagesPrompt!: AdditionalPackagesPrompt;
+    private useAlreadyExistSharedPackagePrompt!: UseAlreadyExistSharedPackagePrompt;
 
     private instalationTypePrompt!: SharedPackageInstalationTypePrompt;
     private sharedPackageNamePrompt!: SharedPackageNamePrompt;
@@ -91,6 +94,7 @@ export class PromptManager {
         this.uiLibraryPrompt = init(UILibraryPrompt);
         this.iconLibraryPrompt = init(IconLibraryPrompt);
         this.additionalPackagesPrompt = init(AdditionalPackagesPrompt);
+        this.useAlreadyExistSharedPackagePrompt = init(UseAlreadyExistSharedPackagePrompt);
 
         this.instalationTypePrompt = init(SharedPackageInstalationTypePrompt);
         this.sharedPackageNamePrompt = init(SharedPackageNamePrompt);
@@ -262,6 +266,31 @@ export class PromptManager {
         const { selectedPackages } = await inquirer.prompt([
             this.additionalPackagesPrompt.getPrompt()
         ]);
+        for (const pkgName of selectedPackages) {
+            const sharedPackage = await sharedPackageExists(pkgName);
+            if (sharedPackage) {
+                const pkg = this.packagesManager.getPackageByName(pkgName);
+                const { useAlreadyExistSharedPackage } = await inquirer.prompt([
+                    this.useAlreadyExistSharedPackagePrompt.getSharedPrompt(pkg)
+                ]);
+
+                if (useAlreadyExistSharedPackage === 'installNew') {
+                    logger.log(
+                        `${chalk.green('>>')} ${pkgName} will be installed as a new package`
+                    );
+                } else {
+                    const sharedPackage = await getSharedPackageByBasePackage(pkgName);
+                    if (sharedPackage) {
+                        pkg.setUseAlreadyInstalledSharedPackage(sharedPackage.name);
+                    }
+                    logger.log(
+                        `${chalk.green('>>')} ${pkgName} will be used an already created shared package`
+                    );
+                }
+            }
+        }
+        // markar como que va a usar el ya instalado..
+        // podriamos filtrar el p[ackage de la lista, y agregarlo separado despues]
         return selectedPackages.map((pkgName: string) =>
             this.packagesManager.getPackageByName(pkgName)
         );
@@ -334,11 +363,8 @@ export class PromptManager {
         const description = await this.promptForDescription();
         this.configsManager.setDescription(description);
 
-        console.log('0000');
         const port = await this.promptForAppPort();
         this.configsManager.setPort(port);
-
-        console.log('44444');
 
         return { framwork, name, description, port };
     }
@@ -396,16 +422,6 @@ export class PromptManager {
                 let sharedDescription: string | undefined = undefined;
                 if (instalationType === 'shared') {
                     sharedName = await this.promptForSharedPackageName(pkg);
-                    // TODO: check previus installed shared packages
-                    logger.warn(
-                        chalk.bgYellow.bold(
-                            `Revisar si no tenemos ya este package instalado como shared,
-en cuyo caso hay que ofertar usar esa instancia en vez de crear una nueva.
-Para esto deberiamos al momento de instalar todo,
-updatear un json que lleve control de que packages se instalaron como shared
-y que configuraciones incluyeron`
-                        )
-                    );
                     sharedDescription = await this.promptForSharedPackageDescription(pkg);
                 }
                 const sharedPackageInfo = {
@@ -430,5 +446,38 @@ y que configuraciones incluyeron`
                 }
             }
         }
+    }
+
+    public async allReadyPrompt() {
+        const { continueInstalation } = await inquirer.prompt([
+            {
+                name: 'continueInstalation',
+                type: 'confirm',
+                message:
+                    'All information are Ready. Do you want to continue with the app/shared packages creation?',
+                default: true,
+                choices: [
+                    { name: 'Yes', value: true },
+                    { name: 'No', value: false }
+                ]
+            }
+        ]);
+        return !!continueInstalation;
+    }
+
+    public async execPnpmInstall() {
+        const { execPnpmInstall } = await inquirer.prompt([
+            {
+                name: 'execPnpmInstall',
+                type: 'confirm',
+                message: '"Run pnpm install to install all dependencies of the new app?',
+                default: true,
+                choices: [
+                    { name: 'Yes', value: true },
+                    { name: 'No', value: false }
+                ]
+            }
+        ]);
+        return !!execPnpmInstall;
     }
 }

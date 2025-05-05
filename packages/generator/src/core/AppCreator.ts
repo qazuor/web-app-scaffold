@@ -160,7 +160,9 @@ export class AppCreator {
     }
 
     async addSharedPackages(): Promise<void> {
-        const sharedPackages = this.configsManager.getSharedPackages();
+        const sharedPackages = this.configsManager
+            .getSharedPackages()
+            .filter((pkg) => !pkg.getUseAlreadyInstalledSharedPackage());
         if (sharedPackages.length > 0) {
             logger.info('Adding shared packages...');
             for (const pkg of sharedPackages) {
@@ -283,12 +285,34 @@ export class AppCreator {
         // dependencies from selected packages
         const selectedPackages = this.configsManager
             .getSelectedPackage()
-            .filter((pkg) => !pkg.instalallAsSharedPackage());
+            .filter(
+                (pkg) =>
+                    !pkg.instalallAsSharedPackage() && !pkg.getUseAlreadyInstalledSharedPackage()
+            );
         for (const pkg of selectedPackages) {
             dependencies.push(...pkg.getDependencies());
         }
 
         this.appFramework.setDependencies(dependencies);
+
+        // dependencies from already shared packages
+        const alreadySharedPackages = this.configsManager
+            .getSelectedPackage()
+            .filter((pkg) => pkg.getUseAlreadyInstalledSharedPackage());
+        for (const pkg of alreadySharedPackages) {
+            const sharedPackageDependency: PackageDependency = {
+                name: `@repo/${pkg.getSharedPackageName()}`,
+                version: pkg.getVersion(),
+                addInApp: true,
+                addInShared: false,
+                from: {
+                    type: 'sharedPackage',
+                    scope: 'app'
+                }
+            };
+
+            this.appFramework.addDependency(sharedPackageDependency);
+        }
         return dependencies;
     }
 

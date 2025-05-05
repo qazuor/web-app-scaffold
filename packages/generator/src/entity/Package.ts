@@ -21,6 +21,7 @@ export class Package {
     private envVars: PackageEnvVar[] = [];
     private executableScripts: ScriptsObject = {};
     private templateFiles: Record<string, FolderItem> = {};
+    private useAlreadyInstalledSharedPackage = false;
 
     constructor(data: PackageOptions) {
         if (!data) {
@@ -228,5 +229,14 @@ export class Package {
 
     public getDynamicEnvVars(): PackageEnvVar[] {
         return this.envVars.filter((envVar) => envVar.from?.type === 'executable');
+    }
+
+    public setUseAlreadyInstalledSharedPackage(sharedPackageName: string): void {
+        this.setSharedPackageName(sharedPackageName);
+        this.useAlreadyInstalledSharedPackage = true;
+    }
+
+    public getUseAlreadyInstalledSharedPackage(): boolean {
+        return this.useAlreadyInstalledSharedPackage;
     }
 }
