@@ -1,0 +1,73 @@
+# {{app.name}}
+
+{{app.description}}
+
+A modern static site built with Astro and React islands.
+
+## Features
+
+- 🚀 Static Site Generation with Astro
+- ⚛️ React Islands for Interactive Components
+- 🎨 Tailwind CSS for Styling
+- 🧪 Testing with Vitest and Testing Library
+- 📝 Linting with Biome
+- 🔒 Type Safety with TypeScript
+
+## Quick Start
+
+```bash
+# Start development server
+pnpm dev
+
+# Build for production
+pnpm build
+
+# Preview production build
+pnpm preview
+
+# Run tests
+pnpm test
+```
+
+## Environment Variables
+
+{{#each envVars.configAppEnvVars}}
+- `{{name}}` - {{value}}
+{{/each}}
+
+{{#each envVars.dynamicAppEnvVars}}
+- `{{name}}` - {{value}}
+{{/each}}
+
+## Project Structure
+
+```
+src/
+├── components/    # React components
+├── layouts/      # Astro layouts
+├── pages/        # Astro pages
+└── __test__/    # Test files
+```
+
+## Testing
+
+Tests are written using Vitest and React Testing Library. Run them with:
+
+```bash
+# Run tests once
+pnpm test
+
+# Watch mode
+pnpm test:watch
+
+# Coverage report
+pnpm test:coverage
+```
+
+## Author
+
+{{app.author}}
+
+## License
+
+{{app.license}}

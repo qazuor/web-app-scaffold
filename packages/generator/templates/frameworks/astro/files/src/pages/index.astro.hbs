@@ -1,0 +1,46 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Counter from '../components/Counter';
+---
+
+<Layout title="Welcome to {{app.name}}" description="{{app.description}}">
+    <main class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold text-center mb-8">
+            Welcome to <span class="text-gradient">{{app.name}}</span>
+        </h1>
+
+        <div class="grid gap-8 max-w-3xl mx-auto">
+            <Counter client:load />
+
+            <div class="instructions bg-white p-6 rounded-lg shadow-md">
+                <p class="text-lg mb-4">
+                    Check out the <code class="font-mono bg-gray-100 px-2 py-1 rounded">src/pages</code> directory to get started.
+                </p>
+                <p class="text-gray-600">
+                    Edit this page in <code class="font-mono bg-gray-100 px-2 py-1 rounded">src/pages/index.astro</code>
+                </p>
+            </div>
+
+            <div class="link-card-grid grid grid-cols-1 md:grid-cols-2 gap-4">
+                <a href="https://docs.astro.build/" class="card bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                    <h2 class="text-xl font-bold mb-2">Documentation</h2>
+                    <p>Learn how Astro works and explore the official API docs.</p>
+                </a>
+                <a href="https://astro.build/integrations/" class="card bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                    <h2 class="text-xl font-bold mb-2">Integrations</h2>
+                    <p>Supercharge your project with new frameworks and libraries.</p>
+                </a>
+            </div>
+        </div>
+    </main>
+</Layout>
+
+<style>
+    .text-gradient {
+        background-image: linear-gradient(45deg, rgb(124, 58, 237), #da62c4);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-size: 400%;
+        background-position: 0%;
+    }
+</style>
