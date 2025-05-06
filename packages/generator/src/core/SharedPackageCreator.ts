@@ -155,11 +155,7 @@ export class SharedPackageCreator {
             contextVars
         );
         for (const item of folderContent) {
-            if (item.isFolder) {
-                if (item.relativePath !== 'sharedPackagesFiles' && item.relativePath !== 'files') {
-                    await createDirectory(path.join(this.packagePath, item.relativePath));
-                }
-            } else if (item.isSharedPackageFile) {
+            if (item.isSharedPackageFile) {
                 if (item.isPackageJsonFile) {
                     await this.processPackageJsonFile(item, context);
                 } else if (item.isEnvFile) {
@@ -170,7 +166,16 @@ export class SharedPackageCreator {
             } else if (item.isTemplate || item.isConfigFile) {
                 await this.processTemplateFile(item, context);
             } else {
-                await createDirectory(path.dirname(path.join(this.packagePath, item.relativePath)));
+                await createDirectory(
+                    path.dirname(
+                        path.join(
+                            this.packagePath,
+                            item.relativePath
+                                .replace('files', '')
+                                .replace('sharedPackagesFiles', '')
+                        )
+                    )
+                );
                 await copyFile(
                     path.join(this.templatePackagePath, item.relativePath),
                     path.dirname(

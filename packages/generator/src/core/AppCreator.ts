@@ -205,19 +205,19 @@ export class AppCreator {
             contextVars
         );
         for (const item of folderContent) {
-            if (item.isFolder) {
-                await createDirectory(path.join(this.appPath, item.relativePath));
-            } else if (item.isPackageJsonFile) {
+            if (item.isPackageJsonFile) {
                 await this.processPackageJsonFile(item, context);
             } else if (item.isEnvFile) {
                 await this.processEnvFile(item, context);
             } else if (item.isTemplate || item.isConfigFile) {
                 await this.processTemplateFile(item, context);
-            } else {
-                await createDirectory(path.dirname(path.join(this.appPath, item.relativePath)));
+            } else if (!item.isFolder) {
+                await createDirectory(
+                    path.dirname(path.join(this.appPath, item.relativePath.replace('files', '')))
+                );
                 await copyFile(
                     path.join(this.templateAppPath, item.relativePath),
-                    path.dirname(path.join(this.appPath, item.relativePath))
+                    path.dirname(path.join(this.appPath, item.relativePath.replace('files', '')))
                 );
             }
         }
@@ -232,7 +232,7 @@ export class AppCreator {
             context
         );
         await createFile(
-            path.join(this.appPath, fileInfo.relativePath.replace('.hbs', '')),
+            path.join(this.appPath, fileInfo.relativePath.replace('files', '').replace('.hbs', '')),
             proccessedTemplate
         );
     }
@@ -246,7 +246,7 @@ export class AppCreator {
             context
         );
         await createFile(
-            path.join(this.appPath, fileInfo.relativePath.replace('.hbs', '')),
+            path.join(this.appPath, fileInfo.relativePath.replace('files', '').replace('.hbs', '')),
             proccessedTemplate
         );
     }
