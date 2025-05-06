@@ -1,0 +1,125 @@
+{
+    "$schema": "../../framework.schema.json",
+    "name": "tanstack-start",
+    "displayName": "Tanstack Start Web App",
+    "description": "Modern Web app built with Tanstart start Framework",
+    "defaultAppName": "tanstack-start-app",
+    "defaultAppDescription": "A modern Web app built with Tanstart start Framework",
+    "dependencies": [
+        {
+            "name": "@tanstack/react-router",
+            "version": "^1.119.0"
+        },
+        {
+            "name": "@tanstack/react-router-devtools",
+            "version": "^1.119.1"
+        },
+        {
+            "name": "@tanstack/react-start",
+            "version": "^1.119.2"
+        },
+        {
+            "name": "react",
+            "version": "^19.0.0"
+        },
+        {
+            "name": "react-dom",
+            "version": "^19.0.0"
+        },
+        {
+            "name": "tailwind-merge",
+            "version": "^2.6.0"
+        },
+        {
+            "name": "vinxi",
+            "version": "^0.5.3"
+        },
+        {
+            "name": "@repo/logger",
+            "version": "workspace:*"
+        }
+    ],
+    "devDependencies": [
+        {
+            "name": "@repo/config",
+            "version": "workspace:*"
+        },
+        {
+            "name": "@types/node",
+            "version": "^22.5.4"
+        },
+        {
+            "name": "@types/react",
+            "version": "^19.0.8"
+        },
+        {
+            "name": "@types/react-dom",
+            "version": "^19.0.3"
+        },
+        {
+            "name": "autoprefixer",
+            "version": "^10.4.20"
+        },
+        {
+            "name": "postcss",
+            "version": "^8.5.1"
+        },
+        {
+            "name": "tailwindcss",
+            "version": "^3.4.17"
+        },
+        {
+            "name": "typescript",
+            "version": "^5.7.2"
+        },
+        {
+            "name": "vite-tsconfig-paths",
+            "version": "^5.1.4"
+        }
+    ],
+    "scripts": [
+        {
+            "name": "start",
+            "command": "vinxi start"
+        },
+        {
+            "name": "build",
+            "command": "vinxi build"
+        },
+        {
+            "name": "lint",
+            "command": "biome check --write ."
+        }
+    ],
+    "hasUI": true,
+    "addBiome": true,
+    "addTesting": true,
+    "testingDependencies": [
+        {
+            "name": "vitest",
+            "version": "^3.1.2"
+        },
+        {
+            "name": "@testing-library/react",
+            "version": "^16.3.0"
+        },
+        {
+            "name": "@testing-library/jest-dom",
+            "version": "^6.6.3"
+        }
+    ],
+    "testingScripts": [
+        {
+            "name": "test",
+            "command": "vitest run"
+        },
+        {
+            "name": "test:watch",
+            "command": "vitest"
+        },
+        {
+            "name": "test:coverage",
+            "command": "vitest run --coverage"
+        }
+    ]
+}
