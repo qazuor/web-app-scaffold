@@ -1,0 +1,73 @@
+# {{app.name}}
+
+{{app.description}}
+
+A modern React application built with Vite.
+
+## Features
+
+- ⚡️ Lightning fast development with Vite
+- ⚛️ React {{contextVars.reactVersion}}
+- 🎯 TypeScript for type safety
+- 🧪 Testing with Vitest and Testing Library
+- 📝 Linting with Biome
+- 🎨 Styling with Tailwind CSS
+
+## Quick Start
+
+```bash
+# Start development server
+pnpm dev
+
+# Run tests
+pnpm test
+
+# Build for production
+pnpm build
+
+# Preview production build
+pnpm preview
+```
+
+## Environment Variables
+
+{{#each envVars.configAppEnvVars}}
+- `{{name}}` - {{value}}
+{{/each}}
+
+{{#each envVars.dynamicAppEnvVars}}
+- `{{name}}` - {{value}}
+{{/each}}
+
+## Project Structure
+
+```
+src/
+├── App.tsx           # Main application component
+├── main.tsx         # Application entry point
+├── __test__/       # Test files
+└── styles/         # CSS styles
+```
+
+## Testing
+
+Tests are written using Vitest and React Testing Library. Run them with:
+
+```bash
+# Run tests once
+pnpm test
+
+# Watch mode
+pnpm test:watch
+
+# Coverage report
+pnpm test:coverage
+```
+
+## Author
+
+{{app.author}}
+
+## License
+
+{{app.license}}
