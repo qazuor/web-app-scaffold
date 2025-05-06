@@ -1,0 +1,109 @@
+{
+    "$schema": "../../framework.schema.json",
+    "name": "react-vite",
+    "displayName": "React Web App With Vite",
+    "description": "Modern React application with Vite",
+    "defaultAppName": "react-vite-app",
+    "defaultAppDescription": "A modern web application built with Vite",
+    "dependencies": [
+        {
+            "name": "react",
+            "version": "^19.1.0"
+        },
+        {
+            "name": "react-dom",
+            "version": "^19.1.0"
+        },
+        {
+            "name": "@repo/logger",
+            "version": "workspace:*"
+        }
+    ],
+    "devDependencies": [
+        {
+            "name": "@repo/config",
+            "version": "workspace:*"
+        },
+        {
+            "name": "@tailwindcss/postcss",
+            "version": "^4.1.4"
+        },
+        {
+            "name": "@types/react",
+            "version": "^19.1.0"
+        },
+        {
+            "name": "@types/react-dom",
+            "version": "^19.1.1"
+        },
+        {
+            "name": "@vitejs/plugin-react",
+            "version": "^4.4.1"
+        },
+        {
+            "name": "globals",
+            "version": "^16.0.0"
+        },
+        {
+            "name": "jsdom",
+            "version": "^26.1.0"
+        },
+        {
+            "name": "msw",
+            "version": "^2.7.5"
+        },
+        {
+            "name": "typescript",
+            "version": "~5.7.3"
+        },
+        {
+            "name": "vite",
+            "version": "^6.3.1"
+        }
+    ],
+    "scripts": [
+        {
+            "name": "build",
+            "command": "tsc && vite build"
+        },
+        {
+            "name": "lint",
+            "command": "biome check --write ."
+        },
+        {
+            "name": "preview",
+            "command": "vite preview"
+        }
+    ],
+    "hasUI": true,
+    "addBiome": true,
+    "addTesting": true,
+    "testingDependencies": [
+        {
+            "name": "vitest",
+            "version": "^3.1.2"
+        },
+        {
+            "name": "@testing-library/react",
+            "version": "^16.3.0"
+        },
+        {
+            "name": "@testing-library/jest-dom",
+            "version": "^6.6.3"
+        }
+    ],
+    "testingScripts": [
+        {
+            "name": "test",
+            "command": "vitest run"
+        },
+        {
+            "name": "test:watch",
+            "command": "vitest"
+        },
+        {
+            "name": "test:coverage",
+            "command": "vitest run --coverage"
+        }
+    ]
+}
