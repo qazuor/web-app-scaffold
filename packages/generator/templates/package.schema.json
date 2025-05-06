@@ -94,7 +94,7 @@
                 },
                 "version": {
                     "type": "string",
-                    "pattern": "^(?:\\^|~)?\\d+\\.\\d+\\.\\d+(?:-[\\w.-]+)?(?:\\+[\\w.-]+)?$",
+                    "pattern": "^(workspace:(\\*|\\^|~)|[~^]?\\d+\\.\\d+\\.\\d+(?:-[\\w.-]+)?(?:\\+[\\w.-]+)?)$",
                     "description": "Semver version (valid format)"
                 },
                 "addInShared": {
