@@ -41,6 +41,10 @@
     ],
     "devDependencies": [
         {
+            "name": "@repo/config",
+            "version": "workspace:*"
+        },
+        {
             "name": "@types/react",
             "version": "^19.1.2"
         },

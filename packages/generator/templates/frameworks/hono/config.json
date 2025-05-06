@@ -21,6 +21,10 @@
     ],
     "devDependencies": [
         {
+            "name": "@repo/config",
+            "version": "workspace:*"
+        },
+        {
             "name": "typescript",
             "version": "^5.8.3"
         },
