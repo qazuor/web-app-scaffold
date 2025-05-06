@@ -97,6 +97,7 @@ export interface DependenciesTemplateContextVars {
     configAppDevDependencies: PackageDependency[];
     dynamicAppDependencies: PackageDependency[];
     dynamicAppDevDependencies: PackageDependency[];
+    testingAppDevDependencies: PackageDependency[];
 
     configPackagesDependencies: PackageDependency[];
     configPackagesDevDependencies: PackageDependency[];

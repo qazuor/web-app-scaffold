@@ -103,6 +103,13 @@ export class Framework {
         );
     }
 
+    public getTestingDevDependencies(): PackageDependency[] {
+        return this.devDependencies.filter(
+            (devDependency) =>
+                devDependency.from?.type === 'testing' && devDependency.from?.scope === 'app'
+        );
+    }
+
     public getPackageDevDependenciesFromConfigs(): PackageDependency[] {
         return this.devDependencies.filter(
             (devDependency) =>

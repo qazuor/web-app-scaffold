@@ -74,6 +74,7 @@ export class TemplateManager {
                 const allDependencies = [
                     ...this.getDependenciesString(dependencies?.configAppDevDependencies),
                     ...this.getDependenciesString(dependencies?.dynamicAppDevDependencies),
+                    ...this.getDependenciesString(dependencies?.testingAppDevDependencies),
                     ...this.getDependenciesString(dependencies?.configPackagesDevDependencies),
                     ...this.getDependenciesString(dependencies?.dynamicPackagesDevDependencies)
                 ];
@@ -198,6 +199,7 @@ export class TemplateManager {
             configAppDevDependencies: framework.getDevDependenciesFromConfigs(),
             dynamicAppDependencies: framework.getDynamicDependencies(),
             dynamicAppDevDependencies: framework.getDynamicDevDependencies(),
+            testingAppDevDependencies: framework.getTestingDevDependencies(),
             configPackagesDependencies: framework.getPackageDependenciesFromConfigs(),
             configPackagesDevDependencies: framework.getPackageDevDependenciesFromConfigs(),
             dynamicPackagesDependencies: framework.getPackageDynamicDependencies(),
