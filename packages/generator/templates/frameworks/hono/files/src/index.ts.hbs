@@ -1,0 +1,84 @@
+import { serve } from '@hono/node-server';
+import { logger as QLogger } from '@repo/logger';
+import { type Context, Hono } from 'hono';
+import { cors } from 'hono/cors';
+import { prettyJSON } from 'hono/pretty-json';
+import { compress } from 'hono/compress'
+import { cache } from 'hono/cache'
+import { logger } from 'hono/logger'
+
+export const customLogger = (message: string, ...rest: string[]) => {
+    console.log({message,rest})
+    console.log(message, ...rest)
+    QLogger.log(message, ...rest);
+}
+
+const app = new Hono();
+
+// Middleware
+app.use('*', prettyJSON());
+app.use(compress())
+app.get(
+  '*',
+  cache({
+    cacheName: 'my-app',
+    cacheControl: 'max-age=3600',
+  })
+)
+app.use(logger(customLogger))
+app.use('*', async (c: Context, next: () => Promise<void>) => {
+    logger.log(`${c.req.method} ${c.req.url}`);
+    await next();
+});
+
+app.use(
+    '*',
+    cors({
+        origin: ['http://localhost:{{app.port}}'], // Allow frontend origin
+        allowHeaders: ['Content-Type', 'Authorization'],
+        allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        exposeHeaders: ['Content-Length'],
+        maxAge: 600,
+        credentials: true
+    })
+);
+
+// Routes
+app.get('/', (c: Context) => {
+    QLogger.info('API GET /');
+    return c.json({ message: 'Welcome to {{app.name}}!' })
+});
+
+app.get('/hello/:name', (c: Context) => {
+    const name = c.req.param('name');
+    if (!name) {
+        QLogger.error('API GET /hello/:name - Name is required');
+        return c.json({ error: 'Name is required' }, 400);
+    }
+    QLogger.info(`API GET /hello/${name}`);
+    return c.json({ message: `Hello, ${name}!` });
+});
+
+app.post('/echo', async (c: Context) => {
+    const body = await c.req.json();
+    return c.json(body);
+});
+
+// Error handling
+app.onError((err: Error, c: Context) => {
+    QLogger.error('Server error:', { subtitle: err.message });
+    return c.json({ error: 'Internal Server Error' }, 500);
+});
+
+// Start server
+const port = Number(process.env.PORT) || {{app.port}};
+
+if (process.env.NODE_ENV === 'development') {
+    QLogger.log('Server is running on http://localhost:{{app.port}}');
+    serve({
+        fetch: app.fetch,
+        port
+    });
+}
+
+export default app;

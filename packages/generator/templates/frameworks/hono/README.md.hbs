@@ -1,0 +1,79 @@
+# {{app.name}}
+
+{{app.description}}
+
+A modern, high-performance API built with {{framework.displayName}}.
+
+## Features
+
+- 🚀 High Performance - Built on top of Hono
+- 🔒 CORS Configuration
+- 📝 Request Logging
+- ✨ Pretty JSON Output
+- 🧪 Testing Setup with Vitest
+- 🎯 Type Safety with TypeScript
+- 🔍 Code Quality with Biome
+
+## Quick Start
+
+```bash
+# Start development server
+pnpm dev
+
+# Run tests
+pnpm test
+
+# Build for production
+pnpm build
+
+# Start production server
+pnpm start
+```
+
+## API Endpoints
+
+- `GET /` - Welcome message
+- `GET /hello/:name` - Personalized greeting
+- `POST /echo` - Echo back request body
+
+## Environment Variables
+
+{{#each envVars.configAppEnvVars}}
+- `{{name}}` - {{value}}
+{{/each}}
+
+{{#each envVars.dynamicAppEnvVars}}
+- `{{name}}` - {{value}}
+{{/each}}
+
+## Testing
+
+Tests are written using Vitest. Run them with:
+
+```bash
+# Run tests once
+pnpm test
+
+# Watch mode
+pnpm test:watch
+
+# Coverage report
+pnpm test:coverage
+```
+
+## Project Structure
+
+```
+src/
+├── index.ts        # Main application entry
+└── __test__/      # Test files
+    └── index.test.ts
+```
+
+## Author
+
+{{app.author}}
+
+## License
+
+{{app.license}}

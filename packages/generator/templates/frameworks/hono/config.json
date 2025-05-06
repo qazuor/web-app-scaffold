@@ -1,0 +1,101 @@
+{
+    "$schema": "../../framework.schema.json",
+    "name": "hono",
+    "displayName": "Hono API",
+    "description": "High-performance API framework with TypeScript support",
+    "defaultAppName": "hono-api",
+    "defaultAppDescription": "A modern API built with Hono",
+    "dependencies": [
+        {
+            "name": "hono",
+            "version": "^4.7.8"
+        },
+        {
+            "name": "@hono/node-server",
+            "version": "^1.14.1"
+        },
+        {
+            "name": "@repo/logger",
+            "version": "workspace:*"
+        }
+    ],
+    "devDependencies": [
+        {
+            "name": "typescript",
+            "version": "^5.8.3"
+        },
+        {
+            "name": "tsx",
+            "version": "^4.7.1"
+        },
+        {
+            "name": "@types/node",
+            "version": "^20.11.17"
+        },
+        {
+            "name": "cross-env",
+            "version": "^7.0.3"
+        }
+    ],
+    "scripts": [
+        {
+            "name": "dev",
+            "command": "cross-env NODE_ENV=development tsx watch src/index.ts"
+        },
+        {
+            "name": "build",
+            "command": "tsc"
+        },
+        {
+            "name": "start",
+            "command": "node dist/index.js"
+        },
+        {
+            "name": "lint",
+            "command": "biome check ."
+        },
+        {
+            "name": "format",
+            "command": "biome format --write ."
+        },
+        {
+            "name": "test",
+            "command": "vitest run"
+        }
+    ],
+    "hasUI": false,
+    "addBiome": true,
+    "addTesting": true,
+    "testingDependencies": [
+        {
+            "name": "vitest",
+            "version": "^1.3.0"
+        },
+        {
+            "name": "@vitest/coverage-v8",
+            "version": "^1.3.0"
+        },
+        {
+            "name": "@testing-library/react",
+            "version": "^14.1.2"
+        },
+        {
+            "name": "@testing-library/jest-dom",
+            "version": "^6.1.5"
+        }
+    ],
+    "testingScripts": [
+        {
+            "name": "test",
+            "command": "vitest run"
+        },
+        {
+            "name": "test:watch",
+            "command": "vitest"
+        },
+        {
+            "name": "test:coverage",
+            "command": "vitest run --coverage"
+        }
+    ]
+}
